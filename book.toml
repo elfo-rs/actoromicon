@@ -1,0 +1,6 @@
+[book]
+authors = ["Paul Loyd"]
+language = "en"
+multilingual = false
+src = "src"
+title = "The Actoromicon"
