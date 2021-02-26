@@ -10,6 +10,14 @@ Install [mdBook](https://phaiax.github.io/mdBook/README.html):
 cargo install mdbook
 ```
 
+To build the book's HTML:
+
 ```sh
-mdbook watch
+mdbook build
+```
+
+And to edit the book in pseudo-interactive "watch" mode:
+
+```sh
+mdbook watch --open
 ```
