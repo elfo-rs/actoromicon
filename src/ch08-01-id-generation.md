@@ -10,9 +10,10 @@ Here we discuss how to design good ID and show a couple of great ID designs.
 Despite of wide spread of 64-bit computer architecture several popular technologies still don't support 64-bit unsigned integer numbers completely.
 For example several popular versions of Java [have only `i64` type](https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html) so you [can't have](https://docs.oracle.com/javase/8/docs/api/java/lang/Long.html#MAX_VALUE) positive integer numbers bigger than `2 ^ 63 - 1` without excess [overhead](https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html).
 Therefore a lot of Java-powered apps (e.g. Graylog) have limitations on IDs' domain.
+
 At some external apps you can gain a couple of problems because of IDs less than `1`, e.g. value `0` may be [explicitly forbidden](https://cloud.google.com/datastore/docs/concepts/entities#assigning_your_own_numeric_id).
-Avoiding `0` value simplifies [popular memory optimizations](https://doc.rust-lang.org/core/num/struct.NonZeroU64.html).
-Besides, the use of zeros instead of `Nullable` columns can improve performance in some DB (e.g. ClickHouse).
+Avoiding `0` value in IDs simplifies some popular [memory optimizations](https://doc.rust-lang.org/core/num/struct.NonZeroU64.html) and allows you to use zero values instead of `Nullable` columns which can improve performance in some databases (e.g. ClickHouse).
+
 This leads us to the following integer numbers' domain for IDs:
 
 ```
@@ -23,9 +24,9 @@ MAX = 2 ^ 63 - 1 =
     ≈ 9.2e18
 ```
 
-Probably today you don't need to be compatible with such systems but in most cases such limitations are very easy to withstand and there's no reason for your project not to be ready for integration with such obsolete systems in the future.
+Probably today you don't need to be compatible with such domain-limiting systems but in most cases such limitations are very easy to withstand and there's no reason for your project not to be ready for integration with such obsolete systems in the future.
 Such domain allows you to store `2 ^ 63 - 1` entities which is bigger than `9.2e18` and is enough to uniquely identify entities in almost every possible practical task.
-You shouldn't forget though that a good ID generation scheme is just a trade-off between a dense domain usage and robust sharded unique IDs generation.
+You shouldn't forget though that a good ID generation scheme is just a trade-off between a dense domain usage and robust sharded unique IDs generation algorithm.
 That's why we recommend using 63-bit positive integers as IDs.
 
 #### Systems with ECMAScript
