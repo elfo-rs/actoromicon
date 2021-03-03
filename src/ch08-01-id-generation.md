@@ -8,7 +8,7 @@ Here we discuss how to design good ID and show a couple of great ID designs.
 ### Choosing the domain for your IDs
 
 Despite of wide spread of 64-bit computer architecture several popular technologies still don't support 64-bit unsigned integer numbers completely.
-For example several popular versions of Java [have only `i64` type](https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html) so you [can't have](https://docs.oracle.com/javase/8/docs/api/java/lang/Long.html#MAX_VALUE) positive integer numbers bigger than `2 ^ 63 - 1` without excess [overhead](https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html).
+For example several popular versions of Java [have only `i64` type](https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html) so you [can't have](https://docs.oracle.com/javase/8/docs/api/java/lang/Long.html#MAX_VALUE) positive integer numbers bigger than \\( 2\^{63} - 1 \\) without excess [overhead](https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html).
 Therefore a lot of Java-powered apps (e.g. Graylog) have limitations on IDs' domain.
 
 At some external apps you can gain a couple of problems because of IDs less than `1`, e.g. value `0` may be [explicitly forbidden](https://cloud.google.com/datastore/docs/concepts/entities#assigning_your_own_numeric_id).
@@ -25,13 +25,14 @@ MAX = 2 ^ 63 - 1 =
 ```
 
 Probably today you don't need to be compatible with such domain-limiting systems but in most cases such limitations are very easy to withstand and there's no reason for your project not to be ready for integration with such obsolete systems in the future.
-Such domain allows you to store `2 ^ 63 - 1` entities which is bigger than `9.2e18` and is enough to uniquely identify entities in almost every possible practical task.
+Such domain allows you to store \\( 2\^{63} - 1 \\) entities which is bigger than \\( 9.2 \dot{} 10\^{18} \\) and is enough to uniquely identify entities in almost every possible practical task.
 You shouldn't forget though that a good ID generation scheme is just a trade-off between a dense domain usage and robust sharded unique IDs generation algorithm.
+
 That's why we recommend using 63-bit positive integers as IDs.
 
 #### Systems with ECMAScript
 
-In theory JSON allows you to use numbers of any length, but in a bunch of scenarios it will be great to process or display your data using ECMAScript (JavaScript, widely spread in web browsers) and it [has only `f64` primitive type](https://262.ecma-international.org/11.0/#sec-numbers-and-dates) for numbers so you [can't have](https://262.ecma-international.org/11.0/#sec-number.max_safe_integer) positive integer numbers bigger than `2 ^ 53 - 1` without excess [overhead](https://262.ecma-international.org/11.0/#sec-ecmascript-language-types-bigint-type).
+In theory JSON allows you to use numbers of any length, but in a bunch of scenarios it will be great to process or display your data using ECMAScript (JavaScript, widely spread in web browsers) and it [has only `f64` primitive type](https://262.ecma-international.org/11.0/#sec-numbers-and-dates) for numbers so you [can't have](https://262.ecma-international.org/11.0/#sec-number.max_safe_integer) positive integer numbers bigger than \\( 2\^{53} - 1 \\) without excess [overhead](https://262.ecma-international.org/11.0/#sec-ecmascript-language-types-bigint-type).
 This leads us to the following integer numbers' domain for IDs in systems with ECMAScript:
 
 ```
@@ -47,21 +48,21 @@ From the other hand you can add an extra serialization step storing your IDs in 
 ### Properties of your ID
 
 
-#### Level of monotony
+#### Level of monotonicity
 
 Depending on the length of monotonous segments in the generated IDs sequence we can divide ID generation algorithms to:
 
 - _Fully monotonous_ — generated ID sequence is monotonous during the whole lifetime of the system (e.g. [`ConfiguredId`][ConfiguredId]).
 - _Periodically monotonous_ — ID generation algorithm reaches the maximal value for ID several times during the lifetime of the system and starts counting from the beginning of the domain.
     This mean that storage would contain a couple of monotonous segments e.g. several months long each (e.g. [`TraceId`][TraceId]).
-- Applicable to _sharded monotony_ — the app generates IDs monotonously for several segments frequently switching between these segments.
-    E.g. every actor generates only monotonous IDs but because of their concurrent work storage should handle a lot of intersecting consecutive IDs inserts (e.g. [`DecimalId`][DecimalId]).
+- With _sharded monotonicity_ — the app generates IDs monotonously for several segments frequently switching between these segments.
+    E.g. every actor generates only monotonous IDs but because of actors' concurrent work storage should handle a lot of intersecting consecutive IDs inserts (e.g. [`DecimalId`][DecimalId]).
 
-#### Monotony source
+#### Monotonycity source
 
-- via DB
-- Decimal
-- Time
+- via DB (e.g. [`ConfiguredId`][ConfiguredId]).
+- Decimal (e.g. [`DecimalId`][DecimalId]).
+- Time (e.g. [`TraceId`][TraceId]).
 
 ### Why monotonous IDs are so great
 
@@ -84,14 +85,14 @@ Algorithms above are for IDs that should just look randomly.
 
 #### Taking monotonous IDs from the DB
 
-needs atomic compare-and-set (ScyllaDB) or autoincrement
+needs atomic compare-and-set (ScyllaDB) or auto-increment
 
 #### Decimal
 
 TODO
 
 #### Time
-Timeseries-based (not determined, has advantages limitations). Example: trace ID generation.
+Time-series-based (not determined, has advantages limitations). Example: trace ID generation.
 
 ## Great IDs case study
 
@@ -101,10 +102,13 @@ Uses DB to provide persistent ID storage.
 
 ### `DecimalId`
 
+This ID has [sharded monotonicity][monotonicity_level].
+
 ### `TraceId`
 
-Uses periodic monotony with a period approx. 1 year
+Uses periodic monotonicity with a period approx. 1 year
 
 [ConfiguredId]: #configuredid
 [DecimalId]: #decimalid
+[monotonicity_level]: #level-of-monotonicity
 [TraceId]: #traceid
