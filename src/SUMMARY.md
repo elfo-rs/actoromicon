@@ -31,7 +31,7 @@
 - [Deployment](ch07-00-deployment.md)
 
 - [Patterns](ch08-00-patterns.md)
-    - [Pattern: Id Generation](ch08-01-id-generation.md)
+    - [Pattern: ID Generation](ch08-01-id-generation.md)
     - [Pattern: Pub/Sub](ch08-02-pub-sub.md)
     - [Pattern: A Workqueue](ch08-03-a-workqueue.md)
     - [Pattern: CQS](ch08-04-cqs.md)
