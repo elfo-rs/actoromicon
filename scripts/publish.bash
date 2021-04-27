@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+git branch -D public
+git checkout -b public
+mdbook build -d docs
+git add docs
+git commit -m 'docs: generate'
+git push -f --set-upstream origin public
+git checkout -
