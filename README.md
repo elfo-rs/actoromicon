@@ -1,6 +1,6 @@
 # Actoromicon
 
-[![Build status](https://travis-ci.org/loyd/actoromicon.svg)](https://travis-ci.org/loyd/actoromicon)
+[![Build status](https://travis-ci.org/elfo-rs/actoromicon.svg)](https://travis-ci.org/elfo-rs/actoromicon)
 
 ## Contributing
 
