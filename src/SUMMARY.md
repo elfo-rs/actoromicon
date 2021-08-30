@@ -8,9 +8,11 @@
 
 - [Actors](ch02-00-actors.md)
     - [A Mailbox](ch02-01-a-mailbox.md)
-    - [Routing](ch02-02-routing.md)
-    - [Status Management](ch02-03-status-management.md)
-    - [Supervision](ch02-04-supervision.md)
+    - [Sources](ch02-02-sources.md)
+    - [Routing](ch02-03-routing.md)
+    - [Status Management](ch02-04-status-management.md)
+    - [Supervision](ch02-05-supervision.md)
+    - [Configuration](ch02-06-configuration.md)
 
 - [Distributed Actors](ch03-00-dustributed-actors.md)
 
