@@ -67,7 +67,7 @@ Such messages cannot be deserialized properly; that's ok until they are used as 
 
 The default implementation of dumpers writes all dumps to a file on the local file system.
 
-Modern NVMe SSDs can achieve a write speed up to 3GiB/s, which should be more than enough to avoid a bottleneck in this place.
+Even home-purpose SSDs can achieve 3GiB/s in 2021, which should be more than enough to avoid a bottleneck in this place.
 
 Dumps are stored in an uncompressed way so that they can take a lot of space. So, it's essential to rotate the dump file timely and delete outdated ones.
 
