@@ -77,18 +77,24 @@ Note that message ordering between actor groups (and even inside the same actor)
 
 Dump files contain messages in the newline-delimited JSON format. Each line is object containing the following properties:
 * `g` — an actor group's name
-* `k` — an optional actor's key
+* `k` — an *optional* actor's key
 * `n` — [`node_no`][distributed]
 * `s` — `sequence_no`, unique inside an actor group
 * `t` — [`trace_id`][tracing]
 * `ts` — timestamp
 * `d` — direction, "In" or "Out"
-* `cl` — an optional class
+* `cl` — an *optional* class
 * `mn` — a message's name
 * `mp` — a message's protocol, usually a crate, which contains the message
 * `mk` — a message's kind, "Regular", "Request" or "Response"
-* `m` — a nullable message's body
-* `c` — an optional correlation id, which links requests with corresponding responses
+* `m` — a *nullable* message's body
+* `c` — an *optional* correlation id, which links requests with corresponding responses
+
+Terms:
+* *optional* means that the property can be omitted, but if it's present, then its value isn't `null`.
+* *nullable* means that the property is present always, but the value can be `null`.
+
+The `sequence_no` field can be used to detect missed messages (because of limiting or ignoring).
 
 **TODO: note about classes**
 
