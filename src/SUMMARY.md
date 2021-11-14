@@ -18,7 +18,7 @@
 
 - [Utility](ch04-00-utility.md)
     - [Logging](ch04-01-logging.md)
-    - [Inspecting](ch04-02-inspecting.md)
+    - [Telemetry](ch04-02-telemetry.md)
     - [Dumping](ch04-03-dumping.md)
     - [Tracing](ch04-04-tracing.md)
 
