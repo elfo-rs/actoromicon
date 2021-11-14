@@ -25,18 +25,24 @@ dumpers.mount(elfo::dumper::new());
 Besides this, the path to a dump file must be specified in the config:
 ```toml
 [system.dumpers]
-path = “path/to/dump/file.dump"
+path = "path/to/dump/file.dump"
 ```
 
-### Disable dumping for the entire actor group
+### Configure dumping on a per-group basis
 
-Put `system.dumping.disabled = true` under the section for the corresponding actor group. Note that the settings can be changed and applied [on the fly][configs]:
+Dumping settings can be specified for each actor group individually.
+Note that the settings can be changed and applied [on the fly][configs].
+
+Example:
 ```toml
 [some_actor_group]
-system.dumping.disabled = true
+system.dumping.disabled = true      # false by default
+system.dumping.rate_limit = 100500  # 100000 by default
 ```
 
-### Disable dumping for a message
+Dumps above the rate limit are lost, but the sequence number is incremented anyway to detect missed messages later.
+
+### Configure dumping on a per-message basis
 
 Simply add the `message(dumping = "disabled")` attribute to the message. Another and default value of the attribute is `"full"`.
 ```rust,ignore
@@ -46,7 +52,7 @@ pub struct SomethingHappened {
 }
 ```
 
-### Short messages
+### Shorten fields of a message
 
 Sometimes the content of messages is too large, for instance, in writing a backend for graph plotting, where every response can contain thousands of points. We don't want to lose additional information about responses, but saving whole messages is very expensive in this case.
 
@@ -54,14 +60,17 @@ For this situation, elfo provides a helper to hide specified fields during seria
 
 ```rust,ignore
 #[message]
-pub struct ChunkArrived {
+pub struct ChunkProduced {
+    pub graph_id: GraphId,
     #[serde(serialize_with = "elfo::dumping::hide")]
-    pub points: Vec<(f64, f64)>,
-    pub is_end: bool,
+    pub points: Vec<(f64, f64)>,   // will be dumped as "<hidden>"
 }
 ```
 
 Such messages cannot be deserialized properly; that's ok until they are used as input for [regression testing][regression].
+
+## Metrics
+TODO
 
 ## Local storage
 
@@ -94,7 +103,7 @@ Terms:
 * *optional* means that the property can be omitted, but if it's present, then its value isn't `null`.
 * *nullable* means that the property is present always, but the value can be `null`.
 
-The `sequence_no` field can be used to detect missed messages (because of limiting or ignoring).
+The `sequence_no` field can be used to detect missed messages because of limiting.
 
 **TODO: note about classes**
 
@@ -122,7 +131,7 @@ The common schema looks like
 
 **TODO: add a link to the example with vector.dev and clickhouse**
 
-## Implentation details
+## Implementation details
 
 At a top level, dumping is separated into two parts: the dumping subsystem and the dumper.
 
