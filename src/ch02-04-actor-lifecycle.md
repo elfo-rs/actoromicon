@@ -68,4 +68,7 @@ Also, details can be provided with each status:
 ctx.set_status(ActorStatus::INITIALIZING.with_details("loading state"));
 ```
 
+## Subscribing to actor's statuses
+TODO: `SubscribeToActorStatuses`, `ActorStatusReport`
+
 [mailbox]: ./ch02-01-a-mailbox.html
