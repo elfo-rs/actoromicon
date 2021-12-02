@@ -6,3 +6,4 @@ src = "src"
 title = "The Actoromicon"
 [output.html]
 mathjax-support = true
+additional-css = ["custom.css"]
