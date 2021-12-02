@@ -127,7 +127,7 @@ Ok, so you want to store dumps in DB. The right choice, if you can afford it. Wh
 
 The common schema looks like
 
-![](assets/dumping-infrastructure.svg)
+![](assets/dumping-infrastructure.drawio.svg)
 
 **TODO: add a link to the example with vector.dev and clickhouse**
 
@@ -137,7 +137,7 @@ At a top level, dumping is separated into two parts: the dumping subsystem and t
 
 The dumping subsystem is based on sharded in-memory storage containing a limited queue of messages. We use a predefined number of shards for now, but we will likely use the number of available cores in the future. Every thread writes to its dedicated shard. Such an approach reduces contention and false sharing between threads.
 
-![](assets/dumping-implementation-details.svg)
+![](assets/dumping-implementation-details.drawio.svg)
 
 The dumper sequentially, in a round-robin way, replaces the shard's queue with the extra one, then reads and serializes all messages and writes them to the dump file. All this work happens on a timer tick. Firstly,  it's one of the simplest ways to get appropriate batching. Secondly, because the dumper uses [tokio::task::spawn_blocking](https://docs.rs/tokio/1/tokio/task/fn.spawn_blocking.html) and blocking writes insides, that's more effective than using async [tokio::fs](https://docs.rs/tokio/1/tokio/fs/index.html) directly. The timer approach allows us to reduce the impact on the tokio executor. However, this behavior is going to be improved for environments with io_uring in the future.
 
