@@ -4,6 +4,10 @@ language = "en"
 multilingual = false
 src = "src"
 title = "The Actoromicon"
+
+[rust]
+edition = "2018"
+
 [output.html]
 mathjax-support = true
 additional-css = ["custom.css"]
