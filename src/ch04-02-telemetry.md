@@ -84,7 +84,40 @@ TODO: `elfo-telemeter` config.
 TODO: specific to elfo-logger, elfo-dumper, elfo_telemeter
 
 ## Derived metrics
+
+### Statuses
 TODO
+
+### Incoming/outgoing rate
+TODO
+
+```
+rate(elfo_message_handling_time_seconds_count{actor_group="${actor_group:raw}",actor_key=""}[$__rate_interval])
+```
+
+### Waiting time
+TODO
+
+```
+rate(elfo_message_waiting_time_seconds{actor_group="${actor_group:raw}",actor_key="",quantile=~"0.75|0.9|0.95"}[$__rate_interval])
+```
+
+### Utilization
+TODO
+
+
+```
+rate(elfo_message_handling_time_seconds_sum{actor_group="${actor_group:raw}",actor_key=""}[$__rate_interval])
+```
+
+### Executor utilization (≈ CPU usage)
+TODO
+
+The time for which the task executor is blocked. Equals to CPU time if blocking IO isn't used.
+
+```
+rate(elfo_busy_time_seconds_sum[$__rate_interval])
+```
 
 ## Dashboards
 TODO
