@@ -10,7 +10,7 @@
     - [A Mailbox](ch02-01-a-mailbox.md)
     - [Sources](ch02-02-sources.md)
     - [Routing](ch02-03-routing.md)
-    - [Status Management](ch02-04-status-management.md)
+    - [Actor Lifecycle](ch02-04-actor-lifecycle.md)
     - [Supervision](ch02-05-supervision.md)
     - [Configuration](ch02-06-configuration.md)
 
