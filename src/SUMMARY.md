@@ -12,7 +12,7 @@
     - [Sources]()
     - [Structural Actors]()
 
-- [Actor Groups]()
+- [Actor Groups](ch03-00-groups.md)
     - [Routing]()
     - [Supervision]()
     - [Configuration]()
