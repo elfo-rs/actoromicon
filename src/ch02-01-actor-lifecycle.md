@@ -19,7 +19,7 @@ An actor goes through several stages in life. Transitions between stages are acc
 
     An actor is preparing to termination, e.g. doing some cleanup, flushing data, etc.
 
-    It happens when the actor's [mailbox is closed][mailbox] and all messages are handled. Additionally, if the actor uses `TerminationPolicy::manually`, it also happens when `Terminate` is received.
+    It happens when the actor's mailbox is closed and all messages are handled. Additionally, if the actor uses `TerminationPolicy::manually`, it also happens when `Terminate` is received.
 
 * `Terminated`
 
@@ -72,5 +72,3 @@ ctx.set_status(ActorStatus::INITIALIZING.with_details("loading state"));
 
 ## Subscribing to actor's statuses
 TODO: `SubscribeToActorStatuses`, `ActorStatusReport`
-
-[mailbox]: ./ch02-01-a-mailbox.html
