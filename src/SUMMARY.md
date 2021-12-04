@@ -7,14 +7,15 @@
     - [Hello, World!]()
 
 - [Actors]()
-    - [A Mailbox]()
+    - [Actor Lifecycle](ch02-01-actor-lifecycle.md)
     - [Sources]()
+    - [Structural Actors]()
+
+- [Actor Groups]()
     - [Routing]()
-    - [Actor Lifecycle](ch02-04-actor-lifecycle.md)
     - [Supervision]()
     - [Configuration]()
-
-- [Distributed Actors]()
+    - [File System]()
 
 - [Utility]()
     - [Logging]()
@@ -22,7 +23,9 @@
     - [Dumping](ch04-03-dumping.md)
     - [Tracing]()
 
-- [Hot Actor Replacement]()
+- [Distributed Actors]()
+    - [Protocol Evolution]()
+    - [Transport]()
 
 - [Testing]()
     - [Unit Testing]()
