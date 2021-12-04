@@ -22,7 +22,7 @@
     - [Logging]()
     - [Telemetry](ch04-02-telemetry.md)
     - [Dumping](ch04-03-dumping.md)
-    - [Tracing]()
+    - [Tracing](ch04-04-tracing.md)
 
 - [Distributed Actors]()
     - [Protocol Evolution]()
