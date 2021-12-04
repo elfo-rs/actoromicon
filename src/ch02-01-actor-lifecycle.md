@@ -7,7 +7,7 @@ An actor goes through several stages in life. Transitions between stages are acc
 * `Initializing`
 
     An initial status.
-    The actor doesn't handle incoming messages and is doing some initialization, e.g. subscribing to other actors, collecting an initial state, connecting to DB etc.
+    The actor doesn't handle incoming messages and is doing some initialization, e.g. subscribing to other actors, collecting an initial state, connecting to DB, etc.
 
 * `Normal`
 
@@ -17,7 +17,7 @@ An actor goes through several stages in life. Transitions between stages are acc
 
 * `Terminating`
 
-    An actor is preparing to termination, e.g. doing some cleanup, flushing data etc.
+    An actor is preparing to termination, e.g. doing some cleanup, flushing data, etc.
 
     It happens when the actor's [mailbox is closed][mailbox] and all messages are handled. Additionally, if the actor uses `TerminationPolicy::manually`, it also happens when `Terminate` is received.
 
@@ -43,9 +43,9 @@ The schema doesn't include the `Alarming` status, because it can be set only man
 
 From the point of view of the main actor's loop:
 ```rust,ignore
-async fn exec(ctx: Context) {
+async fn exec(mut ctx: Context) {
     // Status: Initializing
-    //  subscribe to other actors, connect to DB etc
+    //  subscribe to other actors, connect to DB, etc
 
     while let Some(envelope) = ctx.recv().await {
         // Status: Normal
@@ -53,7 +53,7 @@ async fn exec(ctx: Context) {
     }
 
     // Status: Terminating
-    //  make cleanup, flush data etc
+    //  make cleanup, flush data, etc
 } // Status: Terminated or Failed
 ```
 

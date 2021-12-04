@@ -6,8 +6,9 @@
     - [Installation]()
     - [Hello, World!]()
 
-- [Actors]()
+- [Actors](ch02-00-actors.md)
     - [Actor Lifecycle](ch02-01-actor-lifecycle.md)
+    - [Communication]()
     - [Sources]()
     - [Structural Actors]()
 
@@ -15,7 +16,7 @@
     - [Routing]()
     - [Supervision]()
     - [Configuration]()
-    - [File System]()
+    - [Modules]()
 
 - [Utility]()
     - [Logging]()
