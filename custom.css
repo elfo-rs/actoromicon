@@ -4,3 +4,9 @@ html.navy img[src$=".drawio.svg"],
 html.ayu  img[src$=".drawio.svg"] {
     filter: invert(1);
 }
+
+/* Center images */
+.content img {
+    display: block;
+    margin: auto;
+}
