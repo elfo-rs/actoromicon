@@ -163,7 +163,7 @@ To make deployment more robust we recommend generating `launch_id` outside of th
 [DecimalId]: #decimalid
 [domain]: #choosing-the-domain-for-your-ids
 [ids_produced_by_db]: #ids-produced-by-db
-[logging]: ./ch04-01-logging.html
+[logging]: ./ch05-01-logging.html
 [monotonicity_level]: #level-of-monotonicity
-[TraceId]: ./ch04-04-tracing.html#traceid
-[tracing]: ./ch04-04-tracing.html
+[TraceId]: ./ch05-04-tracing.html#traceid
+[tracing]: ./ch05-04-tracing.html

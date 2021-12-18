@@ -1,28 +1,28 @@
 # The Actoromicon
 
-- [Introduction](ch00-00-introduction.md)
+- [Introduction](ch01-00-introduction.md)
 
 - [Getting Started]()
     - [Installation]()
     - [Hello, World!]()
 
-- [Actors](ch02-00-actors.md)
-    - [Actor Lifecycle](ch02-01-actor-lifecycle.md)
-    - [Communication](ch02-02-communication.md)
+- [Actors](ch03-00-actors.md)
+    - [Actor Lifecycle](ch03-01-actor-lifecycle.md)
+    - [Communication](ch03-02-communication.md)
     - [Sources]()
     - [Structural Actors]()
 
-- [Actor Groups](ch03-00-groups.md)
+- [Actor Groups](ch04-00-groups.md)
     - [Routing]()
     - [Supervision]()
     - [Configuration]()
-    - [File System](ch03-04-file-system.md)
+    - [File System](ch04-04-file-system.md)
 
 - [Utility]()
     - [Logging]()
-    - [Telemetry](ch04-02-telemetry.md)
-    - [Dumping](ch04-03-dumping.md)
-    - [Tracing](ch04-04-tracing.md)
+    - [Telemetry](ch05-02-telemetry.md)
+    - [Dumping](ch05-03-dumping.md)
+    - [Tracing](ch05-04-tracing.md)
 
 - [Distributed Actors]()
     - [Protocol Evolution]()
@@ -37,7 +37,7 @@
 - [Deployment]()
 
 - [Patterns]()
-    - [Pattern: ID Generation](ch08-01-id-generation.md)
+    - [Pattern: ID Generation](ch09-01-id-generation.md)
     - [Pattern: Pub/Sub]()
     - [Pattern: A Workqueue]()
     - [Pattern: CQS]()

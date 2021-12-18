@@ -149,10 +149,10 @@ Yep, we can restore order in the dumper, but don't do it now because remote DB i
 
 [implementation]: #implementation-details
 
-[mailbox]: ./ch02-01-a-mailbox.html
-[source]: ./ch02-02-sources.html
-[configs]: ./ch02-06-configuration.html
-[distributed]: ./ch03-00-dustributed-actors.html
-[logging]: ./ch04-01-logging.html
-[tracing]: ./ch04-04-tracing.html
-[regression]: ./ch06-02-the-replayer.html
+[mailbox]: ./ch03-00-actors.html
+[source]: ./ch03-03-sources.html
+[configs]: ./ch04-03-configuration.html
+[distributed]: ./ch06-00-dustributed-actors.html
+[logging]: ./ch05-01-logging.html
+[tracing]: ./ch05-04-tracing.html
+[regression]: ./ch07-02-replayer.html

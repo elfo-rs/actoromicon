@@ -78,9 +78,9 @@ Which seems more than enough for the most of the applications.
 Note that `counter` is limited to be at least 1 to keep the [invariant][domain]: \\( \operatorname{id} \geqslant 1 \\).
 Every other component of `TraceId` could be zero.
 
-[domain]: ./ch08-01-id-generation.md#choosing-the-domain-for-your-ids
-[dumping]: ./ch04-03-dumping.html
-[logging]: ./ch04-01-logging.html
-[monotonicity_level]: ./ch08-01-id-generation.md#level-of-monotonicity
-[monotonicity_reasons]: ./ch08-01-id-generation.md#why-monotonic-ids-are-so-great
-[monotonicity_source]: ./ch08-01-id-generation.md#monotonicity-source
+[domain]: ./ch09-01-id-generation.md#choosing-the-domain-for-your-ids
+[dumping]: ./ch05-03-dumping.html
+[logging]: ./ch05-01-logging.html
+[monotonicity_level]: ./ch09-01-id-generation.md#level-of-monotonicity
+[monotonicity_reasons]: ./ch09-01-id-generation.md#why-monotonic-ids-are-so-great
+[monotonicity_source]: ./ch09-01-id-generation.md#monotonicity-source
