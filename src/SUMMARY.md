@@ -8,7 +8,7 @@
 
 - [Actors](ch02-00-actors.md)
     - [Actor Lifecycle](ch02-01-actor-lifecycle.md)
-    - [Communication]()
+    - [Communication](ch02-02-communication.md)
     - [Sources]()
     - [Structural Actors]()
 
