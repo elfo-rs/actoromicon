@@ -38,6 +38,7 @@
 
 - [Patterns]()
     - [Pattern: ID Generation](ch09-01-id-generation.md)
+    - [Pattern: Network servers]()
     - [Pattern: Pub/Sub]()
     - [Pattern: A Workqueue]()
     - [Pattern: CQS]()
