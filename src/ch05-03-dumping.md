@@ -133,6 +133,8 @@ The common schema looks like
 
 ## Implementation details
 
+**TODO: implementation has been changed a lot, need to update the section**
+
 At a top level, dumping is separated into two parts: the dumping subsystem and the dumper.
 
 The dumping subsystem is based on sharded in-memory storage containing a limited queue of messages. We use a predefined number of shards for now, but we will likely use the number of available cores in the future. Every thread writes to its dedicated shard. Such an approach reduces contention and false sharing between threads.
