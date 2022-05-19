@@ -25,6 +25,7 @@ The most important part of the actor model is, of course, the actor itself. It c
 These properties allow us to build highly scalable and fault-tolerant systems relatively thinkable and straightforwardly without using complex concurrent data structures.
 
 ## A Mailbox
+
 Every actor has his own mailbox, a queue containing envelopes sent by other actors to this one.
 
 What's the envelope? The envelope is a wrapper around a message that includes also some useful metadata: the sender's address, time of sending moment, and some other information that is not so important for now.
@@ -36,6 +37,7 @@ A mailbox is the main source of messages for any actor. Messages are handled seq
 A mailbox can become full if the corresponding actor doesn't have time to process the message flow. In this case, the sending actor can decide to drop the message, wait for space in the mailbox or resend after some time. Such strategies will be discussed later.
 
 ## Functional actors
+
 Let's define a some simple actor using `elfo` and figure out what's happening.
 
 The simplest way to define an actor is functional style.

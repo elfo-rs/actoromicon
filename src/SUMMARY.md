@@ -13,11 +13,10 @@
     - [Structural Actors]()
 
 - [Actor Groups](ch04-00-groups.md)
-    - [Routing]()
+    - [Routing](ch04-01-routing.md)
     - [Supervision]()
     - [Configuration]()
     - [Multiple Runtimes]()
-    - [File System](ch04-04-file-system.md)
 
 - [Utility]()
     - [Logging]()
@@ -35,10 +34,13 @@
     - [Approval Testing]()
     - [Stress Testing]()
 
+- [Conventions]()
+    - [Project Structure](ch08-01-project-structure.md)
+
 - [Deployment]()
 
 - [Patterns]()
-    - [Pattern: ID Generation](ch09-01-id-generation.md)
+    - [Pattern: ID Generation](ch10-01-id-generation.md)
     - [Pattern: Network servers]()
     - [Pattern: Pub/Sub]()
     - [Pattern: A Workqueue]()

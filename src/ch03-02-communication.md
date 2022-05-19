@@ -3,6 +3,7 @@
 Actors can communicate in many ways depending on the situation and desired guarantees.
 
 ## Fire and Forget
+
 The most straightforward way is to send a message with minimal guarantees.
 
 ![](assets/fire-and-forget.drawio.svg)
@@ -45,6 +46,7 @@ if let Err(err) = ctx.try_send(SomeMessage) {
 ```
 
 ## Blocking Request-Response
+
 Some communications between actors require response message being sent back to the sender.
 
 ![](assets/blocking-request.drawio.svg)
@@ -52,6 +54,7 @@ Some communications between actors require response message being sent back to t
 TODO
 
 ### Examples
+
 ```rust,ignore
 #[message(ret = Result<(), DoSomethingRejected>)]
 struct DoSomething;
@@ -63,13 +66,16 @@ TODO
 ```
 
 ## Non-blocking Request-Response
+
 ![](assets/non-blocking-request.drawio.svg)
 TODO
 
 ### State
+
 TODO
 
 ### Examples
+
 TODO
 
 ## Subscriptions

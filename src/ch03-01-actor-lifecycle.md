@@ -58,6 +58,7 @@ async fn exec(mut ctx: Context) {
 ```
 
 ## Manual status management
+
 It's possible to avoid managing statuses totally, built-in logic is reasonable enough. However, with the increasing complexity of actors, it can be helpful to provide more information about the current status.
 
 The basic way to change status:
@@ -71,4 +72,5 @@ ctx.set_status(ActorStatus::INITIALIZING.with_details("loading state"));
 ```
 
 ## Subscribing to actor's statuses
+
 TODO: `SubscribeToActorStatuses`, `ActorStatusReport`
