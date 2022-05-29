@@ -11,3 +11,4 @@ edition = "2018"
 [output.html]
 mathjax-support = true
 additional-css = ["custom.css"]
+playground.runnable = false
