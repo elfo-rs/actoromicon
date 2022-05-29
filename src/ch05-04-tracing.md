@@ -79,8 +79,8 @@ Note that `counter` is limited to be at least 1 to keep the [invariant][domain]:
 Every other component of `TraceId` could be zero.
 
 [domain]: ./ch10-01-id-generation.md#choosing-the-domain-for-your-ids
-[dumping]: ./ch05-03-dumping.html
-[logging]: ./ch05-01-logging.html
+[dumping]: ./ch05-03-dumping.md
+[logging]: ./ch05-01-logging.md
 [monotonicity_level]: ./ch10-01-id-generation.md#level-of-monotonicity
 [monotonicity_reasons]: ./ch10-01-id-generation.md#why-monotonic-ids-are-so-great
 [monotonicity_source]: ./ch10-01-id-generation.md#monotonicity-source

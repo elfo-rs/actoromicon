@@ -14,7 +14,7 @@
 
 - [Actor Groups](ch04-00-groups.md)
     - [Routing](ch04-01-routing.md)
-    - [Supervision]()
+    - [Supervision](ch04-02-supervision.md)
     - [Configuration]()
     - [Multiple Runtimes]()
 
