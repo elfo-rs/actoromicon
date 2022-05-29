@@ -1,0 +1,1053 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The Actoromicon</title>
+        <meta name="robots" content="noindex" />
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="custom.css">
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="ch01-00-introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch01-01-comparison.html"><strong aria-hidden="true">1.1.</strong> Comparison</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Getting Started</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">2.1.</strong> Installation</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.2.</strong> Hello, World!</div></li></ol></li><li class="chapter-item expanded "><a href="ch03-00-actors.html"><strong aria-hidden="true">3.</strong> Actors</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch03-01-actor-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Actor Lifecycle</a></li><li class="chapter-item expanded "><a href="ch03-02-communication.html"><strong aria-hidden="true">3.2.</strong> Communication</a></li><li class="chapter-item expanded "><a href="ch03-03-sources.html"><strong aria-hidden="true">3.3.</strong> Sources</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">3.4.</strong> Structural Actors</div></li></ol></li><li class="chapter-item expanded "><a href="ch04-00-groups.html"><strong aria-hidden="true">4.</strong> Actor Groups</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch04-01-routing.html"><strong aria-hidden="true">4.1.</strong> Routing</a></li><li class="chapter-item expanded "><a href="ch04-02-supervision.html"><strong aria-hidden="true">4.2.</strong> Supervision</a></li><li class="chapter-item expanded "><a href="ch04-03-configuration.html"><strong aria-hidden="true">4.3.</strong> Configuration</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.4.</strong> Multiple Runtimes</div></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> Utility</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch05-01-logging.html"><strong aria-hidden="true">5.1.</strong> Logging</a></li><li class="chapter-item expanded "><a href="ch05-02-telemetry.html"><strong aria-hidden="true">5.2.</strong> Telemetry</a></li><li class="chapter-item expanded "><a href="ch05-03-dumping.html"><strong aria-hidden="true">5.3.</strong> Dumping</a></li><li class="chapter-item expanded "><a href="ch05-04-tracing.html"><strong aria-hidden="true">5.4.</strong> Tracing</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.</strong> Distributed Actors</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">6.1.</strong> Protocol Evolution</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.2.</strong> Transport</div></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.</strong> Testing</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">7.1.</strong> Unit Testing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.2.</strong> The Replayer</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.3.</strong> Approval Testing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.4.</strong> Stress Testing</div></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.</strong> Conventions</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch08-01-project-structure.html"><strong aria-hidden="true">8.1.</strong> Project Structure</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">9.</strong> Deployment</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.</strong> Patterns</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch10-01-id-generation.html"><strong aria-hidden="true">10.1.</strong> Pattern: ID Generation</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.2.</strong> Pattern: Network servers</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.3.</strong> Pattern: Pub/Sub</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.4.</strong> Pattern: A Workqueue</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.5.</strong> Pattern: CQS</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.6.</strong> Pattern: Event Sourcing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.7.</strong> Pattern: Transactions</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.8.</strong> Pattern: Frontend as an Actor</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.9.</strong> Pattern: Gateways</div></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Actoromicon</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>This book aims to describe a superior approach to build heavily asynchronous and distributed applications based on the actor model.
+Major part of the book is about the <code>elfo</code> framework and is illustrated with best practices of its usage. The second part of the book tells you about the best corporate practices of asynchronous applications' architecture.</p>
+<h2 id="goals"><a class="header" href="#goals">Goals</a></h2>
+<ul>
+<li>Assist in building fault-tolerant systems.</li>
+<li>Be performant enough for low-latency systems.</li>
+<li>Be observable, provide a lot of metrics to detect problems.</li>
+<li>Provide built-in support of exposing log events, dumps, metrics, and trace events.</li>
+<li>Distributing actors across several machines should be as simple as possible.</li>
+</ul>
+<h2 id="non-goals"><a class="header" href="#non-goals">Non-goals</a></h2>
+<ul>
+<li>Provide the most performant way to communicate between actors.</li>
+<li>Provide any HTTP server.</li>
+</ul>
+<h2 id="features"><a class="header" href="#features">Features</a></h2>
+<ul>
+<li>Asynchronous actors with supervision and custom life cycle.</li>
+<li>Two-level routing system: between actor groups (pipelining) and inside them (sharding).</li>
+<li>Multiple protocols: actors (so-called gates) can handle messages from different protocols.</li>
+<li>Multiple patterns of communication: regular messages, request-response (<em>TODO: subscriptions</em>).</li>
+<li>Config updating and distribution on the fly.</li>
+<li>Appropriate for both low latency and high throughput tasks.</li>
+<li>Tracing: all messages have <code>trace_id</code> that spread across the system implicitly.</li>
+<li>Telemetry (via the <code>metrics</code> crate).</li>
+<li>Dumping: messages can be stored for further debugging.</li>
+<li>Seamless distribution across nodes <em>TODO</em>.</li>
+<li>Utils for simple testing.</li>
+<li>Utils for benchmarking <em>TODO</em>.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-aka-why-not-x"><a class="header" href="#comparison-aka-why-not-x">Comparison aka &quot;Why not X&quot;?</a></h1>
+<h2 id="where-x--csp"><a class="header" href="#where-x--csp">Where X = CSP</a></h2>
+<p>Usage of <a href="https://en.wikipedia.org/wiki/Communicating_sequential_processes">CSP</a> in Rust can be illustrated in the following example:</p>
+<pre><code class="language-rust">// &quot;Processes&quot;
+async fn read_file(path: &amp;str, tx: Sender&lt;Chunk&gt;) { .. }
+async fn decode_chunks(rx: Receiver&lt;Chunk&gt;, tx: Sender&lt;SomeEvent&gt;) { .. }
+async fn process_events(rx: Receiver&lt;SomeEvent&gt;) { .. }
+
+// &quot;Channels&quot;
+let (chunks_tx, chunks_rx) = channel(100);
+let (events_tx, events_rx) = channel(100);
+
+spawn(read_file(path, chunks_tx));
+spawn(decode_chunks(chunks_rx, events_tx));
+spawn(process_events(events_rx));
+</code></pre>
+<p>The CSP approach is a perfect solution that doesn't require expertise in any frameworks for tools or simple applications with well-defined technical specifications and a small number of communications between processes. If this is your case, just use CSP.</p>
+<p>However, complex applications tend to get more and more complicated over time, and their development and maintenance quickly become harder than in the actor model.</p>
+<h3 id="pros-of-csp"><a class="header" href="#pros-of-csp">Pros of CSP</a></h3>
+<ul>
+<li>Implementation of channels can be chosen by a developer, while actor frameworks determine a mailbox implementation.</li>
+<li>Processes can share the same channel using MPMC channels to implement work-stealing behavior. It's not an option for actors, where a mailbox is owned by exactly one actor.</li>
+</ul>
+<h3 id="cons-of-csp"><a class="header" href="#cons-of-csp">Cons of CSP</a></h3>
+<ul>
+<li>Processes in CSP are anonymous, while actors have identities. It means it's hard to distinguish logs and metrics because processes don't have names. Thus, the observability of CSP is much worse than that of the actor model.</li>
+<li>Actors are more decoupled; they can be discovered using some sort of service locators and even changed on the fly, e.g., due to restart.</li>
+<li>Actors can be distributed across several machines because they don't have to send messages directly to a mailbox; they can have a network before it.</li>
+<li>To add more connections between processes, we need to use more channels in one case and combine messages into big enumerations with unrelated items in other cases.</li>
+</ul>
+<h2 id="where-x--actix"><a class="header" href="#where-x--actix">Where X = actix</a></h2>
+<p>TODO</p>
+<h2 id="where-x--bastion"><a class="header" href="#where-x--bastion">Where X = bastion</a></h2>
+<p>TODO</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="actors"><a class="header" href="#actors">Actors</a></h1>
+<p>The most important part of the actor model is, of course, the actor itself. It can be challenging to give the exact definition of this term. However, we can define an actor through its properties:</p>
+<ul>
+<li>
+<p>An actor is a unit of scheduling</p>
+<p>Different threads cannot execute the same actor simultaneously. However, many actors are executed concurrently, often parallel in many threads.</p>
+</li>
+<li>
+<p>An actor is a unit of data encapsulation</p>
+<p>Actors shouldn't share their data with other actors, shouldn't expose implementation details, etc.</p>
+</li>
+<li>
+<p>An actor is a unit of failure encapsulation</p>
+<p>Actors can fail, and it doesn't affect the work of other actors directly.</p>
+</li>
+<li>
+<p>An actor is a unit of logic encapsulation</p>
+<p>Actors solve a specific task instead of doing it all at once.</p>
+</li>
+<li>
+<p>An actor is a unit of communication</p>
+<p>Actors can communicate with others by sending and receiving messages. Actors are uniquely identified by their addresses.</p>
+</li>
+</ul>
+<p>These properties allow us to build highly scalable and fault-tolerant systems relatively thinkable and straightforwardly without using complex concurrent data structures.</p>
+<h2 id="a-mailbox"><a class="header" href="#a-mailbox">A Mailbox</a></h2>
+<p>Every actor has his own mailbox, a queue containing envelopes sent by other actors to this one.</p>
+<p>What's the envelope? The envelope is a wrapper around a message that includes also some useful metadata: the sender's address, time of sending moment, and some other information that is not so important for now.</p>
+<p><img src="assets/mailbox.drawio.svg" alt="" /></p>
+<p>A mailbox is the main source of messages for any actor. Messages are handled sequentially.</p>
+<p>A mailbox can become full if the corresponding actor doesn't have time to process the message flow. In this case, the sending actor can decide to drop the message, wait for space in the mailbox or resend after some time. Such strategies will be discussed later.</p>
+<h2 id="functional-actors"><a class="header" href="#functional-actors">Functional actors</a></h2>
+<p>Let's define a some simple actor using <code>elfo</code> and figure out what's happening.</p>
+<p>The simplest way to define an actor is functional style.</p>
+<p>For example, let's define the simplest counter:</p>
+<pre><code class="language-rust ignore">use elfo::prelude::*;
+
+#[message]
+pub struct Increment {
+    pub delta: u32,
+}
+
+#[message(ret = u32)]
+pub struct GetValue;
+
+pub fn counter() -&gt; Schema {
+    ActorGroup::new().exec(|mut ctx| async move {
+        // Private state of the actor.
+        let mut value = 0;
+
+        // The main actor loop: receive a message, handle it, repeat.
+        // Returns `None` and breaks the loop if actor's mailbox is closed
+        // (usually when the system terminates).
+        while let Some(envelope) = ctx.recv().await {
+            msg!(match envelope {
+                Increment { delta } =&gt; {
+                    value += delta;
+                },
+                // It's a syntax for requests.
+                (GetValue, token) =&gt; {
+                    // ... and responses.
+                    ctx.respond(token, value);
+                },
+            })
+        }
+    })
+}
+</code></pre>
+<p>We haven't discussed actor groups yet, so don't pay attention for now.</p>
+<p>Instead, let's talk about other things in the example:</p>
+<ul>
+<li><code>ctx.recv()</code> allows us to wait for the next message asynchronously. Thus, if the mailbox is empty, the actor will return control to the scheduler instead of spending CPU cycles or sleeping.</li>
+<li><code>msg!</code> allows us to unpack envelopes and match against different types of messages. It's required, because Rust's <code>match</code> must include patterns for the same data type only. However, we want to support different messages, often defined in different crates. Also, reusing the <code>match</code> syntax is highly desired in order to work well with tooling like <code>rustfmt</code> and <code>rust-analyzer</code>.</li>
+<li><code>(RequestType, token)</code> is the syntax for handling requests. <code>token</code> can be used no more than once, thanks to Rust, so we cannot accidentally respond to the request twice. Also, the compiler will warn if we forget to handle <code>token</code>. If the token is explicitly dropped without responding, the sending side will get the special error and decide whether it's normal or not.</li>
+</ul>
+<p>Now let's define another actor to communicate with the counter:</p>
+<pre><code class="language-rust ignore">use elfo::prelude::*;
+use counter::{Increment, GetValue};
+
+pub fn sample() -&gt; Schema {
+    ActorGroup::new().exec(|ctx| async move {
+        // Increment the counter, we aren't interested in errors.
+        let _ = ctx.send(Increment { delta: 1 }).await;
+        // ... and again.
+        let _ = ctx.send(Increment { delta: 3 }).await;
+
+        // Request the current counter's value and wait for the response.
+        if let Ok(value) = ctx.request(GetValue).resolve().await {
+            tracing::info!(value, &quot;got it!&quot;);
+        }
+    }
+}
+</code></pre>
+<p>We haven't connected our actors in any way, this will be discussed later.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="actor-lifecycle"><a class="header" href="#actor-lifecycle">Actor lifecycle</a></h1>
+<p>An actor goes through several stages in life. Transitions between stages are accompanied by statuses. Statuses help us to understand better what's happening with actors. So, a good way to understand actor lifecycle is to get familiar with statuses.</p>
+<h2 id="statuses"><a class="header" href="#statuses">Statuses</a></h2>
+<ul>
+<li>
+<p><code>Initializing</code></p>
+<p>An initial status.
+The actor doesn't handle incoming messages and is doing some initialization, e.g. subscribing to other actors, collecting an initial state, connecting to DB, etc.</p>
+</li>
+<li>
+<p><code>Normal</code></p>
+<p>The actor handles incoming messages.</p>
+<p>This status appears on first <code>ctx.(try_)recv()</code> call.</p>
+</li>
+<li>
+<p><code>Terminating</code></p>
+<p>An actor is preparing to termination, e.g. doing some cleanup, flushing data, etc.</p>
+<p>It happens when the actor's mailbox is closed and all messages are handled. Additionally, if the actor uses <code>TerminationPolicy::manually</code>, it also happens when <code>Terminate</code> is received.</p>
+</li>
+<li>
+<p><code>Terminated</code></p>
+<p>A terminal status. The actor's <code>exec()</code> finished without errors.</p>
+</li>
+<li>
+<p><code>Alarming</code></p>
+<p>The actor has some long term problem, but still handles messages, maybe in a special way.</p>
+<p>Currently, this status can be set manually only.</p>
+</li>
+<li>
+<p><code>Failed</code></p>
+<p>A terminal status. The actor panicked or his <code>exec()</code> returns <code>Err</code>.</p>
+</li>
+</ul>
+<h2 id="built-in-status-transitions"><a class="header" href="#built-in-status-transitions">Built-in status transitions</a></h2>
+<p><img src="assets/status-default-transitions.drawio.svg" alt="" /></p>
+<p>The schema doesn't include the <code>Alarming</code> status, because it can be set only manually for now.</p>
+<p>From the point of view of the main actor's loop:</p>
+<pre><code class="language-rust ignore">async fn exec(mut ctx: Context) {
+    // Status: Initializing
+    //  subscribe to other actors, connect to DB, etc
+
+    while let Some(envelope) = ctx.recv().await {
+        // Status: Normal
+        //  handle messages
+    }
+
+    // Status: Terminating
+    //  make cleanup, flush data, etc
+} // Status: Terminated or Failed
+</code></pre>
+<h2 id="manual-status-management"><a class="header" href="#manual-status-management">Manual status management</a></h2>
+<p>It's possible to avoid managing statuses totally, built-in logic is reasonable enough. However, with the increasing complexity of actors, it can be helpful to provide more information about the current status.</p>
+<p>The basic way to change status:</p>
+<pre><code class="language-rust ignore">ctx.set_status(ActorStatus::ALARMING);
+</code></pre>
+<p>Also, details can be provided with each status:</p>
+<pre><code class="language-rust ignore">ctx.set_status(ActorStatus::INITIALIZING.with_details(&quot;loading state&quot;));
+</code></pre>
+<h2 id="subscribing-to-actors-statuses"><a class="header" href="#subscribing-to-actors-statuses">Subscribing to actor's statuses</a></h2>
+<p>TODO: <code>SubscribeToActorStatuses</code>, <code>ActorStatusReport</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="communication"><a class="header" href="#communication">Communication</a></h1>
+<p>Actors can communicate in many ways depending on the situation and desired guarantees.</p>
+<h2 id="fire-and-forget"><a class="header" href="#fire-and-forget">Fire and Forget</a></h2>
+<p>The most straightforward way is to send a message with minimal guarantees.</p>
+<p><img src="assets/fire-and-forget.drawio.svg" alt="" /></p>
+<p>However, it's possible to choose the desired behavior by calling the most appropriate method. All variants can be described by the following template: <code>(try_|unbounded_)send(_to)</code>.</p>
+<p>Methods with the <code>_to</code> suffix allow to specify a destination address as the first argument. Otherwise, <a href="./ch04-01-routing.html">the routing subsystem</a> will be used.</p>
+<p>The prefix describes what should happen if the destination mailbox is full:</p>
+<table><thead><tr><th>Syntax</th><th>Error cases</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>send().await</code></td><td><code>Closed</code></td><td>Blocks until a destination mailbox has space for new messages</td></tr>
+<tr><td><code>try_send()</code></td><td><code>Full</code>, <code>Closed</code></td><td>Returns <code>Full</code> if the mailbox is full</td></tr>
+<tr><td><code>unbounded_send()</code></td><td><code>Closed</code></td><td>Forcibly increase the mailbox, <strong>not implemented yet</strong></td></tr>
+</tbody></table>
+<p>All methods can return <code>Closed</code> if the destination actor is closed.</p>
+<p>The form <code>send().await</code> is used when desired behavior is backpressure, while <code>try_send()</code> is for actors with predicted latency, when it's acceptable to lose messages or it can be handled manually. <code>unbounded_send()</code> should be avoided because it can increase mailboxes unpredictably, leading to OOM.</p>
+<h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
+<pre><code class="language-rust ignore">#[message]
+struct SomeMessage;
+
+// Do not care if the target actor is closed or full.
+let _ = ctx.try_send(SomeMessage);
+
+// Block if the destination mailbox is full and ignore if closed.
+let _ = ctx.send(SomeMessage).await;
+
+// Fail the current actor if the destination is closed.
+ctx.send(SomeMessage).await?;
+
+// Manually implement backpressure, e.g. store messages.
+if let Err(err) = ctx.try_send(SomeMessage) {
+    let msg = err.into_inner(); // msg: SomeMessage
+}
+</code></pre>
+<h2 id="blocking-request-response"><a class="header" href="#blocking-request-response">Blocking Request-Response</a></h2>
+<p>Some communications between actors require response message being sent back to the sender.</p>
+<p><img src="assets/blocking-request.drawio.svg" alt="" /></p>
+<p>TODO</p>
+<h3 id="examples-1"><a class="header" href="#examples-1">Examples</a></h3>
+<pre><code class="language-rust ignore">#[message(ret = Result&lt;(), DoSomethingRejected&gt;)]
+struct DoSomething;
+
+#[message]
+struct DoSomethingRejected(String);
+
+TODO
+</code></pre>
+<h2 id="non-blocking-request-response"><a class="header" href="#non-blocking-request-response">Non-blocking Request-Response</a></h2>
+<p><img src="assets/non-blocking-request.drawio.svg" alt="" />
+TODO</p>
+<h3 id="state"><a class="header" href="#state">State</a></h3>
+<p>TODO</p>
+<h3 id="examples-2"><a class="header" href="#examples-2">Examples</a></h3>
+<p>TODO</p>
+<h2 id="subscriptions"><a class="header" href="#subscriptions">Subscriptions</a></h2>
+<p><strong>TODO</strong></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sources"><a class="header" href="#sources">Sources</a></h1>
+<p>TODO</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="actor-groups"><a class="header" href="#actor-groups">Actor Groups</a></h1>
+<p>Before talking about actor groups, we need to consider another vital topic: <em>scaling</em>.</p>
+<h2 id="scaling"><a class="header" href="#scaling">Scaling</a></h2>
+<p>Scaling is helpful both to increase throughput of a system and reduce latency.</p>
+<p>Two known ways to do scaling are <em>pipelining</em> and <em>sharding</em>.</p>
+<h3 id="pipelining"><a class="header" href="#pipelining">Pipelining</a></h3>
+<p>Pipelining implies dividing the system into several sequential parts. Thus, instead of doing all work in one actor, different actors do the work in parts.</p>
+<p><img src="assets/pipelining.drawio.svg" alt="" /></p>
+<p>Pipelining increases minimal possible latency because of overhead costs but can reduce maximal latency because of parallel execution of different parts. Throughput is the minimum of parts' throughputs. However, total throughput increases because every actor in the pipeline does less work.</p>
+<p>Usually, it's not necessary to think about pipelining because well-designed systems are already divided into multiple actors according to their responsibilities, not because of performance requirements.</p>
+<h3 id="sharding"><a class="header" href="#sharding">Sharding</a></h3>
+<p>Sharding implies multiple running actors with the same, possible parameterized, code and responsibility.</p>
+<p><img src="assets/sharding.drawio.svg" alt="" /></p>
+<p>Sharding requires some work to route messages to the corresponding shard. Thus, throughput is increased sublinearly. Similarly to pipelining, maximal latency is reduced because arrival messages see ahead of themself fewer messages.</p>
+<h2 id="actor-groups-1"><a class="header" href="#actor-groups-1">Actor Groups</a></h2>
+<p>Actor groups in <code>elfo</code> are a solution for the sharding problem. Each actor has some actor key, a unique label inside a group, that can be used for routing purposes.</p>
+<p>The group's router is not an actor but some shared code that's executed on sending side to determine which actor should receive a message. Usually, routers are stateless; thus, this approach is more performant and scalable than routers implemented as separate actors.</p>
+<p><img src="assets/actor-group.drawio.svg" alt="" /></p>
+<p><code>elfo</code> doesn't support running actors without actor groups. Instead, it's ok to use groups with only one actor inside if it's meaningless to do sharding for now.</p>
+<p>Note that actor keys can be arbitrary structures, not mandatory strings.</p>
+<p>See the next chapter to get more details about routing.</p>
+<h2 id="stability"><a class="header" href="#stability">Stability</a></h2>
+<p>TODO: move to the first usage.</p>
+<p>It's useful to know the term <em>stability</em>. Stable systems are restricted only by input rate and don't have 100% utilization. We usually want to minimize latency in such systems while keeping throughput higher than real-life requirements. Most of systems are supposed to be stable and have predictable latency. Unstable systems have 100% utilization and reach their throughput. For instance, ETL systems.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="routing"><a class="header" href="#routing">Routing</a></h1>
+<p>Routing is the process of searching for the actor that will handle a sent message. In order to append the message to his mailbox, we need to discover the actor's address.</p>
+<p><code>elfo</code> offers a two-level routing system. What does it mean? Messages can pass through up to two steps of routing, depending on used methods, as shown on the following diagram:</p>
+<p><img src="assets/routing-process.drawio.svg" alt="" /></p>
+<ol>
+<li>If we don't know any address (<code>ctx.(try_)send(msg)</code> and <code>ctx.request(msg)</code>), the inter-group router is called to determine which groups are interested in the message. Then, the corresponding inner-group router is called for each interested group to decide which shards should receive the message.</li>
+<li>Only the inner-group router is called if we already know a group's address (<code>ctx.(try_)send_to(group_addr, msg)</code> and <code>ctx.request_to(group_addr, msg)</code>).</li>
+<li>If we already know an actor's address (<code>ctx.(try_)send_to(actor_addr, msg)</code> and <code>ctx.request_to(actor_addr, msg)</code>), nothing additional is done because we already know which actor should handle the message.</li>
+</ol>
+<p>Note that if several actors are interested in the message, each receives a copy of the message. It's ok for messages without heap-allocated fields or for rare messages, but for the big ones consider wrapping into <code>Arc</code> to reduce the <code>clone()</code> overhead.</p>
+<h2 id="inter-group-routing"><a class="header" href="#inter-group-routing">Inter-group routing</a></h2>
+<p>Inter-group routing is responsible for connecting actor groups among themselves.</p>
+<p>Let's consider the following architecture scheme:</p>
+<p><img src="assets/inter-group-routing.drawio.svg" alt="" /></p>
+<p>Actor groups and connections between them are defined in so-called &quot;topology&quot;:</p>
+<pre><code class="language-rust">fn topology(config_path: &amp;str) -&gt; elfo::Topology {
+    let topology = elfo::Topology::empty();
+    let logger = elfo::logger::init();
+
+    // Define system groups.
+    let loggers = topology.local(&quot;system.loggers&quot;);
+    let telemeters = topology.local(&quot;system.telemeters&quot;);
+    let dumpers = topology.local(&quot;system.dumpers&quot;);
+    let pingers = topology.local(&quot;system.pingers&quot;);
+    let configurers = topology.local(&quot;system.configurers&quot;).entrypoint();
+
+    // Define user groups.
+    let group_a = topology.local(&quot;group_a&quot;);
+    let group_b = topology.local(&quot;group_b&quot;);
+    let group_c = topology.local(&quot;group_c&quot;);
+
+    // Define connections between user actor groups.
+    group_a.route_to(&amp;group_b, |e| { // &quot;e&quot; means &quot;Envelope&quot;
+        msg!(match e {
+            MessageX | MessageY =&gt; true,
+            _ =&gt; false,
+        })
+    });
+    group_a.route_to(&amp;group_c, |e| {
+        msg!(match e {
+            MessageX =&gt; true,
+            _ =&gt; false,
+        })
+    });
+    group_b.route_to(&amp;group_c, |e| {
+        msg!(match e {
+            MessageZ =&gt; true,
+            _ =&gt; false,
+        })
+    });
+    group_c.route_to(&amp;group_a, |e| {
+        msg!(match e {
+            MessageW =&gt; true,
+            _ =&gt; false,
+        })
+    });
+
+    // Mount specific implementations.
+    loggers.mount(logger);
+    telemeters.mount(elfo::telemeter::new());
+    dumpers.mount(elfo::dumper::new());
+    pingers.mount(elfo::pinger::new(&amp;topology));
+
+    // Actors can use `topology` as a service locator.
+    // Usually it should be used for utilities only.
+    configurers.mount(elfo::configurer::from_path(&amp;topology, config_path));
+
+    group_a.mount(group_a::new());
+    group_b.mount(group_b::new());
+    group_c.mount(group_c::new());
+
+    topology
+}
+</code></pre>
+<p>Not all messages should be specified at this level. Usually, only requests and some multicast events are specified here, but not messages that will be passed directly, such as responses or events of subscriptions.</p>
+<h2 id="inner-group-routing"><a class="header" href="#inner-group-routing">Inner-group routing</a></h2>
+<p>Inner-group routing is responsible for choosing which shards should handle incoming messages.</p>
+<p><img src="assets/actor-group.drawio.svg" alt="" /></p>
+<p>The inner-group router is defined next to the actor implementation, in the group declaration.</p>
+<h3 id="stateless-router"><a class="header" href="#stateless-router">Stateless router</a></h3>
+<pre><code class="language-rust">use elfo::routers::{Outcome, MapRouter};
+
+ActorGroup::new()
+    .router(MapRouter::new(|e| {
+        msg!(match e {
+            MessageX { key, .. } =&gt; Outcome::Unicast(key),
+            MessageY { keys, .. } =&gt; Outcome::Multicast(keys.to_vec()),
+            MessageZ =&gt; Outcome::Broadcast,
+            _ =&gt; Outcome::Default,
+        })
+    }))
+    .exec(exec);
+</code></pre>
+<ul>
+<li><code>Outcome::Unicast</code> sends the message only to the actor with a specified key. If there is no active or restarting actor for the key, the new one will be started.</li>
+<li><code>Outcome::Multicast</code> sends to several actors. New actors will be started.</li>
+<li><code>Outcome::Broadcast</code> sends to all active actors.</li>
+<li><code>Outcome::Discard</code> drops the message (that leads to an error on sending side).</li>
+<li><code>Outcome::Default</code> works as <code>Outcome::Discard</code> for user-defined messages, but as <code>Outcome::Broadcast</code> for the system ones, such as <code>UpdateConfig</code>, <code>ValidateConfig</code>, <code>Terminate</code> and so on.</li>
+</ul>
+<h3 id="stateful-router"><a class="header" href="#stateful-router">Stateful router</a></h3>
+<p>Sometimes we need to use a router with rarely changing state. If the state should be changed often, consider using a dedicated actor as a router.</p>
+<p>To create a stateful router use the <code>MapRouter::with_state</code> constructor. Note that the state type should implement <code>Default</code>, <code>Send</code> and <code>Sync</code>.</p>
+<pre><code class="language-rust">ActorGroup::new()
+    .router(MapRouter::with_state(
+        // Called if the config is changed.
+        |config: &amp;Config, state| make_new_state(..),
+        // The routing function.
+        |e, state| {
+            msg!(match e { .. })
+        }
+    ))
+    .exec(exec);
+</code></pre>
+<p>The state is recreated every time when the config is changed. Useful when all needed information (e.g. a list of actors) can be extracted from the config. Note that recreation doesn't block execution; the state is atomically replaced only once <code>make_new_state(..)</code> is finished.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="supervision"><a class="header" href="#supervision">Supervision</a></h1>
+<h2 id="startup"><a class="header" href="#startup">Startup</a></h2>
+<p>Once the system is started, the <code>system.init</code> actor starts all actors marked as <code>entrypoint()</code> in the topology. Usually, it's only the <code>system.configurers</code> group. Entry points must have empty configs.</p>
+<p>Then, <code>system.configurers</code> loads the config file and sends <code>UpdateConfig</code> to all actor groups. Thus, if you need to start actors, the <code>UpdateConfig</code> message must be routed to the necessary keys.</p>
+<p><img src="assets/startup.drawio.svg" alt="" /></p>
+<p>Note that the actor system terminates immediately if the config file is invalid at startup (<code>elfo::start()</code> returns an error).</p>
+<h2 id="reconfiguration"><a class="header" href="#reconfiguration">Reconfiguration</a></h2>
+<p>Reconfiguration can be caused in several cases:</p>
+<ul>
+<li>The configurer receives <code>ReloadConfigs</code> or <code>TryRealodConfigs</code>.</li>
+<li>The process receives <code>SIGHUP</code>, it's an equivalent to receiving <code>ReloadConfigs::default()</code>.</li>
+<li>The process receives <code>SIGUSR2</code>, it's an equivalent to receiving <code>ReloadConfigs::default().with_force(true)</code>.</li>
+</ul>
+<p>What's the difference between default behavior and <code>with_force(true)</code> one? By default, group's up-to-date configs aren't sent across the system. In the force mode, all configs are updated, even unchanged ones.</p>
+<p>The reconfiguration process consists of several stages:
+<img src="assets/reconfiguration.drawio.svg" alt="" /></p>
+<ol>
+<li>Config validation: the configurer sends the <code>ValidateConfig</code> request to all groups and waits for responses.</li>
+<li>If all groups respond <code>Ok(_)</code> or ignore the request, the config is considered valid, and the configurer sends <code>UpdateConfig</code> to all groups. If at least one actor responds <code>Err(_)</code>, reconfiguration is aborted, and a new config isn't used.</li>
+</ol>
+<p>More information about configs and the reconfiguration process is available on <a href="./ch04-03-configuration.html">the corresponding page</a>.</p>
+<h2 id="restart"><a class="header" href="#restart">Restart</a></h2>
+<p>Three restart policies are implemented now:</p>
+<ul>
+<li><code>RestartPolicy::on_failures</code> (by default) — actors are restarted only after failures (the <code>exec</code> function returned <code>Err</code> or panicked).</li>
+<li><code>RestartPolicy::always</code> — actors are restarted after termination (the <code>exec</code> function returned <code>Ok</code> or <code>()</code>) and failures.</li>
+<li><code>RestartPolicy::never</code> — actors are never restarted. However, they can be started again on incoming messages.</li>
+</ul>
+<p>If the actor is scheduled to be restarted, incoming messages cannot spawn another actor for his key.</p>
+<p>Repetitive restarts are limited by a linear backoff mechanism:</p>
+<ul>
+<li>If there are no restarts for 5s, restart an actor immediately.</li>
+<li>Otherwise, increase restart time by 5s and schedule restarting.</li>
+<li>Maximum restart time is limited by 30s.</li>
+</ul>
+<p>These constants aren't configurable for now (<a href="https://github.com/elfo-rs/elfo/issues/62">elfo#62</a>).</p>
+<p>The restart policy can be chosen while creating <code>ActorGroup</code>:</p>
+<pre><code class="language-rust">use elfo::group::{RestartPolicy, ActorGroup};
+
+ActorGroup::new().restart_policy(RestartPolicy::always())
+ActorGroup::new().restart_policy(RestartPolicy::on_failures())
+ActorGroup::new().restart_policy(RestartPolicy::never())
+</code></pre>
+<h2 id="termination"><a class="header" href="#termination">Termination</a></h2>
+<p>System termination is started by the <code>system.init</code> actor in several cases:</p>
+<ul>
+<li>Received <code>SIGTERM</code> or <code>SIGINT</code> signals, Unix only.</li>
+<li>Received <code>CTRL_C_EVENT</code> or <code>CTRL_BREAK_EVENT</code> events, Windows only.</li>
+<li>Too high memory usage, Unix only. Now it's 90% (ratio of RSS to total memory) and not configurable (<a href="https://github.com/elfo-rs/elfo/issues/60">elfo#60</a>).</li>
+</ul>
+<p>The process consists of several stages:
+<img src="assets/termination.drawio.svg" alt="" /></p>
+<ol>
+<li><code>system.init</code> sends to all user-defined groups &quot;polite&quot; <code>Terminate::default()</code> message.
+<ul>
+<li>Groups' supervisors stop spawning new actors.</li>
+<li><code>Terminate</code> is routed as a usual message with <code>Outcome::Broadcast</code> by default.</li>
+<li>For <code>TerminationPolicy::closing</code> (by default): the mailbox is closed instantly, <code>ctx.recv()</code> returns <code>None</code> after already stored messages.</li>
+<li>For <code>TerminationPolicy::manually</code>: the mailbox isn't closed, <code>ctx.recv()</code> returns <code>Terminate</code> in order to handle in on your own. Use <code>ctx.close()</code> to close the mailbox.</li>
+</ul>
+</li>
+<li>If some groups haven't terminated after 30s, <code>system.init</code> sends <code>Terminate::closing()</code> message.
+<ul>
+<li><code>Terminate</code> is routed as a usual message with <code>Outcome::Broadcast</code> by default.</li>
+<li>For any policy, the mailbox is closed instantly, <code>ctx.recv()</code> returns <code>None</code> after already stored messages.</li>
+</ul>
+</li>
+<li>If some groups haven't terminated after another 15s, <code>system.init</code> stops waiting for that groups.</li>
+<li>Repeat the above stages for system groups.</li>
+</ol>
+<p>Timeouts above aren't configurable for now (<a href="https://github.com/elfo-rs/elfo/issues/61">elfo#61</a>).</p>
+<p>The termination policy can be chosen while creating <code>ActorGroup</code>:</p>
+<pre><code class="language-rust">use elfo::group::{TerminationPolicy, ActorGroup};
+
+ActorGroup::new().termination_policy(TerminationPolicy::closing())
+ActorGroup::new().termination_policy(TerminationPolicy::manually())
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
+<p>TODO</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="logging"><a class="header" href="#logging">Logging</a></h1>
+<p>TODO</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="telemetry"><a class="header" href="#telemetry">Telemetry</a></h1>
+<h2 id="introduction-1"><a class="header" href="#introduction-1">Introduction</a></h2>
+<p>TODO: <code>metrics</code> crate, metric types.</p>
+<p>All metrics are provided with the <code>actor_group</code> and, optionally, <code>actor_key</code> labels. The last one is added for actor groups with enabled <code>system.telemetry.per_actor_key</code> option.</p>
+<p>Read more information about <a href="https://prometheus.io/docs/concepts/metric_types/">metric types</a>.</p>
+<p>TODO: tips, prefer <code>increment_gauge!</code> over <code>gauge!</code></p>
+<h2 id="configuration-1"><a class="header" href="#configuration-1">Configuration</a></h2>
+<p>Telemetry can be configured separately for each actor group. Possible options and their default values:</p>
+<pre><code class="language-toml">[some_group]
+system.telemetry.per_actor_group = true
+system.telemetry.per_actor_key = false
+</code></pre>
+<p>Note that using <code>per_actor_key</code> can highly increase a number of metrics. Use it only for low cardinality groups.</p>
+<p>TODO: <code>elfo-telemeter</code> config.</p>
+<h2 id="built-in-metrics"><a class="header" href="#built-in-metrics">Built-in metrics</a></h2>
+<p><code>elfo</code> is shipped with a lot of metrics. All of them start with the <code>elfo_</code> prefix to avoid collisions with user defined metrics.</p>
+<h3 id="statuses-1"><a class="header" href="#statuses-1">Statuses</a></h3>
+<ul>
+<li>
+<p>Gauge <code>elfo_active_actors{status}</code></p>
+<p>The number of active actors in the specified status.</p>
+</li>
+<li>
+<p>Gauge <code>elfo_restarting_actors</code></p>
+<p>The number of actors that will be restarted after some time.</p>
+</li>
+<li>
+<p>Counter <code>elfo_actor_status_changes_total{status}</code></p>
+<p>The number of transitions into the specified status.</p>
+</li>
+</ul>
+<h3 id="messages"><a class="header" href="#messages">Messages</a></h3>
+<ul>
+<li>
+<p>Counter <code>elfo_sent_messages_total{message, protocol}</code></p>
+<p>The number of sent messages.</p>
+</li>
+<li>
+<p>Summary <code>elfo_message_handling_time_seconds{message, protocol}</code></p>
+<p>Spent time on handling the message, measured between <code>(try_)recv()</code> calls. Used to detect slow handlers.</p>
+</li>
+<li>
+<p>Summary <code>elfo_message_waiting_time_seconds</code></p>
+<p>Elapsed time between <code>send()</code> and corresponding <code>recv()</code> calls. Usually it represents a time that a message spends in a mailbox. Used to detect places that should be sharded to reduce a total latency.</p>
+</li>
+<li>
+<p>Summary <code>elfo_busy_time_seconds</code></p>
+<p>Spent time on polling a task with an actor. More precisely, the time for which the task executor is blocked. Equals to CPU time if blocking IO isn't used.</p>
+</li>
+</ul>
+<h3 id="log-events"><a class="header" href="#log-events">Log events</a></h3>
+<ul>
+<li>
+<p>Counter <code>elfo_emitted_events_total{level}</code></p>
+<p>The number of emitted events per level (<code>Error</code>, <code>Warn</code>, <code>Info</code>, <code>Debug</code>, <code>Trace</code>).</p>
+</li>
+<li>
+<p>Counter <code>elfo_limited_events_total{level}</code></p>
+<p>The number of events that haven't been emitted because the limit was reached.</p>
+</li>
+<li>
+<p>Counter <code>elfo_lost_events_total{level}</code></p>
+<p>The number of events that hasn't been emitted because the event storage is full.</p>
+</li>
+</ul>
+<h3 id="dump-events"><a class="header" href="#dump-events">Dump events</a></h3>
+<ul>
+<li>
+<p>Counter <code>elfo_emitted_dumps_total</code></p>
+<p>The number of emitted dumps.</p>
+</li>
+<li>
+<p>Counter <code>elfo_limited_dumps_total</code></p>
+<p>The number of dumps that haven't been emitted because the limit was reached.</p>
+</li>
+<li>
+<p>Counter <code>elfo_lost_dumps_total</code></p>
+<p>The number of dumps that hasn't been emitted because the dump storage is full.</p>
+</li>
+</ul>
+<h3 id="other-metrics"><a class="header" href="#other-metrics">Other metrics</a></h3>
+<p>TODO: specific to elfo-logger, elfo-dumper, elfo_telemeter</p>
+<h2 id="derived-metrics"><a class="header" href="#derived-metrics">Derived metrics</a></h2>
+<h3 id="statuses-2"><a class="header" href="#statuses-2">Statuses</a></h3>
+<p>TODO</p>
+<h3 id="incomingoutgoing-rate"><a class="header" href="#incomingoutgoing-rate">Incoming/outgoing rate</a></h3>
+<p>TODO</p>
+<pre><code>rate(elfo_message_handling_time_seconds_count{actor_group=&quot;${actor_group:raw}&quot;,actor_key=&quot;&quot;}[$__rate_interval])
+</code></pre>
+<h3 id="waiting-time"><a class="header" href="#waiting-time">Waiting time</a></h3>
+<p>TODO</p>
+<pre><code>rate(elfo_message_waiting_time_seconds{actor_group=&quot;${actor_group:raw}&quot;,actor_key=&quot;&quot;,quantile=~&quot;0.75|0.9|0.95&quot;}[$__rate_interval])
+</code></pre>
+<h3 id="utilization"><a class="header" href="#utilization">Utilization</a></h3>
+<p>TODO</p>
+<pre><code>rate(elfo_message_handling_time_seconds_sum{actor_group=&quot;${actor_group:raw}&quot;,actor_key=&quot;&quot;}[$__rate_interval])
+</code></pre>
+<h3 id="executor-utilization--cpu-usage"><a class="header" href="#executor-utilization--cpu-usage">Executor utilization (≈ CPU usage)</a></h3>
+<p>TODO</p>
+<p>The time for which the task executor is blocked. Equals to CPU time if blocking IO isn't used.</p>
+<pre><code>rate(elfo_busy_time_seconds_sum[$__rate_interval])
+</code></pre>
+<h2 id="dashboards"><a class="header" href="#dashboards">Dashboards</a></h2>
+<p>TODO</p>
+<h2 id="implementation-details"><a class="header" href="#implementation-details">Implementation details</a></h2>
+<p>TODO</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="dumping"><a class="header" href="#dumping">Dumping</a></h1>
+<h2 id="introduction-2"><a class="header" href="#introduction-2">Introduction</a></h2>
+<p>Dumping is the process of storing incoming and outgoing messages for every actor, including ones from <a href="./ch03-00-actors.html">mailboxes</a> and all other <a href="./ch03-03-sources.html">sources</a> like timers, streams, and so on. The primary purpose is future <a href="./ch05-04-tracing.html">tracing</a>, but it also can be used for regression testing.</p>
+<p>Dumping has a lot of common with <a href="./ch05-01-logging.html">logging</a>, but it's more efficient and optimized for storing a lot of messages, so it has high throughput requirements instead of low latency like in the logging task, where records are supposed to be delivered as soon as possible, especially warnings and errors.</p>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<h3 id="enable-dumping"><a class="header" href="#enable-dumping">Enable dumping</a></h3>
+<p>Dumping is disabled by default until the topology contains the <code>system.dumpers</code> group.</p>
+<p>Elfo provides the default implementation for such group, that's available with the <code>full</code> feature and exported as <code>elfo::dumper</code>:</p>
+<pre><code class="language-rust ignore">let topology = elfo::Topology::empty();
+let dumpers = topology.local(&quot;system.dumpers&quot;);
+
+// ...
+
+dumpers.mount(elfo::dumper::new());
+</code></pre>
+<p>Besides this, the path to a dump file must be specified in the config:</p>
+<pre><code class="language-toml">[system.dumpers]
+path = &quot;path/to/dump/file.dump&quot;
+</code></pre>
+<h3 id="configure-dumping-on-a-per-group-basis"><a class="header" href="#configure-dumping-on-a-per-group-basis">Configure dumping on a per-group basis</a></h3>
+<p>Dumping settings can be specified for each actor group individually.
+Note that the settings can be changed and applied <a href="./ch04-03-configuration.html">on the fly</a>.</p>
+<p>Example:</p>
+<pre><code class="language-toml">[some_actor_group]
+system.dumping.disabled = true      # false by default
+system.dumping.rate_limit = 100500  # 100000 by default
+</code></pre>
+<p>Dumps above the rate limit are lost, but the sequence number is incremented anyway to detect missed messages later.</p>
+<h3 id="configure-dumping-on-a-per-message-basis"><a class="header" href="#configure-dumping-on-a-per-message-basis">Configure dumping on a per-message basis</a></h3>
+<p>Simply add the <code>message(dumping = &quot;disabled&quot;)</code> attribute to the message. Another and default value of the attribute is <code>&quot;full&quot;</code>.</p>
+<pre><code class="language-rust ignore">#[message(dumping = &quot;disabled&quot;)]
+pub struct SomethingHappened {
+    // ...
+}
+</code></pre>
+<h3 id="shorten-fields-of-a-message"><a class="header" href="#shorten-fields-of-a-message">Shorten fields of a message</a></h3>
+<p>Sometimes the content of messages is too large, for instance, in writing a backend for graph plotting, where every response can contain thousands of points. We don't want to lose additional information about responses, but saving whole messages is very expensive in this case.</p>
+<p>For this situation, elfo provides a helper to hide specified fields during serialization, but only in the dumping context. So, these messages still will be properly sent over the network, where serialization is used too.</p>
+<pre><code class="language-rust ignore">#[message]
+pub struct ChunkProduced {
+    pub graph_id: GraphId,
+    #[serde(serialize_with = &quot;elfo::dumping::hide&quot;)]
+    pub points: Vec&lt;(f64, f64)&gt;,   // will be dumped as &quot;&lt;hidden&gt;&quot;
+}
+</code></pre>
+<p>Such messages cannot be deserialized properly; that's ok until they are used as input for [regression testing][regression].</p>
+<h2 id="metrics"><a class="header" href="#metrics">Metrics</a></h2>
+<p>TODO</p>
+<h2 id="local-storage"><a class="header" href="#local-storage">Local storage</a></h2>
+<p>The default implementation of dumpers writes all dumps to a file on the local file system.</p>
+<p>Even home-purpose SSDs can achieve 3GiB/s in 2021, which should be more than enough to avoid a bottleneck in this place.</p>
+<p>Dumps are stored in an uncompressed way so that they can take a lot of space. So, it's essential to rotate the dump file timely and delete outdated ones.</p>
+<p>Note that message ordering between actor groups (and even inside the same actor) can be easily violated because of <a href="ch05-03-dumping.html#implementation-details">implementation details</a>. Therefore, in the case of reading from local dump files, you should sort rows by the timestamp field.</p>
+<h2 id="the-structure-of-dump-files"><a class="header" href="#the-structure-of-dump-files">The structure of dump files</a></h2>
+<p>Dump files contain messages in the newline-delimited JSON format. Each line is object containing the following properties:</p>
+<ul>
+<li><code>g</code> — an actor group's name</li>
+<li><code>k</code> — an <em>optional</em> actor's key</li>
+<li><code>n</code> — node_no</li>
+<li><code>s</code> — <code>sequence_no</code>, unique inside an actor group</li>
+<li><code>t</code> — <a href="./ch05-04-tracing.html"><code>trace_id</code></a></li>
+<li><code>ts</code> — timestamp</li>
+<li><code>d</code> — direction, &quot;In&quot; or &quot;Out&quot;</li>
+<li><code>cl</code> — an <em>optional</em> class</li>
+<li><code>mn</code> — a message's name</li>
+<li><code>mp</code> — a message's protocol, usually a crate, which contains the message</li>
+<li><code>mk</code> — a message's kind, &quot;Regular&quot;, &quot;Request&quot; or &quot;Response&quot;</li>
+<li><code>m</code> — a <em>nullable</em> message's body</li>
+<li><code>c</code> — an <em>optional</em> correlation id, which links requests with corresponding responses</li>
+</ul>
+<p>Terms:</p>
+<ul>
+<li><em>optional</em> means that the property can be omitted, but if it's present, then its value isn't <code>null</code>.</li>
+<li><em>nullable</em> means that the property is present always, but the value can be <code>null</code>.</li>
+</ul>
+<p>The <code>sequence_no</code> field can be used to detect missed messages because of limiting.</p>
+<p><strong>TODO: note about classes</strong></p>
+<h2 id="dump-file-rotation"><a class="header" href="#dump-file-rotation">Dump file rotation</a></h2>
+<p><code>elfo::dumper</code> doesn't use any kind of partitioning and relies on an external file rotation mechanism instead. It means some additional configuration is required, but it provides more flexibility and simplifies the dumper.</p>
+<p>The dumper listens to the <code>SIGHUP</code> signal to reopen the active dump file. Besides this, the dumper accepts the <code>elfo::dumper::ReopenDumpFile</code> command.</p>
+<p>The most popular solution for file rotation is, of course, <code>logrotate</code>.</p>
+<p><strong>TODO: logrotate config</strong></p>
+<p>Tip: if dumps are not supposed to be delivered to DB, use hard links to save the dump file for later discovery and avoid deletion.</p>
+<h2 id="remote-storage"><a class="header" href="#remote-storage">Remote storage</a></h2>
+<p>Depending on your goals, you may or may not want to send your dump files to remote file storage. It can highly improve search capabilities (primarily because of indexing trace_id) and space usage but requires additional infrastructure for dumping. Usually, it's ok for many services to use only local storage. Dumps are stored in a time-ordered way and, thanks to the structure of trace_id, can be used for good enough search. However, elfo doesn't provide the utility to search these files for now.</p>
+<p>Ok, so you want to store dumps in DB. The right choice, if you can afford it. What should you do?</p>
+<p>The common schema looks like</p>
+<p><img src="assets/dumping-infrastructure.drawio.svg" alt="" /></p>
+<p><strong>TODO: add a link to the example with vector.dev and clickhouse</strong></p>
+<h2 id="implementation-details-1"><a class="header" href="#implementation-details-1">Implementation details</a></h2>
+<p><strong>TODO: implementation has been changed a lot, need to update the section</strong></p>
+<p>At a top level, dumping is separated into two parts: the dumping subsystem and the dumper.</p>
+<p>The dumping subsystem is based on sharded in-memory storage containing a limited queue of messages. We use a predefined number of shards for now, but we will likely use the number of available cores in the future. Every thread writes to its dedicated shard. Such an approach reduces contention and false sharing between threads.</p>
+<p><img src="assets/dumping-implementation-details.drawio.svg" alt="" /></p>
+<p>The dumper sequentially, in a round-robin way, replaces the shard's queue with the extra one, then reads and serializes all messages and writes them to the dump file. All this work happens on a timer tick. Firstly,  it's one of the simplest ways to get appropriate batching. Secondly, because the dumper uses <a href="https://docs.rs/tokio/1/tokio/task/fn.spawn_blocking.html">tokio::task::spawn_blocking</a> and blocking writes insides, that's more effective than using async <a href="https://docs.rs/tokio/1/tokio/fs/index.html">tokio::fs</a> directly. The timer approach allows us to reduce the impact on the tokio executor. However, this behavior is going to be improved for environments with io_uring in the future.</p>
+<p>The dumper holds the lock only for a small amount of time to replace the queue inside a shard with another one, which was drained by the dumper on the previous tick. Thus, the actual number of queues is one more than shards.</p>
+<p>All actors in a group share the same handler with some common things like sequence_no generator and rate limiter. Whenever an actor sends or receives a message, the handler is used to push message to the shard according to the current thread. Thus, messages produced by the same actor can reorder if it's migrated to another thread by a scheduler.</p>
+<p>Yep, we can restore order in the dumper, but don't do it now because remote DB is doing it anyway. However, we can add the corresponding option in the future. It's not trivial, although.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tracing"><a class="header" href="#tracing">Tracing</a></h1>
+<p>TODO</p>
+<h2 id="traceid"><a class="header" href="#traceid"><code>TraceId</code></a></h2>
+<p>This ID is <a href="./ch10-01-id-generation.html#level-of-monotonicity">periodically monotonic</a> and fits great as a primary key for tracing entries.
+It was accomplished by using rarely (approx. once a year) wrapping <code>timestamp</code> ID component.</p>
+<p><code>TraceId</code> essentially is:</p>
+<p>\[
+\operatorname{trace\_id} =
+\operatorname{timestamp} \dot{} 2^{38} +
+\operatorname{node\_no} \dot{} 2^{22} +
+\operatorname{chunk\_no} \dot{} 2^{10} +
+\operatorname{counter}
+\]</p>
+<p>This formula's parameters were chosen carefully to leave a good stock of spare space for <code>TraceId</code>'s components inside the available set of <a href="./ch10-01-id-generation.html#choosing-the-domain-for-your-ids">63-bit positive integers</a>.
+You may see the general idea by looking at the bits distribution table.
+From MSB to LSB:</p>
+<table><thead><tr><th style="text-align: right">Bits</th><th>Description</th><th>Range</th><th>Source</th></tr></thead><tbody>
+<tr><td style="text-align: right">1</td><td><a href="./ch10-01-id-generation.html#choosing-the-domain-for-your-ids">Reserved</a></td><td><code>0</code></td><td>-</td></tr>
+<tr><td style="text-align: right">25</td><td><code>timestamp</code> in secs</td><td><code>0..=33_554_431</code></td><td>Clock at runtime</td></tr>
+<tr><td style="text-align: right">16</td><td><code>node_no</code></td><td><code>0..=65_535</code></td><td>Externally specified node (process) configuration</td></tr>
+<tr><td style="text-align: right">12</td><td><code>chunk_no</code></td><td><code>0..=4095</code></td><td>Some number produced at runtime</td></tr>
+<tr><td style="text-align: right">10</td><td><code>counter</code></td><td><code>1..=1023</code></td><td>A counter inside the chunk</td></tr>
+</tbody></table>
+<p>The code generating <code>TraceId</code> of course can be optimized by using bit shifts for fast multiplication on a power of two:</p>
+<pre><code>trace_id = (timestamp &lt;&lt; 38) | (node_no &lt;&lt; 22) | (chunk_no &lt;&lt; 10) | counter
+</code></pre>
+<p><code>TraceId</code> uses time as its <a href="./ch10-01-id-generation.html#monotonicity-source">monotonicity source</a> so <strong><code>timestamp</code></strong> is probably the most important part of the ID.
+Note that <code>timestamp</code> has pretty rough resolution — in seconds.
+How long you can count seconds inside 25 bits?</p>
+<p>\[
+\operatorname{timestamp}_{max} = \frac{2^{25} - 1}{60 \dot{} 60 \dot{} 24} = \frac{33554431}{86400} \approx 388 \text{ days}
+\]</p>
+<p>Which is almost a year plus 23 days.
+What happens when this almost-one-year term ends?
+<code>timestamp</code> starts counting from 0 once again:</p>
+<pre><code>TIMESTAMP_MAX = (1 &lt;&lt; 25) - 1 // 0x1ff_ffff
+timestamp = now_s() &amp; TIMESTAMP_MAX
+</code></pre>
+<p>This means that primary key is guaranteed to act as a unique identifier for one year.
+To keep an order of entries between monotonic periods of <code>TraceId</code> use some fully monotonic (but not necessarily unique) field as a <a href="https://clickhouse.tech/docs/en/engines/table-engines/mergetree-family/mergetree/#choosing-a-primary-key-that-differs-from-the-sorting-key">sorting key</a> for your entries (<code>created_at</code> or <code>seq_no</code> / <code>sequential_number</code>).</p>
+<p><code>TraceId</code> with such <code>timestamp</code> part is well optimized to produce a lot of entities worth querying for only a limited period of time: <a href="./ch05-01-logging.html">logs</a>, <a href="./ch05-03-dumping.html">dumps</a> or tracing entries.
+However you're able to store such entries as long as you like and use <a href="./ch10-01-id-generation.html#why-monotonic-ids-are-so-great">data skipping indices</a> for quick time series queries.</p>
+<p>To make IDs unique across several instances of your system without any synchronization between them <strong><code>node_no</code></strong> ID component should be externally specified from the system deployment configuration.</p>
+<p><strong>TODO: actualize information about <code>thread_id</code>: it's not used by <code>elfo</code>, but appropriate way to generate <code>trace_id</code> in other systems that want to interact with <code>elfo</code>.</strong></p>
+<p><strong><code>thread_id</code></strong> shares bit space with <code>counter</code>. At the start of the system you should determine how much threads your node could possibly have and choose appropriate \( \operatorname{counter}_{max} \) according to that.</p>
+<p>Previous components segregated entries produced by separate threads on every instance of the system at different seconds.
+To create multiple unique IDs during a single second inside a single thread we use <strong><code>counter</code></strong> ID component.</p>
+<p>Let's calculate how much records per second (\( \operatorname{RPS}_{max} \)) allows us to produce <code>counter</code> with the bounds we've chosen.
+Assuming we have 32 threads:</p>
+<p>\[
+\operatorname{RPS}_{max} = \frac{2^{22} - 1}{\operatorname{threads\_count}} = \frac{2^{22} - 1}{2^{5}} \approx 2^{17} \approx 1.3 \dot{} 10^{5} \text{  } \frac{\text{records}}{\text{second}}
+\]</p>
+<p>Which seems more than enough for the most of the applications.
+Note that <code>counter</code> is limited to be at least 1 to keep the <a href="./ch10-01-id-generation.html#choosing-the-domain-for-your-ids">invariant</a>: \( \operatorname{id} \geqslant 1 \).
+Every other component of <code>TraceId</code> could be zero.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="project-structure"><a class="header" href="#project-structure">Project Structure</a></h1>
+<p>TODO</p>
+<pre><code>&lt;actor_name&gt;/
+    src/
+        mod.rs
+        actor.rs
+        config.rs
+        router.rs
+        ...
+    tests/
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pattern-id-generation"><a class="header" href="#pattern-id-generation">Pattern: ID Generation</a></h1>
+<p>It should be noted that ID generation approach which was chosen in your app affects your app's architecture and overall performance.
+Here we discuss how to design good ID and show a couple of great ID designs.</p>
+<h2 id="choosing-the-domain-for-your-ids"><a class="header" href="#choosing-the-domain-for-your-ids">Choosing the domain for your IDs</a></h2>
+<p>Despite of wide spread of 64-bit computer architecture several popular technologies still don't support 64-bit unsigned integer numbers completely.
+For example several popular versions of Java <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html">have only <code>i64</code> type</a> so you <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Long.html#MAX_VALUE">can't have</a> positive integer numbers bigger than \( 2^{63} - 1 \) without excess <a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html">overhead</a>.
+Therefore a lot of Java-powered apps (e.g. Graylog) have limitations on IDs' domain.</p>
+<p>At some external apps you can gain a couple of problems because of IDs less than <code>1</code>, e.g. value <code>0</code> may be <a href="https://cloud.google.com/datastore/docs/concepts/entities#assigning_your_own_numeric_id">explicitly forbidden</a>.
+Avoiding <code>0</code> value in IDs simplifies some popular <a href="https://doc.rust-lang.org/core/num/struct.NonZeroU64.html">memory optimizations</a> and allows you to use zero values instead of <code>Nullable</code> columns which can improve performance in some databases (e.g. ClickHouse).</p>
+<p>This leads us to the following integer numbers' domain for IDs:</p>
+<pre><code>MIN = 1
+MAX = 2 ^ 63 - 1 =
+    = 9_223_372_036_854_775_807 =
+    = 0x7fff_ffff_ffff_ffff ≈
+    ≈ 9.2e18
+</code></pre>
+<p>Probably today you don't need to be compatible with such domain-limiting systems but in most cases such limitations are very easy to withstand and there's no reason for your project not to be ready for integration with such obsolete systems in the future.
+Such domain allows you to store \( 2^{63} - 1 \) entities which is bigger than \( 9.2 \dot{} 10^{18} \) and is enough to uniquely identify entities in almost every possible practical task.
+You shouldn't forget though that a good ID generation scheme is just a trade-off between a dense domain usage and robust sharded unique IDs generation algorithm.</p>
+<p>That's why we recommend using 63-bit positive integers as IDs.</p>
+<h3 id="systems-with-ecmascript"><a class="header" href="#systems-with-ecmascript">Systems with ECMAScript</a></h3>
+<p>In theory JSON allows you to use numbers of any length, but in a bunch of scenarios it will be great to process or display your data using ECMAScript (JavaScript, widely spread in web browsers) and it has <a href="https://262.ecma-international.org/11.0/#sec-numbers-and-dates">only</a> <code>f64</code> primitive type for numbers so you <a href="https://262.ecma-international.org/11.0/#sec-number.max_safe_integer">can't have</a> positive integer numbers bigger than \( 2^{53} - 1 \) without excess <a href="https://262.ecma-international.org/11.0/#sec-ecmascript-language-types-bigint-type">overhead</a>.
+This leads us to the following integer numbers' domain for IDs in systems with ECMAScript:</p>
+<pre><code>MIN = 1
+MAX = 2 ^ 53 - 1 =
+    = 9_007_199_254_740_991 =
+    = 0x1f_ffff_ffff_ffff ≈
+    ≈ 9.0e12
+</code></pre>
+<p>From the other hand you can add an extra serialization step storing your IDs in JSON as strings which will be a decent workaround for this problem.</p>
+<h2 id="properties-of-your-id-generation-algorithm"><a class="header" href="#properties-of-your-id-generation-algorithm">Properties of your ID generation algorithm</a></h2>
+<p>We call generated IDs sequence <em>monotonic</em> if every subsequent ID is bigger than a previous one as a number.</p>
+<h3 id="why-monotonic-ids-are-so-great"><a class="header" href="#why-monotonic-ids-are-so-great">Why monotonic IDs are so great</a></h3>
+<p>The app should gain parameters for ID generation algorithm after every restart taking into account previously issued IDs.
+Monotonic IDs generation allows you to take into account only the most recently generated IDs or don't bother about existing entries at all.</p>
+<p>Most of the modern storages allow you to take a notable performance advance if your data was put down in an ordered or partially-ordered form.
+The storage lays down the data according to <a href="https://clickhouse.tech/docs/en/engines/table-engines/mergetree-family/mergetree/#mergetree-query-clauses">sorting key</a> which <a href="https://clickhouse.tech/docs/en/engines/table-engines/mergetree-family/mergetree/#choosing-a-primary-key-that-differs-from-the-sorting-key">may differ</a> from the primary key (ID).
+To perform time series queries on partially-ordered data very quickly one can use the cheapest form of <a href="https://clickhouse.tech/docs/en/engines/table-engines/mergetree-family/mergetree/#table_engine-mergetree-data_skipping-indexes">data skipping indices</a> — the <code>minmax</code> index.</p>
+<p>Partially-monotonic data can be compressed using <a href="https://clickhouse.tech/docs/en/sql-reference/statements/create/table/#create-query-specialized-codecs">specialized codecs</a> very effectively, thanks to storing deltas instead of absolute values.
+Effective data compression is able to lower storage consumption and increase DB throughput significantly.</p>
+<p>This means that you should have a good reason to use non-monotonic IDs.</p>
+<h3 id="level-of-monotonicity"><a class="header" href="#level-of-monotonicity">Level of monotonicity</a></h3>
+<p>Depending on the length of monotonic segments in the generated IDs sequence we can divide ID generation algorithms to:</p>
+<ul>
+<li><em>Fully monotonic</em> — generated ID sequence is monotonic during the whole lifetime of the system (see also <a href="ch10-01-id-generation.html#ids-produced-by-db">IDs produced by DB</a>).</li>
+<li><em>Periodically monotonic</em> — ID generation algorithm reaches the maximal value for ID several times during the lifetime of the system and starts counting from the beginning of the domain.
+This means that the storage would contain a couple of monotonic segments e.g. with data for several months long each (see also <a href="./ch05-04-tracing.html#traceid"><code>TraceId</code></a>).</li>
+<li>With <em>sharded monotonicity</em> — the app generates IDs monotonically for several segments frequently switching between these segments.
+E.g. every actor generates only monotonic IDs but because of concurrent nature of actors' work the storage should handle a lot of intersecting consecutive IDs inserts (see also <a href="ch10-01-id-generation.html#decimalid"><code>DecimalId</code></a>).</li>
+</ul>
+<h3 id="monotonicity-source"><a class="header" href="#monotonicity-source">Monotonicity source</a></h3>
+<p>There're several means to gain monotonic IDs.
+Your choice of them would affect application restart strategy:</p>
+<ul>
+<li><a href="ch10-01-id-generation.html#ids-produced-by-db">Using DB</a>.
+Needs atomic <a href="https://www.scylladb.com/2020/07/15/getting-the-most-out-of-lightweight-transactions-in-scylla/">compare-and-set</a> (ScyllaDB) or auto-increment</li>
+<li>Launch number (e.g. <a href="ch10-01-id-generation.html#decimalid"><code>DecimalId</code></a>).</li>
+<li>Time (e.g. <a href="./ch05-04-tracing.html#traceid"><code>TraceId</code></a>).
+Time-series-based (not determined, has advantages limitations).</li>
+</ul>
+<h3 id="the-reasons-for-non-monotonic-ids"><a class="header" href="#the-reasons-for-non-monotonic-ids">The reasons for non-monotonic IDs</a></h3>
+<p>If ID generation algorithm shouldn't look predictive because of information security concerns it's a good reason to use <a href="https://en.wikipedia.org/wiki/Hash_function#Multiplicative_hashing">multiplicative hashing</a> or <a href="https://preshing.com/20121224/how-to-generate-a-sequence-of-unique-random-integers/">random permutations</a> to generate your IDs.</p>
+<p>It's usually a great idea to apply randomness tests to your IDs in such scenarios.</p>
+<p>Please note that really secure IDs would require security algorithms (or at least some versions of UUID).
+Algorithms mentioned above are for IDs that should just <em>look random</em>.</p>
+<h3 id="common-or-separate-domains-for-several-entities-ids"><a class="header" href="#common-or-separate-domains-for-several-entities-ids">Common or separate domains for several entities' IDs</a></h3>
+<p>Should we use common ID generator for several entities?</p>
+<p>In such scenario IDs for various entities will never intersect so you have no chance to successfully query entity A by ID of entity B by mistake and you essentially have “fail fast” approach on entities' querying.</p>
+<p>Unfortunately common ID generator for several entities will exhaust ID domain more quickly.</p>
+<h2 id="great-ids-case-study"><a class="header" href="#great-ids-case-study">Great IDs case study</a></h2>
+<h3 id="ids-produced-by-db"><a class="header" href="#ids-produced-by-db">IDs produced by DB</a></h3>
+<p>Probably you did already use <code>AUTO_INCREMENT</code> SQL DDL instruction for primary keys.
+The general idea with it is to never generate IDs by ourselves and instead rely on the counter inside the database as a single source of truth.
+This means that you don't know the IDs of entities you'd like to insert before you actually insert them so you should essentially support separate schema just for entities' “construction stubs” and your app's latency is bound by DB latency by design.
+If you need a cycle reference between entities you'd like to insert you're most likely in trouble.
+If you need database replication you'll be in trouble <a href="https://mariadb.com/kb/en/auto_increment/#replication">too</a>.</p>
+<p>Alternative — is to use atomic compare-and-swap integrated into several DB engines, for example <a href="https://stackoverflow.com/a/29391877/697625">Cassandra's lightweight transactions</a>.
+IDs produced by DB are great for storing entities appearing with relatively low frequency (probably less than 10000 per second): like users or accounts.</p>
+<p>Such approach gives us <a href="ch10-01-id-generation.html#level-of-monotonicity">fully monotonic</a> IDs and uses the whole <a href="ch10-01-id-generation.html#choosing-the-domain-for-your-ids">63-bit space</a> to store ID's positive value right away.</p>
+<h3 id="decimalid"><a class="header" href="#decimalid"><code>DecimalId</code></a></h3>
+<p>Probably your application already has some kind of <em>launch log</em> storing information about release ticket in the issue tracking system, launch time, user initiated the launch, etc.
+If you have such entity in your system <code>DecimalId</code> will probably serve to you really good.
+This ID has <a href="ch10-01-id-generation.html#level-of-monotonicity">sharded monotonicity</a>.
+The primary idea behind <code>DecimalId</code> is to increase ID's legibility by storing its parts in a separate decimal places.</p>
+<p><code>DecimalId</code> essentially is:</p>
+<p>\[
+\operatorname{decimal\_id} = \operatorname{counter} \dot{} 10^{10} + \operatorname{generator\_id} \dot{} 10^{5} + \operatorname{launch\_id}
+\]</p>
+<p>This formula corresponds to the following decimal places distribution table:</p>
+<table><thead><tr><th style="text-align: right">Digits</th><th>Description</th><th>Range</th><th>Source</th></tr></thead><tbody>
+<tr><td style="text-align: right">9</td><td><code>counter</code></td><td><code>1..=922_337_202</code></td><td>Not synchronized runtime parameter</td></tr>
+<tr><td style="text-align: right">5</td><td><code>generator_id</code></td><td><code>0..=99_999</code></td><td>Synchronized runtime parameter</td></tr>
+<tr><td style="text-align: right">5</td><td><code>launch_id</code></td><td><code>1..=99_999</code>, <code>0</code> for tests</td><td>Externally specified and consistent across the whole system during a single launch</td></tr>
+</tbody></table>
+<p>The code implementing <code>DecimalId</code> generation can't use bit shift hack as we did for <code>TraceId</code>, but IDs generated using such schema are much more legible.
+You're able to read their decimal representation like this: <code>cc*ggggglllll</code> (<strong>c</strong>ounter, <strong>g</strong>enerator ID, <strong>l</strong>aunch ID — respectively).
+For instance:</p>
+<pre><code>               ID 14150009200065
+                  ccccggggglllll
+                   ▲    ▲    ▲
+   counter (1415) ─┘    │    │
+generator_id (92) ──────┘    │
+   launch_id (65) ───────────┘
+</code></pre>
+<p><a href="ch10-01-id-generation.html#choosing-the-domain-for-your-ids">Maximal possible</a> ID value is <code>922_337_203___68_547___75_807</code> however <strong><code>counter</code></strong> is limited by <code>922_337_202</code> (please note the decrement).
+Such trick prevents limiting <code>generator_id</code> (next ID component) by <code>68_547</code> (now it's limited by <code>99_999</code>).
+Note that \( \operatorname{counter}_{min} = 1 \) to keep the <a href="ch10-01-id-generation.html#choosing-the-domain-for-your-ids">invariant</a>: \( \operatorname{id} \geqslant 1 \) because every other conmonent of <code>DecimalId</code> could be zero.</p>
+<p>Every time system produces more than \( \operatorname{counter}_{max} \) elements it requests persistent synchronized counter global for the whole system for the next <strong><code>generator_id</code></strong>.
+This increment happens at the every start of the app and only once for every \( 9.2 \dot{} 10^{8} \) records so contention on it is negligible.</p>
+<p>At every launch of your app <strong><code>launch_id</code></strong> should be taken from the persistent launch log of the system.
+To make deployment more robust we recommend generating <code>launch_id</code> outside of the app in the deployment configuration.</p>
+<p><code>launch_id = 0</code> should never appear in production records and may only be used for testing.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            MathJax.Hub.Register.StartupHook('End', function() {
+                window.setTimeout(window.print, 100);
+            });
+        });
+        </script>
+    </body>
+</html>

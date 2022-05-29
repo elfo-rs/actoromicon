@@ -1,0 +1,277 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Dumping - The Actoromicon</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="custom.css">
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="ch01-00-introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch01-01-comparison.html"><strong aria-hidden="true">1.1.</strong> Comparison</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Getting Started</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">2.1.</strong> Installation</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.2.</strong> Hello, World!</div></li></ol></li><li class="chapter-item expanded "><a href="ch03-00-actors.html"><strong aria-hidden="true">3.</strong> Actors</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch03-01-actor-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Actor Lifecycle</a></li><li class="chapter-item expanded "><a href="ch03-02-communication.html"><strong aria-hidden="true">3.2.</strong> Communication</a></li><li class="chapter-item expanded "><a href="ch03-03-sources.html"><strong aria-hidden="true">3.3.</strong> Sources</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">3.4.</strong> Structural Actors</div></li></ol></li><li class="chapter-item expanded "><a href="ch04-00-groups.html"><strong aria-hidden="true">4.</strong> Actor Groups</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch04-01-routing.html"><strong aria-hidden="true">4.1.</strong> Routing</a></li><li class="chapter-item expanded "><a href="ch04-02-supervision.html"><strong aria-hidden="true">4.2.</strong> Supervision</a></li><li class="chapter-item expanded "><a href="ch04-03-configuration.html"><strong aria-hidden="true">4.3.</strong> Configuration</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.4.</strong> Multiple Runtimes</div></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> Utility</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch05-01-logging.html"><strong aria-hidden="true">5.1.</strong> Logging</a></li><li class="chapter-item expanded "><a href="ch05-02-telemetry.html"><strong aria-hidden="true">5.2.</strong> Telemetry</a></li><li class="chapter-item expanded "><a href="ch05-03-dumping.html" class="active"><strong aria-hidden="true">5.3.</strong> Dumping</a></li><li class="chapter-item expanded "><a href="ch05-04-tracing.html"><strong aria-hidden="true">5.4.</strong> Tracing</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.</strong> Distributed Actors</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">6.1.</strong> Protocol Evolution</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.2.</strong> Transport</div></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.</strong> Testing</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">7.1.</strong> Unit Testing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.2.</strong> The Replayer</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.3.</strong> Approval Testing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.4.</strong> Stress Testing</div></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.</strong> Conventions</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch08-01-project-structure.html"><strong aria-hidden="true">8.1.</strong> Project Structure</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">9.</strong> Deployment</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.</strong> Patterns</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch10-01-id-generation.html"><strong aria-hidden="true">10.1.</strong> Pattern: ID Generation</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.2.</strong> Pattern: Network servers</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.3.</strong> Pattern: Pub/Sub</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.4.</strong> Pattern: A Workqueue</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.5.</strong> Pattern: CQS</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.6.</strong> Pattern: Event Sourcing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.7.</strong> Pattern: Transactions</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.8.</strong> Pattern: Frontend as an Actor</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.9.</strong> Pattern: Gateways</div></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Actoromicon</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="dumping"><a class="header" href="#dumping">Dumping</a></h1>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>Dumping is the process of storing incoming and outgoing messages for every actor, including ones from <a href="./ch03-00-actors.html">mailboxes</a> and all other <a href="./ch03-03-sources.html">sources</a> like timers, streams, and so on. The primary purpose is future <a href="./ch05-04-tracing.html">tracing</a>, but it also can be used for regression testing.</p>
+<p>Dumping has a lot of common with <a href="./ch05-01-logging.html">logging</a>, but it's more efficient and optimized for storing a lot of messages, so it has high throughput requirements instead of low latency like in the logging task, where records are supposed to be delivered as soon as possible, especially warnings and errors.</p>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<h3 id="enable-dumping"><a class="header" href="#enable-dumping">Enable dumping</a></h3>
+<p>Dumping is disabled by default until the topology contains the <code>system.dumpers</code> group.</p>
+<p>Elfo provides the default implementation for such group, that's available with the <code>full</code> feature and exported as <code>elfo::dumper</code>:</p>
+<pre><code class="language-rust ignore">let topology = elfo::Topology::empty();
+let dumpers = topology.local(&quot;system.dumpers&quot;);
+
+// ...
+
+dumpers.mount(elfo::dumper::new());
+</code></pre>
+<p>Besides this, the path to a dump file must be specified in the config:</p>
+<pre><code class="language-toml">[system.dumpers]
+path = &quot;path/to/dump/file.dump&quot;
+</code></pre>
+<h3 id="configure-dumping-on-a-per-group-basis"><a class="header" href="#configure-dumping-on-a-per-group-basis">Configure dumping on a per-group basis</a></h3>
+<p>Dumping settings can be specified for each actor group individually.
+Note that the settings can be changed and applied <a href="./ch04-03-configuration.html">on the fly</a>.</p>
+<p>Example:</p>
+<pre><code class="language-toml">[some_actor_group]
+system.dumping.disabled = true      # false by default
+system.dumping.rate_limit = 100500  # 100000 by default
+</code></pre>
+<p>Dumps above the rate limit are lost, but the sequence number is incremented anyway to detect missed messages later.</p>
+<h3 id="configure-dumping-on-a-per-message-basis"><a class="header" href="#configure-dumping-on-a-per-message-basis">Configure dumping on a per-message basis</a></h3>
+<p>Simply add the <code>message(dumping = &quot;disabled&quot;)</code> attribute to the message. Another and default value of the attribute is <code>&quot;full&quot;</code>.</p>
+<pre><code class="language-rust ignore">#[message(dumping = &quot;disabled&quot;)]
+pub struct SomethingHappened {
+    // ...
+}
+</code></pre>
+<h3 id="shorten-fields-of-a-message"><a class="header" href="#shorten-fields-of-a-message">Shorten fields of a message</a></h3>
+<p>Sometimes the content of messages is too large, for instance, in writing a backend for graph plotting, where every response can contain thousands of points. We don't want to lose additional information about responses, but saving whole messages is very expensive in this case.</p>
+<p>For this situation, elfo provides a helper to hide specified fields during serialization, but only in the dumping context. So, these messages still will be properly sent over the network, where serialization is used too.</p>
+<pre><code class="language-rust ignore">#[message]
+pub struct ChunkProduced {
+    pub graph_id: GraphId,
+    #[serde(serialize_with = &quot;elfo::dumping::hide&quot;)]
+    pub points: Vec&lt;(f64, f64)&gt;,   // will be dumped as &quot;&lt;hidden&gt;&quot;
+}
+</code></pre>
+<p>Such messages cannot be deserialized properly; that's ok until they are used as input for [regression testing][regression].</p>
+<h2 id="metrics"><a class="header" href="#metrics">Metrics</a></h2>
+<p>TODO</p>
+<h2 id="local-storage"><a class="header" href="#local-storage">Local storage</a></h2>
+<p>The default implementation of dumpers writes all dumps to a file on the local file system.</p>
+<p>Even home-purpose SSDs can achieve 3GiB/s in 2021, which should be more than enough to avoid a bottleneck in this place.</p>
+<p>Dumps are stored in an uncompressed way so that they can take a lot of space. So, it's essential to rotate the dump file timely and delete outdated ones.</p>
+<p>Note that message ordering between actor groups (and even inside the same actor) can be easily violated because of <a href="#implementation-details">implementation details</a>. Therefore, in the case of reading from local dump files, you should sort rows by the timestamp field.</p>
+<h2 id="the-structure-of-dump-files"><a class="header" href="#the-structure-of-dump-files">The structure of dump files</a></h2>
+<p>Dump files contain messages in the newline-delimited JSON format. Each line is object containing the following properties:</p>
+<ul>
+<li><code>g</code> — an actor group's name</li>
+<li><code>k</code> — an <em>optional</em> actor's key</li>
+<li><code>n</code> — node_no</li>
+<li><code>s</code> — <code>sequence_no</code>, unique inside an actor group</li>
+<li><code>t</code> — <a href="./ch05-04-tracing.html"><code>trace_id</code></a></li>
+<li><code>ts</code> — timestamp</li>
+<li><code>d</code> — direction, &quot;In&quot; or &quot;Out&quot;</li>
+<li><code>cl</code> — an <em>optional</em> class</li>
+<li><code>mn</code> — a message's name</li>
+<li><code>mp</code> — a message's protocol, usually a crate, which contains the message</li>
+<li><code>mk</code> — a message's kind, &quot;Regular&quot;, &quot;Request&quot; or &quot;Response&quot;</li>
+<li><code>m</code> — a <em>nullable</em> message's body</li>
+<li><code>c</code> — an <em>optional</em> correlation id, which links requests with corresponding responses</li>
+</ul>
+<p>Terms:</p>
+<ul>
+<li><em>optional</em> means that the property can be omitted, but if it's present, then its value isn't <code>null</code>.</li>
+<li><em>nullable</em> means that the property is present always, but the value can be <code>null</code>.</li>
+</ul>
+<p>The <code>sequence_no</code> field can be used to detect missed messages because of limiting.</p>
+<p><strong>TODO: note about classes</strong></p>
+<h2 id="dump-file-rotation"><a class="header" href="#dump-file-rotation">Dump file rotation</a></h2>
+<p><code>elfo::dumper</code> doesn't use any kind of partitioning and relies on an external file rotation mechanism instead. It means some additional configuration is required, but it provides more flexibility and simplifies the dumper.</p>
+<p>The dumper listens to the <code>SIGHUP</code> signal to reopen the active dump file. Besides this, the dumper accepts the <code>elfo::dumper::ReopenDumpFile</code> command.</p>
+<p>The most popular solution for file rotation is, of course, <code>logrotate</code>.</p>
+<p><strong>TODO: logrotate config</strong></p>
+<p>Tip: if dumps are not supposed to be delivered to DB, use hard links to save the dump file for later discovery and avoid deletion.</p>
+<h2 id="remote-storage"><a class="header" href="#remote-storage">Remote storage</a></h2>
+<p>Depending on your goals, you may or may not want to send your dump files to remote file storage. It can highly improve search capabilities (primarily because of indexing trace_id) and space usage but requires additional infrastructure for dumping. Usually, it's ok for many services to use only local storage. Dumps are stored in a time-ordered way and, thanks to the structure of trace_id, can be used for good enough search. However, elfo doesn't provide the utility to search these files for now.</p>
+<p>Ok, so you want to store dumps in DB. The right choice, if you can afford it. What should you do?</p>
+<p>The common schema looks like</p>
+<p><img src="assets/dumping-infrastructure.drawio.svg" alt="" /></p>
+<p><strong>TODO: add a link to the example with vector.dev and clickhouse</strong></p>
+<h2 id="implementation-details"><a class="header" href="#implementation-details">Implementation details</a></h2>
+<p><strong>TODO: implementation has been changed a lot, need to update the section</strong></p>
+<p>At a top level, dumping is separated into two parts: the dumping subsystem and the dumper.</p>
+<p>The dumping subsystem is based on sharded in-memory storage containing a limited queue of messages. We use a predefined number of shards for now, but we will likely use the number of available cores in the future. Every thread writes to its dedicated shard. Such an approach reduces contention and false sharing between threads.</p>
+<p><img src="assets/dumping-implementation-details.drawio.svg" alt="" /></p>
+<p>The dumper sequentially, in a round-robin way, replaces the shard's queue with the extra one, then reads and serializes all messages and writes them to the dump file. All this work happens on a timer tick. Firstly,  it's one of the simplest ways to get appropriate batching. Secondly, because the dumper uses <a href="https://docs.rs/tokio/1/tokio/task/fn.spawn_blocking.html">tokio::task::spawn_blocking</a> and blocking writes insides, that's more effective than using async <a href="https://docs.rs/tokio/1/tokio/fs/index.html">tokio::fs</a> directly. The timer approach allows us to reduce the impact on the tokio executor. However, this behavior is going to be improved for environments with io_uring in the future.</p>
+<p>The dumper holds the lock only for a small amount of time to replace the queue inside a shard with another one, which was drained by the dumper on the previous tick. Thus, the actual number of queues is one more than shards.</p>
+<p>All actors in a group share the same handler with some common things like sequence_no generator and rate limiter. Whenever an actor sends or receives a message, the handler is used to push message to the shard according to the current thread. Thus, messages produced by the same actor can reorder if it's migrated to another thread by a scheduler.</p>
+<p>Yep, we can restore order in the dumper, but don't do it now because remote DB is doing it anyway. However, we can add the corresponding option in the future. It's not trivial, although.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch05-02-telemetry.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="ch05-04-tracing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch05-02-telemetry.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="ch05-04-tracing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Routing - The Actoromicon</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="custom.css">
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="ch01-00-introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch01-01-comparison.html"><strong aria-hidden="true">1.1.</strong> Comparison</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Getting Started</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">2.1.</strong> Installation</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.2.</strong> Hello, World!</div></li></ol></li><li class="chapter-item expanded "><a href="ch03-00-actors.html"><strong aria-hidden="true">3.</strong> Actors</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch03-01-actor-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Actor Lifecycle</a></li><li class="chapter-item expanded "><a href="ch03-02-communication.html"><strong aria-hidden="true">3.2.</strong> Communication</a></li><li class="chapter-item expanded "><a href="ch03-03-sources.html"><strong aria-hidden="true">3.3.</strong> Sources</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">3.4.</strong> Structural Actors</div></li></ol></li><li class="chapter-item expanded "><a href="ch04-00-groups.html"><strong aria-hidden="true">4.</strong> Actor Groups</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch04-01-routing.html" class="active"><strong aria-hidden="true">4.1.</strong> Routing</a></li><li class="chapter-item expanded "><a href="ch04-02-supervision.html"><strong aria-hidden="true">4.2.</strong> Supervision</a></li><li class="chapter-item expanded "><a href="ch04-03-configuration.html"><strong aria-hidden="true">4.3.</strong> Configuration</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.4.</strong> Multiple Runtimes</div></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> Utility</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch05-01-logging.html"><strong aria-hidden="true">5.1.</strong> Logging</a></li><li class="chapter-item expanded "><a href="ch05-02-telemetry.html"><strong aria-hidden="true">5.2.</strong> Telemetry</a></li><li class="chapter-item expanded "><a href="ch05-03-dumping.html"><strong aria-hidden="true">5.3.</strong> Dumping</a></li><li class="chapter-item expanded "><a href="ch05-04-tracing.html"><strong aria-hidden="true">5.4.</strong> Tracing</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.</strong> Distributed Actors</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">6.1.</strong> Protocol Evolution</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.2.</strong> Transport</div></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.</strong> Testing</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">7.1.</strong> Unit Testing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.2.</strong> The Replayer</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.3.</strong> Approval Testing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.4.</strong> Stress Testing</div></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.</strong> Conventions</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch08-01-project-structure.html"><strong aria-hidden="true">8.1.</strong> Project Structure</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">9.</strong> Deployment</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.</strong> Patterns</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="ch10-01-id-generation.html"><strong aria-hidden="true">10.1.</strong> Pattern: ID Generation</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.2.</strong> Pattern: Network servers</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.3.</strong> Pattern: Pub/Sub</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.4.</strong> Pattern: A Workqueue</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.5.</strong> Pattern: CQS</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.6.</strong> Pattern: Event Sourcing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.7.</strong> Pattern: Transactions</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.8.</strong> Pattern: Frontend as an Actor</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.9.</strong> Pattern: Gateways</div></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Actoromicon</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="routing"><a class="header" href="#routing">Routing</a></h1>
+<p>Routing is the process of searching for the actor that will handle a sent message. In order to append the message to his mailbox, we need to discover the actor's address.</p>
+<p><code>elfo</code> offers a two-level routing system. What does it mean? Messages can pass through up to two steps of routing, depending on used methods, as shown on the following diagram:</p>
+<p><img src="assets/routing-process.drawio.svg" alt="" /></p>
+<ol>
+<li>If we don't know any address (<code>ctx.(try_)send(msg)</code> and <code>ctx.request(msg)</code>), the inter-group router is called to determine which groups are interested in the message. Then, the corresponding inner-group router is called for each interested group to decide which shards should receive the message.</li>
+<li>Only the inner-group router is called if we already know a group's address (<code>ctx.(try_)send_to(group_addr, msg)</code> and <code>ctx.request_to(group_addr, msg)</code>).</li>
+<li>If we already know an actor's address (<code>ctx.(try_)send_to(actor_addr, msg)</code> and <code>ctx.request_to(actor_addr, msg)</code>), nothing additional is done because we already know which actor should handle the message.</li>
+</ol>
+<p>Note that if several actors are interested in the message, each receives a copy of the message. It's ok for messages without heap-allocated fields or for rare messages, but for the big ones consider wrapping into <code>Arc</code> to reduce the <code>clone()</code> overhead.</p>
+<h2 id="inter-group-routing"><a class="header" href="#inter-group-routing">Inter-group routing</a></h2>
+<p>Inter-group routing is responsible for connecting actor groups among themselves.</p>
+<p>Let's consider the following architecture scheme:</p>
+<p><img src="assets/inter-group-routing.drawio.svg" alt="" /></p>
+<p>Actor groups and connections between them are defined in so-called &quot;topology&quot;:</p>
+<pre><code class="language-rust">fn topology(config_path: &amp;str) -&gt; elfo::Topology {
+    let topology = elfo::Topology::empty();
+    let logger = elfo::logger::init();
+
+    // Define system groups.
+    let loggers = topology.local(&quot;system.loggers&quot;);
+    let telemeters = topology.local(&quot;system.telemeters&quot;);
+    let dumpers = topology.local(&quot;system.dumpers&quot;);
+    let pingers = topology.local(&quot;system.pingers&quot;);
+    let configurers = topology.local(&quot;system.configurers&quot;).entrypoint();
+
+    // Define user groups.
+    let group_a = topology.local(&quot;group_a&quot;);
+    let group_b = topology.local(&quot;group_b&quot;);
+    let group_c = topology.local(&quot;group_c&quot;);
+
+    // Define connections between user actor groups.
+    group_a.route_to(&amp;group_b, |e| { // &quot;e&quot; means &quot;Envelope&quot;
+        msg!(match e {
+            MessageX | MessageY =&gt; true,
+            _ =&gt; false,
+        })
+    });
+    group_a.route_to(&amp;group_c, |e| {
+        msg!(match e {
+            MessageX =&gt; true,
+            _ =&gt; false,
+        })
+    });
+    group_b.route_to(&amp;group_c, |e| {
+        msg!(match e {
+            MessageZ =&gt; true,
+            _ =&gt; false,
+        })
+    });
+    group_c.route_to(&amp;group_a, |e| {
+        msg!(match e {
+            MessageW =&gt; true,
+            _ =&gt; false,
+        })
+    });
+
+    // Mount specific implementations.
+    loggers.mount(logger);
+    telemeters.mount(elfo::telemeter::new());
+    dumpers.mount(elfo::dumper::new());
+    pingers.mount(elfo::pinger::new(&amp;topology));
+
+    // Actors can use `topology` as a service locator.
+    // Usually it should be used for utilities only.
+    configurers.mount(elfo::configurer::from_path(&amp;topology, config_path));
+
+    group_a.mount(group_a::new());
+    group_b.mount(group_b::new());
+    group_c.mount(group_c::new());
+
+    topology
+}
+</code></pre>
+<p>Not all messages should be specified at this level. Usually, only requests and some multicast events are specified here, but not messages that will be passed directly, such as responses or events of subscriptions.</p>
+<h2 id="inner-group-routing"><a class="header" href="#inner-group-routing">Inner-group routing</a></h2>
+<p>Inner-group routing is responsible for choosing which shards should handle incoming messages.</p>
+<p><img src="assets/actor-group.drawio.svg" alt="" /></p>
+<p>The inner-group router is defined next to the actor implementation, in the group declaration.</p>
+<h3 id="stateless-router"><a class="header" href="#stateless-router">Stateless router</a></h3>
+<pre><code class="language-rust">use elfo::routers::{Outcome, MapRouter};
+
+ActorGroup::new()
+    .router(MapRouter::new(|e| {
+        msg!(match e {
+            MessageX { key, .. } =&gt; Outcome::Unicast(key),
+            MessageY { keys, .. } =&gt; Outcome::Multicast(keys.to_vec()),
+            MessageZ =&gt; Outcome::Broadcast,
+            _ =&gt; Outcome::Default,
+        })
+    }))
+    .exec(exec);
+</code></pre>
+<ul>
+<li><code>Outcome::Unicast</code> sends the message only to the actor with a specified key. If there is no active or restarting actor for the key, the new one will be started.</li>
+<li><code>Outcome::Multicast</code> sends to several actors. New actors will be started.</li>
+<li><code>Outcome::Broadcast</code> sends to all active actors.</li>
+<li><code>Outcome::Discard</code> drops the message (that leads to an error on sending side).</li>
+<li><code>Outcome::Default</code> works as <code>Outcome::Discard</code> for user-defined messages, but as <code>Outcome::Broadcast</code> for the system ones, such as <code>UpdateConfig</code>, <code>ValidateConfig</code>, <code>Terminate</code> and so on.</li>
+</ul>
+<h3 id="stateful-router"><a class="header" href="#stateful-router">Stateful router</a></h3>
+<p>Sometimes we need to use a router with rarely changing state. If the state should be changed often, consider using a dedicated actor as a router.</p>
+<p>To create a stateful router use the <code>MapRouter::with_state</code> constructor. Note that the state type should implement <code>Default</code>, <code>Send</code> and <code>Sync</code>.</p>
+<pre><code class="language-rust">ActorGroup::new()
+    .router(MapRouter::with_state(
+        // Called if the config is changed.
+        |config: &amp;Config, state| make_new_state(..),
+        // The routing function.
+        |e, state| {
+            msg!(match e { .. })
+        }
+    ))
+    .exec(exec);
+</code></pre>
+<p>The state is recreated every time when the config is changed. Useful when all needed information (e.g. a list of actors) can be extracted from the config. Note that recreation doesn't block execution; the state is atomically replaced only once <code>make_new_state(..)</code> is finished.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch04-00-groups.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="ch04-02-supervision.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch04-00-groups.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="ch04-02-supervision.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>
