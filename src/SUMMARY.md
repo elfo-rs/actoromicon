@@ -1,6 +1,7 @@
 # The Actoromicon
 
 - [Introduction](ch01-00-introduction.md)
+    - [Comparison](ch01-01-comparison.md)
 
 - [Getting Started]()
     - [Installation]()
