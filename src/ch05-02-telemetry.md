@@ -67,7 +67,7 @@ TODO: `elfo-telemeter` config.
 
 * Counter `elfo_limited_events_total{level}`
 
-    The number of events that haven't been emitted because [the limit](TODO) was reached.
+    The number of events that haven't been emitted because the limit was reached.
 
 * Counter `elfo_lost_events_total{level}`
 
@@ -81,7 +81,7 @@ TODO: `elfo-telemeter` config.
 
 * Counter `elfo_limited_dumps_total`
 
-    The number of dumps that haven't been emitted because [the limit](TODO) was reached.
+    The number of dumps that haven't been emitted because the limit was reached.
 
 * Counter `elfo_lost_dumps_total`
 
