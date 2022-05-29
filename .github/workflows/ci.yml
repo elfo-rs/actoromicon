@@ -49,9 +49,9 @@ jobs:
         echo "`pwd`/bin" >> $GITHUB_PATH
     - name: Build the book
       run: mdbook build
-    - name: Configure git
-      run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
     - name: Publish
-      run: ./scripts/publish
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./book
+        cname: actoromicon.rs

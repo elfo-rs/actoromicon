@@ -1,9 +1,9 @@
 # Actoromicon
 
-[![Build Status][actions-badge]][actions-url]
+[![CI][actions-badge]][actions-url]
 
-[actions-badge]: https://github.com/elfo-rs/actoromicon/workflows/CI/badge.svg
-[actions-url]: https://github.com/elfo-rs/actoromicon/actions?query=workflow%3ACI+branch%3Amaster
+[actions-badge]: https://github.com/elfo-rs/actoromicon/actions/workflows/ci.yml/badge.svg
+[actions-url]: https://github.com/elfo-rs/actoromicon/actions/workflows/ci.yml
 
 ## Contributing
 
