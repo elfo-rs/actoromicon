@@ -11,10 +11,10 @@ It was accomplished by using rarely (approx. once a year) wrapping `timestamp` I
 
 \\[
 \operatorname{trace\\_id} =
-    \operatorname{timestamp} \dot{} 2^{38}
-  + \operatorname{node\\_no} \dot{} 2^{22}
-  + \operatorname{chunk\\_no} \dot{} 2^{10}
-  + \operatorname{counter}
+  \operatorname{timestamp} \dot{} 2^{38} +
+  \operatorname{node\\_no} \dot{} 2^{22} +
+  \operatorname{chunk\\_no} \dot{} 2^{10} +
+  \operatorname{counter}
 \\]
 
 This formula's parameters were chosen carefully to leave a good stock of spare space for `TraceId`'s components inside the available set of [63-bit positive integers][domain].

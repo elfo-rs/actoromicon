@@ -1,6 +1,9 @@
 # Actoromicon
 
-[![Build status](https://travis-ci.org/elfo-rs/actoromicon.svg)](https://travis-ci.org/elfo-rs/actoromicon)
+[![Build Status][actions-badge]][actions-url]
+
+[actions-badge]: https://github.com/elfo-rs/actoromicon/workflows/CI/badge.svg
+[actions-url]: https://github.com/elfo-rs/actoromicon/actions?query=workflow%3ACI+branch%3Amaster
 
 ## Contributing
 
@@ -19,5 +22,15 @@ mdbook build
 And to edit the book in pseudo-interactive "watch" mode:
 
 ```sh
-mdbook watch --open
+mdbook watch --open # local files
+mdbook serve --open # server at localhost:3000
 ```
+
+### `linkcheck`
+
+We use the `linkcheck` tool to find broken links.
+To run it locally (requires the nightly toolchain):
+
+```sh
+curl -sSLo linkcheck.sh https://raw.githubusercontent.com/rust-lang/rust/master/src/tools/linkchecker/linkcheck.sh
+sh linkcheck.sh book

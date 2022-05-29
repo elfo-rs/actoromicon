@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Dumping is the process of storing incoming and outgoing messages for every actor, including ones from [mailboxes][mailbox] and all other [sources][source] like timers, streams, and so on. The primary purpose is future [tracing][tracing], but it also can be used for [regression testing][regression].
+Dumping is the process of storing incoming and outgoing messages for every actor, including ones from [mailboxes][mailbox] and all other [sources][source] like timers, streams, and so on. The primary purpose is future [tracing][tracing], but it also can be used for regression testing.
 
 Dumping has a lot of common with [logging][logging], but it's more efficient and optimized for storing a lot of messages, so it has high throughput requirements instead of low latency like in the logging task, where records are supposed to be delivered as soon as possible, especially warnings and errors.
 
@@ -87,7 +87,7 @@ Note that message ordering between actor groups (and even inside the same actor)
 Dump files contain messages in the newline-delimited JSON format. Each line is object containing the following properties:
 * `g` — an actor group's name
 * `k` — an *optional* actor's key
-* `n` — [`node_no`][distributed]
+* `n` — node_no
 * `s` — `sequence_no`, unique inside an actor group
 * `t` — [`trace_id`][tracing]
 * `ts` — timestamp
@@ -154,7 +154,5 @@ Yep, we can restore order in the dumper, but don't do it now because remote DB i
 [mailbox]: ./ch03-00-actors.html
 [source]: ./ch03-03-sources.html
 [configs]: ./ch04-03-configuration.html
-[distributed]: ./ch06-00-dustributed-actors.html
 [logging]: ./ch05-01-logging.html
 [tracing]: ./ch05-04-tracing.html
-[regression]: ./ch07-02-replayer.html
