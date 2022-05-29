@@ -14,7 +14,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install Rust
       run: |
         rustup set profile minimal
@@ -28,10 +28,30 @@ jobs:
       run: |
         mkdir bin
         curl -sSL https://github.com/rust-lang/mdBook/releases/download/$MDBOOK_VERSION/mdbook-$MDBOOK_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
-        echo "$(pwd)/bin" >> $GITHUB_PATH
+        echo "`pwd`/bin" >> $GITHUB_PATH
     - name: Report versions
       run: |
         mdbook -V
         rustup -V
     - name: Build & Run linkcheck
       run: sh linkcheck.sh book
+
+  deploy:
+    needs: [check]
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/master' }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install mdBook
+      run: |
+        mkdir bin
+        curl -sSL https://github.com/rust-lang/mdBook/releases/download/$MDBOOK_VERSION/mdbook-$MDBOOK_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
+        echo "`pwd`/bin" >> $GITHUB_PATH
+    - name: Build the book
+      run: mdbook build
+    - name: Configure git
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+    - name: Publish
+      run: ./scripts.publish
