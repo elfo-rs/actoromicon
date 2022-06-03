@@ -110,8 +110,11 @@ ActorGroup::new()
     .exec(exec);
 ```
 
+Possible `Outcome`'s variants:
 * `Outcome::Unicast` sends the message only to the actor with a specified key. If there is no active or restarting actor for the key, the new one will be started.
+* `Outcome::GentleUnicast` works like `Outcome::Unicast`, but doesn't lead to spawning new actors, instead a message is discarded.
 * `Outcome::Multicast` sends to several actors. New actors will be started.
+* `Outcome::GentleMulticast` works like `Outcome::Multicast`, but doesn't lead to spawning new actors, instead a message is discarded.
 * `Outcome::Broadcast` sends to all active actors.
 * `Outcome::Discard` drops the message (that leads to an error on sending side).
 * `Outcome::Default` works as `Outcome::Discard` for user-defined messages, but as `Outcome::Broadcast` for the system ones, such as `UpdateConfig`, `ValidateConfig`, `Terminate` and so on.
