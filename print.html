@@ -897,15 +897,62 @@ Assuming we have 32 threads:</p>
 Note that <code>counter</code> is limited to be at least 1 to keep the <a href="./ch10-01-id-generation.html#choosing-the-domain-for-your-ids">invariant</a>: \( \operatorname{id} \geqslant 1 \).
 Every other component of <code>TraceId</code> could be zero.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="project-structure"><a class="header" href="#project-structure">Project Structure</a></h1>
-<p>TODO</p>
-<pre><code>&lt;actor_name&gt;/
+<p>Although the project structure can be arbitrary, it looks reasonable to provide some advices here:</p>
+<ul>
+<li>Use a separate crate for every actor group.
+<ul>
+<li>It speeds up a build time.</li>
+<li>It helps to isolate code.</li>
+</ul>
+</li>
+<li>Use separate crates for protocols, where messages are defined. Internal messages (timer ticks, inner group messages etc) are defined inside a group's crate.</li>
+<li>Actor crates shouldn't depend on each other. Instead, they should depend on protocol crates.
+<ul>
+<li>It helps to achieve loosely coupling.</li>
+</ul>
+</li>
+<li>Prefer integration tests (<code>tests/</code>) over unit tests (<code>mod tests</code>). Unit tests are still fine for internal structures.
+<ul>
+<li>Integration tests use no implementation details and relies only on protocols.</li>
+</ul>
+</li>
+<li>Store libraries (additional code potentially used by multiple actors) separately from actors' code. It's ok to depends on protocols in that code, but don't depend on actors. <code>libs/</code> in the example below.</li>
+<li>Store different parts of a group in dedicated files, it siplifies navigation:
+<ul>
+<li><code>exec()</code> and message handling in <code>actor.rs</code>.</li>
+<li>An inner-group router in <code>router.rs</code>.</li>
+<li>A group's config in <code>config.rs</code>.</li>
+</ul>
+</li>
+<li>Store topology definitions separately from actors' code. Services can share actors. Also, it's a good place for additional files like systemd units and so on. <code>services/</code> in the example below.</li>
+</ul>
+<p>For instance:</p>
+<pre><code>actors/
+    &lt;actor_name_1&gt;/
+        src/
+            mod.rs
+            actor.rs
+            config.rs
+            router.rs
+        tests/
+            helpers.rs
+            test_&lt;name_1&gt;.rs
+            test_&lt;name_2&gt;.rs
+        Cargo.toml
+    &lt;actor_name_2&gt;/
+protocol/
     src/
-        mod.rs
-        actor.rs
-        config.rs
-        router.rs
-        ...
-    tests/
+        lib.rs
+    Cargo.toml
+libs/
+    &lt;lib_name_1&gt;/
+    &lt;lib_name_2&gt;/
+services/
+    &lt;service_name_1&gt;/
+    &lt;service_name_2&gt;/
+Cargo.toml
+Cargo.lock
+rustfmt.toml
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="pattern-id-generation"><a class="header" href="#pattern-id-generation">Pattern: ID Generation</a></h1>
 <p>It should be noted that ID generation approach which was chosen in your app affects your app's architecture and overall performance.
