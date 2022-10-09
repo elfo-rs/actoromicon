@@ -2,27 +2,32 @@
 
 The most important part of the actor model is, of course, the actor itself. It can be challenging to give the exact definition of this term. However, we can define an actor through its properties:
 
+* An actor is a unit of logic encapsulation
+
+    Actors solve a specific task instead of doing it all at once.
+
 * An actor is a unit of scheduling
 
-    Different threads cannot execute the same actor simultaneously. However, many actors are executed concurrently, often parallel in many threads.
+    Different threads cannot execute the same actor simultaneously[^multithread]. However, many actors are executed concurrently, often parallel in many threads.
 
 * An actor is a unit of data encapsulation
 
     Actors shouldn't share their data with other actors, shouldn't expose implementation details, etc.
+    Do not communicate by sharing memory; instead, share memory by communicating.
 
 * An actor is a unit of failure encapsulation
 
-    Actors can fail, and it doesn't affect the work of other actors directly.
-
-* An actor is a unit of logic encapsulation
-
-    Actors solve a specific task instead of doing it all at once.
+    Actors can fail, and it doesn't affect the work of other actors directly[^failure].
 
 * An actor is a unit of communication
 
     Actors can communicate with others by sending and receiving messages. Actors are uniquely identified by their addresses.
 
 These properties allow us to build highly scalable and fault-tolerant systems relatively thinkable and straightforwardly without using complex concurrent data structures.
+
+[^multithread]: Actually, sometimes it's useful to use `rayon` or alternatives. It's possible in `elfo` by wrapping threads into an actor's scope.
+
+[^failure]: Actors should be designed to be tolerant to failures of other actors.
 
 ## A Mailbox
 
@@ -106,3 +111,7 @@ pub fn sample() -> Schema {
 ```
 
 We haven't connected our actors in any way, this will be discussed later.
+
+## Structural actors
+
+TODO
