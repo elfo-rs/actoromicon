@@ -10,3 +10,9 @@ html.ayu  img[src$=".drawio.svg"] {
     display: block;
     margin: auto;
 }
+
+/* The protocol evolution page */
+.protocol-evolution td {
+    border: 0;
+    vertical-align: top;
+}

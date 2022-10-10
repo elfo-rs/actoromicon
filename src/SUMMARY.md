@@ -25,9 +25,9 @@
     - [Dumping](ch05-03-dumping.md)
     - [Tracing](ch05-04-tracing.md)
 
-- [Distributed Actors]()
-    - [Protocol Evolution]()
+- [Distribution]()
     - [Transport]()
+    - [Protocol Evolution](ch06-02-protocol-evolution.md)
 
 - [Testing]()
     - [Unit Testing]()
