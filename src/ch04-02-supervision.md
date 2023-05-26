@@ -22,8 +22,8 @@ What's the difference between default behavior and `with_force(true)` one? By de
 The reconfiguration process consists of several stages:
 ![](assets/reconfiguration.drawio.svg)
 
-1. Config validation: the configurer sends the `ValidateConfig` request to all groups and waits for responses.
-2. If all groups respond `Ok(_)` or ignore the request, the config is considered valid, and the configurer sends `UpdateConfig` to all groups. If at least one actor responds `Err(_)`, reconfiguration is aborted, and a new config isn't used.
+1. Config validation: the configurer sends the `ValidateConfig` request to all groups and waits for responses. If all groups respond `Ok(_)` or discard the request (which is the default behaviour), the config is considered valid and the configurer proceeds to the next step.
+2. Config update: the configurer sends `UpdateConfig` to all groups. If at least one actor responds `Err(_)`, reconfiguration is aborted, and a new config isn't used.
 
 More information about configs and the reconfiguration process is available on [the corresponding page][configuration].
 

@@ -117,7 +117,10 @@ Possible `Outcome`'s variants:
 * `Outcome::GentleMulticast` works like `Outcome::Multicast`, but doesn't lead to spawning new actors, instead a message is discarded.
 * `Outcome::Broadcast` sends to all active actors.
 * `Outcome::Discard` drops the message (that leads to an error on sending side).
-* `Outcome::Default` works as `Outcome::Discard` for user-defined messages, but as `Outcome::Broadcast` for the system ones, such as `UpdateConfig`, `ValidateConfig`, `Terminate` and so on.
+* `Outcome::Default` behaviour depends on the message type:
+    - `Outcome::Discard` for `ValidateConfig` message. Note that `ValidateConfig` message is designed to validate config against actor's state. Any other validation must happen on the deserialization stage.
+    - `Outcome::Broadcast` for all other system messages (such as `UpdateConfig`, `Terminate`, etc).
+    - `Outcome::Discard` for user-defined messages.
 
 ### Stateful router
 
