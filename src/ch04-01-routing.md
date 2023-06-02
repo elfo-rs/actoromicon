@@ -118,7 +118,7 @@ Possible `Outcome`'s variants:
 * `Outcome::Broadcast` sends to all active actors.
 * `Outcome::Discard` drops the message (that leads to an error on sending side).
 * `Outcome::Default` behaviour depends on the message type:
-    - `Outcome::Discard` for `ValidateConfig` message. Note that `ValidateConfig` message is designed to validate config against actor's state. Any other validation must happen on the deserialization stage.
+    - `Outcome::Discard` for `ValidateConfig` message.
     - `Outcome::Broadcast` for all other system messages (such as `UpdateConfig`, `Terminate`, etc).
     - `Outcome::Discard` for user-defined messages.
 

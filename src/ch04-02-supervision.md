@@ -4,7 +4,7 @@
 
 Once the system is started, the `system.init` actor starts all actors marked as `entrypoint()` in the topology. Usually, it's only the `system.configurers` group. Entry points must have empty configs.
 
-Then, `system.configurers` loads the config file and sends `UpdateConfig` to all actor groups. Thus, if you need to start actors, the `UpdateConfig` message must be routed to the necessary keys.
+Then, `system.configurers` loads the config file and sends `UpdateConfig` to all actor groups. This message is usually used to start any remaining actors in the system. Thus, you need to define routing for `UpdateConfig` with either `Outcome::Unicast` or `Outcome::Multicast` for actor keys you want to start on startup.
 
 ![](assets/startup.drawio.svg)
 
@@ -23,7 +23,7 @@ The reconfiguration process consists of several stages:
 ![](assets/reconfiguration.drawio.svg)
 
 1. Config validation: the configurer sends the `ValidateConfig` request to all groups and waits for responses. If all groups respond `Ok(_)` or discard the request (which is the default behaviour), the config is considered valid and the configurer proceeds to the next step.
-2. Config update: the configurer sends `UpdateConfig` to all groups. If at least one actor responds `Err(_)`, reconfiguration is aborted, and a new config isn't used.
+2. Config update: the configurer sends `UpdateConfig` to all groups. Note that it is sent as a regular message, rather than request, making config update asynchronous. System does not wait for all configs to apply before finishing this stage and it is possible for an actor to fail while applying the new config. Despite actor failures, any further actors spawned (or restarted) will have the new config available for them.
 
 More information about configs and the reconfiguration process is available on [the corresponding page][configuration].
 
