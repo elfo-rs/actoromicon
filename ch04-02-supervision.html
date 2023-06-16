@@ -140,7 +140,7 @@
                         <h1 id="supervision"><a class="header" href="#supervision">Supervision</a></h1>
 <h2 id="startup"><a class="header" href="#startup">Startup</a></h2>
 <p>Once the system is started, the <code>system.init</code> actor starts all actors marked as <code>entrypoint()</code> in the topology. Usually, it's only the <code>system.configurers</code> group. Entry points must have empty configs.</p>
-<p>Then, <code>system.configurers</code> loads the config file and sends <code>UpdateConfig</code> to all actor groups. Thus, if you need to start actors, the <code>UpdateConfig</code> message must be routed to the necessary keys.</p>
+<p>Then, <code>system.configurers</code> loads the config file and sends <code>UpdateConfig</code> to all actor groups. This message is usually used to start any remaining actors in the system. Thus, you need to define routing for <code>UpdateConfig</code> with either <code>Outcome::Unicast</code> or <code>Outcome::Multicast</code> for actor keys you want to start on startup.</p>
 <p><img src="assets/startup.drawio.svg" alt="" /></p>
 <p>Note that the actor system terminates immediately if the config file is invalid at startup (<code>elfo::start()</code> returns an error).</p>
 <h2 id="reconfiguration"><a class="header" href="#reconfiguration">Reconfiguration</a></h2>
@@ -154,8 +154,8 @@
 <p>The reconfiguration process consists of several stages:
 <img src="assets/reconfiguration.drawio.svg" alt="" /></p>
 <ol>
-<li>Config validation: the configurer sends the <code>ValidateConfig</code> request to all groups and waits for responses.</li>
-<li>If all groups respond <code>Ok(_)</code> or ignore the request, the config is considered valid, and the configurer sends <code>UpdateConfig</code> to all groups. If at least one actor responds <code>Err(_)</code>, reconfiguration is aborted, and a new config isn't used.</li>
+<li>Config validation: the configurer sends the <code>ValidateConfig</code> request to all groups and waits for responses. If all groups respond <code>Ok(_)</code> or discard the request (which is the default behaviour), the config is considered valid and the configurer proceeds to the next step.</li>
+<li>Config update: the configurer sends <code>UpdateConfig</code> to all groups. Note that it is sent as a regular message, rather than request, making config update asynchronous. System does not wait for all configs to apply before finishing this stage and it is possible for an actor to fail while applying the new config. Despite actor failures, any further actors spawned (or restarted) will have the new config available for them.</li>
 </ol>
 <p>More information about configs and the reconfiguration process is available on <a href="./ch04-03-configuration.html">the corresponding page</a>.</p>
 <h2 id="restart"><a class="header" href="#restart">Restart</a></h2>
