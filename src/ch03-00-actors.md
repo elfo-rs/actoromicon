@@ -45,7 +45,7 @@ A mailbox can become full if the corresponding actor doesn't have time to proces
 
 Let's define a some simple actor using `elfo` and figure out what's happening.
 
-The simplest way to define an actor is functional style.
+The simplest way to define an actor as a function.
 
 For example, let's define the simplest counter:
 ```rust,ignore
@@ -112,6 +112,6 @@ pub fn sample() -> Blueprint {
 
 We haven't connected our actors in any way, this will be discussed later.
 
-## Structural actors
+Note: it's more useful to write complex actors in another way, which will be considered later in the [Structural Actors] section.
 
-TODO
+[Structural Actors]: ./ch03-04-structural-actors.html

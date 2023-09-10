@@ -11,7 +11,7 @@
     - [Actor Lifecycle](ch03-01-actor-lifecycle.md)
     - [Communication](ch03-02-communication.md)
     - [Sources](ch03-03-sources.md)
-    - [Structural Actors]()
+    - [Structural Actors](ch03-04-structural-actors.md)
 
 - [Actor Groups](ch04-00-groups.md)
     - [Routing](ch04-01-routing.md)
