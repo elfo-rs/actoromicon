@@ -59,7 +59,7 @@ pub struct Increment {
 #[message(ret = u32)]
 pub struct GetValue;
 
-pub fn counter() -> Schema {
+pub fn counter() -> Blueprint {
     ActorGroup::new().exec(|mut ctx| async move {
         // Private state of the actor.
         let mut value = 0;
@@ -95,7 +95,7 @@ Now let's define another actor to communicate with the counter:
 use elfo::prelude::*;
 use counter::{Increment, GetValue};
 
-pub fn sample() -> Schema {
+pub fn sample() -> Blueprint {
     ActorGroup::new().exec(|ctx| async move {
         // Increment the counter, we aren't interested in errors.
         let _ = ctx.send(Increment { delta: 1 }).await;
