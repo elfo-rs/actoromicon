@@ -28,7 +28,9 @@ This book aims to describe a superior approach to build heavily asynchronous and
 * Dumping: messages can be archived for subsequent debugging.
 * Effortless distribution across nodes.
 * Utilities for straightforward testing.
-* Benchmarking utilities **TODO**.
+
+The term "observability" could be better understood through demonstration. Consider, for example, the concept of metrics:
+![](assets/metrics.png)
 
 [elfo]: https://github.com/elfo-rs/elfo
 [metrics]: https://docs.rs/metrics
