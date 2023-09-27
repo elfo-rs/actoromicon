@@ -139,35 +139,34 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p>This book aims to describe a superior approach to build heavily asynchronous and distributed applications based on the actor model.
-Major part of the book is about the <code>elfo</code> framework and is illustrated with best practices of its usage. The second part of the book tells you about the best corporate practices of asynchronous applications' architecture.</p>
+<p>This book aims to describe a superior approach to build heavily asynchronous and distributed applications based on the actor model using the <a href="https://github.com/elfo-rs/elfo">elfo</a> framework.</p>
 <h2 id="goals"><a class="header" href="#goals">Goals</a></h2>
 <ul>
-<li>Assist in building fault-tolerant systems.</li>
-<li>Be performant enough for low-latency systems.</li>
-<li>Be observable, provide a lot of metrics to detect problems.</li>
-<li>Provide built-in support of exposing log events, dumps, metrics, and trace events.</li>
-<li>Distributing actors across several machines should be as simple as possible.</li>
+<li>Facilitate the development of resilient, fault-tolerant systems.</li>
+<li>Maintain enough performance to meet the needs of low-latency systems.</li>
+<li>Enhance observability through extensive metrics to identify and rectify issues promptly.</li>
+<li>Offer built-in support for exposing log events, dumps, metrics, and trace events.</li>
+<li>Simplify the process of distributing actors across multiple machines.</li>
 </ul>
 <h2 id="non-goals"><a class="header" href="#non-goals">Non-goals</a></h2>
 <ul>
 <li>Provide the most performant way to communicate between actors.</li>
-<li>Provide any HTTP server.</li>
+<li>Provide any HTTP/WS server functionalities.</li>
 </ul>
 <h2 id="features"><a class="header" href="#features">Features</a></h2>
 <ul>
-<li>Asynchronous actors with supervision and custom life cycle.</li>
+<li>Asynchronous actors equipped with supervision and a customizable life cycle.</li>
 <li>Two-level routing system: between actor groups (pipelining) and inside them (sharding).</li>
-<li>Multiple protocols: actors (so-called gates) can handle messages from different protocols.</li>
-<li>Multiple patterns of communication: regular messages, request-response (<em>TODO: subscriptions</em>).</li>
-<li>Config updating and distribution on the fly.</li>
-<li>Appropriate for both low latency and high throughput tasks.</li>
-<li>Tracing: all messages have <code>trace_id</code> that spread across the system implicitly.</li>
-<li>Telemetry (via the <code>metrics</code> crate).</li>
-<li>Dumping: messages can be stored for further debugging.</li>
-<li>Seamless distribution across nodes <em>TODO</em>.</li>
-<li>Utils for simple testing.</li>
-<li>Utils for benchmarking <em>TODO</em>.</li>
+<li>Protocol diversity: actors have the capability to process messages from various protocols, defined in different places.</li>
+<li>Varied communication patterns: regular messages, request-response (<em>TODO: subscriptions</em>).</li>
+<li>Dynamic configuration updates and distribution.</li>
+<li>Suitable for tasks requiring both low latency and high throughput.</li>
+<li>Tracing: every message is assigned a <code>trace_id</code> which spreads system-wide implicitly.</li>
+<li>Telemetry through the <a href="https://docs.rs/metrics">metrics</a> crate.</li>
+<li>Dumping: messages can be archived for subsequent debugging.</li>
+<li>Effortless distribution across nodes.</li>
+<li>Utilities for straightforward testing.</li>
+<li>Benchmarking utilities <strong>TODO</strong>.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-aka-why-not-x"><a class="header" href="#comparison-aka-why-not-x">Comparison aka &quot;Why not X&quot;?</a></h1>
 <h2 id="where-x--csp"><a class="header" href="#where-x--csp">Where X = CSP</a></h2>
