@@ -1,32 +1,34 @@
 # Introduction
 
-This book aims to describe a superior approach to build heavily asynchronous and distributed applications based on the actor model.
-Major part of the book is about the `elfo` framework and is illustrated with best practices of its usage. The second part of the book tells you about the best corporate practices of asynchronous applications' architecture.
+This book aims to describe a superior approach to build heavily asynchronous and distributed applications based on the actor model using the [elfo] framework.
 
 ## Goals
 
-* Assist in building fault-tolerant systems.
-* Be performant enough for low-latency systems.
-* Be observable, provide a lot of metrics to detect problems.
-* Provide built-in support of exposing log events, dumps, metrics, and trace events.
-* Distributing actors across several machines should be as simple as possible.
+* Facilitate the development of resilient, fault-tolerant systems.
+* Maintain enough performance to meet the needs of low-latency systems.
+* Enhance observability through extensive metrics to identify and rectify issues promptly.
+* Offer built-in support for exposing log events, dumps, metrics, and trace events.
+* Simplify the process of distributing actors across multiple machines.
 
 ## Non-goals
 
 * Provide the most performant way to communicate between actors.
-* Provide any HTTP server.
+* Provide any HTTP/WS server functionalities.
 
 ## Features
 
-* Asynchronous actors with supervision and custom life cycle.
+* Asynchronous actors equipped with supervision and a customizable life cycle.
 * Two-level routing system: between actor groups (pipelining) and inside them (sharding).
-* Multiple protocols: actors (so-called gates) can handle messages from different protocols.
-* Multiple patterns of communication: regular messages, request-response (*TODO: subscriptions*).
-* Config updating and distribution on the fly.
-* Appropriate for both low latency and high throughput tasks.
-* Tracing: all messages have `trace_id` that spread across the system implicitly.
-* Telemetry (via the `metrics` crate).
-* Dumping: messages can be stored for further debugging.
-* Seamless distribution across nodes *TODO*.
-* Utils for simple testing.
-* Utils for benchmarking *TODO*.
+* Protocol diversity: actors have the capability to process messages from various protocols, defined in different places.
+* Varied communication patterns: regular messages, request-response (*TODO: subscriptions*).
+* Dynamic configuration updates and distribution.
+* Suitable for tasks requiring both low latency and high throughput.
+* Tracing: every message is assigned a `trace_id` which spreads system-wide implicitly.
+* Telemetry through the [metrics] crate.
+* Dumping: messages can be archived for subsequent debugging.
+* Effortless distribution across nodes.
+* Utilities for straightforward testing.
+* Benchmarking utilities **TODO**.
+
+[elfo]: https://github.com/elfo-rs/elfo
+[metrics]: https://docs.rs/metrics
