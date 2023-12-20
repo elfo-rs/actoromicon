@@ -852,27 +852,67 @@ ActorGroup::new()
 </ol>
 <p>More information about configs and the reconfiguration process is available on <a href="./ch04-03-configuration.html">the corresponding page</a>.</p>
 <h2 id="restart"><a class="header" href="#restart">Restart</a></h2>
+<h3 id="restart-policies"><a class="header" href="#restart-policies">Restart policies</a></h3>
 <p>Three restart policies are implemented now:</p>
 <ul>
-<li><code>RestartPolicy::on_failures</code> (by default) — actors are restarted only after failures (the <code>exec</code> function returned <code>Err</code> or panicked).</li>
+<li><code>RestartPolicy::never</code> (by default) — actors are never restarted. However, they can be started again on incoming messages.</li>
+<li><code>RestartPolicy::on_failure</code> — actors are restarted only after failures (the <code>exec</code> function returned <code>Err</code> or panicked).</li>
 <li><code>RestartPolicy::always</code> — actors are restarted after termination (the <code>exec</code> function returned <code>Ok</code> or <code>()</code>) and failures.</li>
-<li><code>RestartPolicy::never</code> — actors are never restarted. However, they can be started again on incoming messages.</li>
 </ul>
 <p>If the actor is scheduled to be restarted, incoming messages cannot spawn another actor for his key.</p>
-<p>Repetitive restarts are limited by a linear backoff mechanism:</p>
-<ul>
-<li>If there are no restarts for 5s, restart an actor immediately.</li>
-<li>Otherwise, increase restart time by 5s and schedule restarting.</li>
-<li>Maximum restart time is limited by 30s.</li>
-</ul>
-<p>These constants aren't configurable for now (<a href="https://github.com/elfo-rs/elfo/issues/62">elfo#62</a>).</p>
-<p>The restart policy can be chosen while creating <code>ActorGroup</code>:</p>
-<pre><code class="language-rust">use elfo::group::{RestartPolicy, ActorGroup};
+<p>The restart policy can be chosen while creating an <code>ActorGroup</code>. This is the default restart policy for the group, which will be used if not overridden. </p>
+<pre><code class="language-rust">use elfo::{RestartPolicy, RestartParams, ActorGroup};
 
-ActorGroup::new().restart_policy(RestartPolicy::always())
-ActorGroup::new().restart_policy(RestartPolicy::on_failures())
+ActorGroup::new().restart_policy(RestartPolicy::always(RestartParams::new(...)))
+ActorGroup::new().restart_policy(RestartPolicy::on_failure(RestartParams::new(...)))
 ActorGroup::new().restart_policy(RestartPolicy::never())
 </code></pre>
+<p>The group restart policy can be overridden separately for each actor group in the configuration:</p>
+<pre><code class="language-toml">[group_a.system.restart_policy]
+when = &quot;Never&quot; # Override group policy on `config_update` with `RestartPolicy::never()`.
+
+[group_b.system.restart_policy]
+# Override the group policy on `config_update` with `RestartPolicy::always(...)`.
+when = &quot;Always&quot; # or &quot;OnFailure&quot;.
+# Configuration details for the RestartParams of the backoff strategy in the restart policy. 
+# The parameters are described further in the chapter.
+min_backoff = &quot;5s&quot; # Required.
+max_backoff = &quot;30s&quot; # Required.
+factor = &quot;2.0&quot; # Optional.
+max_retries = &quot;20&quot; # Optional.
+auto_reset = &quot;5s&quot; # Optional.
+
+[group_c]
+# If the restart policy is not specified, the restart policy from the blueprint will be used.
+</code></pre>
+<p>Additionally, each actor can further override its restart policy through the actor's context:</p>
+<pre><code class="language-rust">// Override the group policy with the actor's policy, which is applicable only for this lifecycle.
+ctx.set_restart_policy(RestartPolicy::...);
+
+// Restore the group policy from the configuration (if specified), or use the default group policy.
+ctx.set_restart_policy(None);
+</code></pre>
+<h3 id="repetitive-restarts"><a class="header" href="#repetitive-restarts">Repetitive restarts</a></h3>
+<p>Repetitive restarts are limited by an exponential backoff strategy. The delay for each subsequent retry is calculated as follows:</p>
+<pre><code>delay = min(min_backoff * pow(factor, power), max_backoff)
+power = power + 1
+</code></pre>
+<p>So for example, when <code>factor</code> is set to <code>2</code>, <code>min_backoff</code> is set to <code>4</code>, and <code>max_backoff</code> is set to <code>36</code>, and <code>power</code> is set to <code>0</code>,
+this will result in the following sequence of delays: <code>[4, 8, 16, 32, 36]</code>.</p>
+<p>The backoff strategy is configured by passing a <code>RestartParams</code> to one of the restart policies, either <code>RestartPolicy::on_failure</code> or <code>RestartPolicy::always</code>, upon creation.
+The required parameters for <code>RestartParams</code> are as follows:</p>
+<ul>
+<li><code>min_backoff</code> - Minimal restart time limit.</li>
+<li><code>max_backoff</code> - Maximum restart time limit.</li>
+</ul>
+<p>The <code>RestartParams</code> can be further configured with the following optional parameters:</p>
+<ul>
+<li><code>factor</code> - The value to multiply the current delay with for each retry attempt. Default value is <code>2.0</code>.</li>
+<li><code>max_retries</code> - The limit on retry attempts, after which the actor stops attempts to restart. The default value is <code>NonZeroU64::MAX</code>, which effectively means unlimited retries.</li>
+<li><code>auto_reset</code> - The duration of an actor's lifecycle sufficient to deem the actor healthy. The default value is <code>min_backoff</code>.
+After this duration elapses, the backoff strategy automatically resets. The following restart will occur <strong>without delays</strong> and will be considered the first retry.
+Subsequent restarts will have delays calculated using the formula above, with the <code>power</code> starting from 0.</li>
+</ul>
 <h2 id="termination"><a class="header" href="#termination">Termination</a></h2>
 <p>System termination is started by the <code>system.init</code> actor in several cases:</p>
 <ul>
