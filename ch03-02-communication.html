@@ -148,7 +148,7 @@
 <table><thead><tr><th>Syntax</th><th>Error cases</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>send().await</code></td><td><code>Closed</code></td><td>Blocks until a destination mailbox has space for new messages</td></tr>
 <tr><td><code>try_send()</code></td><td><code>Full</code>, <code>Closed</code></td><td>Returns <code>Full</code> if the mailbox is full</td></tr>
-<tr><td><code>unbounded_send()</code></td><td><code>Closed</code></td><td>Forcibly increase the mailbox, <strong>not implemented yet</strong></td></tr>
+<tr><td><code>unbounded_send()</code></td><td><code>Closed</code></td><td>Ignores the capacity of the mailbox</td></tr>
 </tbody></table>
 <p>All methods can return <code>Closed</code> if the destination actor is closed.</p>
 <p>The form <code>send().await</code> is used when desired behavior is backpressure, while <code>try_send()</code> is for actors with predicted latency, when it's acceptable to lose messages or it can be handled manually. <code>unbounded_send()</code> should be avoided because it can increase mailboxes unpredictably, leading to OOM.</p>
@@ -156,14 +156,14 @@
 <pre><code class="language-rust ignore">#[message]
 struct SomeMessage;
 
-// Do not care if the target actor is closed or full.
-let _ = ctx.try_send(SomeMessage);
-
-// Block if the destination mailbox is full and ignore if closed.
-let _ = ctx.send(SomeMessage).await;
-
-// Fail the current actor if the destination is closed.
+// Block if the destination mailbox is full.
 ctx.send(SomeMessage).await?;
+
+// Do not care if the target actor is closed or full.
+ctx.try_send(SomeMessage)?;
+
+// Forcibly push the message into the mailbox.
+ctx.unbounded_send(SomeMessage)?;
 
 // Manually implement backpressure, e.g. store messages.
 if let Err(err) = ctx.try_send(SomeMessage) {

@@ -142,9 +142,9 @@
 <p><code>elfo</code> offers a two-level routing system. What does it mean? Messages can pass through up to two steps of routing, depending on used methods, as shown on the following diagram:</p>
 <p><img src="assets/routing-process.drawio.svg" alt="" /></p>
 <ol>
-<li>If we don't know any address (<code>ctx.(try_)send(msg)</code> and <code>ctx.request(msg)</code>), the inter-group router is called to determine which groups are interested in the message. Then, the corresponding inner-group router is called for each interested group to decide which shards should receive the message.</li>
-<li>Only the inner-group router is called if we already know a group's address (<code>ctx.(try_)send_to(group_addr, msg)</code> and <code>ctx.request_to(group_addr, msg)</code>).</li>
-<li>If we already know an actor's address (<code>ctx.(try_)send_to(actor_addr, msg)</code> and <code>ctx.request_to(actor_addr, msg)</code>), nothing additional is done because we already know which actor should handle the message.</li>
+<li>If we don't know any address (<code>ctx.(try_|unbounded_)send(msg)</code> and <code>ctx.request(msg)</code>), the inter-group router is called to determine which groups are interested in the message. Then, the corresponding inner-group router is called for each interested group to decide which shards should receive the message.</li>
+<li>Only the inner-group router is called if we already know a group's address (<code>ctx.(try_|unbounded_)send_to(group_addr, msg)</code> and <code>ctx.request_to(group_addr, msg)</code>).</li>
+<li>If we already know an actor's address (<code>ctx.(try_|unbounded_)send_to(actor_addr, msg)</code> and <code>ctx.request_to(actor_addr, msg)</code>), nothing additional is done because we already know which actor should handle the message.</li>
 </ol>
 <p>Note that if several actors are interested in the message, each receives a copy of the message. It's ok for messages without heap-allocated fields or for rare messages, but for the big ones consider wrapping into <code>Arc</code> to reduce the <code>clone()</code> overhead.</p>
 <h2 id="inter-group-routing"><a class="header" href="#inter-group-routing">Inter-group routing</a></h2>
