@@ -6,9 +6,9 @@ Routing is the process of searching for the actor that will handle a sent messag
 
 ![](assets/routing-process.drawio.svg)
 
-1. If we don't know any address (`ctx.(try_)send(msg)` and `ctx.request(msg)`), the inter-group router is called to determine which groups are interested in the message. Then, the corresponding inner-group router is called for each interested group to decide which shards should receive the message.
-2. Only the inner-group router is called if we already know a group's address (`ctx.(try_)send_to(group_addr, msg)` and `ctx.request_to(group_addr, msg)`).
-3. If we already know an actor's address (`ctx.(try_)send_to(actor_addr, msg)` and `ctx.request_to(actor_addr, msg)`), nothing additional is done because we already know which actor should handle the message.
+1. If we don't know any address (`ctx.(try_|unbounded_)send(msg)` and `ctx.request(msg)`), the inter-group router is called to determine which groups are interested in the message. Then, the corresponding inner-group router is called for each interested group to decide which shards should receive the message.
+2. Only the inner-group router is called if we already know a group's address (`ctx.(try_|unbounded_)send_to(group_addr, msg)` and `ctx.request_to(group_addr, msg)`).
+3. If we already know an actor's address (`ctx.(try_|unbounded_)send_to(actor_addr, msg)` and `ctx.request_to(actor_addr, msg)`), nothing additional is done because we already know which actor should handle the message.
 
 Note that if several actors are interested in the message, each receives a copy of the message. It's ok for messages without heap-allocated fields or for rare messages, but for the big ones consider wrapping into `Arc` to reduce the `clone()` overhead.
 

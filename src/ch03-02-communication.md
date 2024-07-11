@@ -18,7 +18,7 @@ The prefix describes what should happen if the destination mailbox is full:
 | ------------------ | ---------------- | ------------ |
 | `send().await`     | `Closed`         | Blocks until a destination mailbox has space for new messages |
 | `try_send()`       | `Full`, `Closed` | Returns `Full` if the mailbox is full |
-| `unbounded_send()` | `Closed`         | Forcibly increase the mailbox, **not implemented yet** |
+| `unbounded_send()` | `Closed`         | Ignores the capacity of the mailbox |
 
 All methods can return `Closed` if the destination actor is closed.
 
@@ -30,14 +30,14 @@ The form `send().await` is used when desired behavior is backpressure, while `tr
 #[message]
 struct SomeMessage;
 
-// Do not care if the target actor is closed or full.
-let _ = ctx.try_send(SomeMessage);
-
-// Block if the destination mailbox is full and ignore if closed.
-let _ = ctx.send(SomeMessage).await;
-
-// Fail the current actor if the destination is closed.
+// Block if the destination mailbox is full.
 ctx.send(SomeMessage).await?;
+
+// Do not care if the target actor is closed or full.
+ctx.try_send(SomeMessage)?;
+
+// Forcibly push the message into the mailbox.
+ctx.unbounded_send(SomeMessage)?;
 
 // Manually implement backpressure, e.g. store messages.
 if let Err(err) = ctx.try_send(SomeMessage) {
