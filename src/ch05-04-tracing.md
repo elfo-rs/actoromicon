@@ -31,7 +31,7 @@ From MSB to LSB:
 
 The code generating `TraceId` of course can be optimized by using bit shifts for fast multiplication on a power of two:
 
-```
+```text
 trace_id = (timestamp << 38) | (node_no << 22) | (chunk_no << 10) | counter
 ```
 
@@ -47,7 +47,7 @@ Which is almost a year plus 23 days.
 What happens when this almost-one-year term ends?
 `timestamp` starts counting from 0 once again:
 
-```
+```text
 TIMESTAMP_MAX = (1 << 25) - 1 // 0x1ff_ffff
 timestamp = now_s() & TIMESTAMP_MAX
 ```
@@ -71,7 +71,7 @@ Let's calculate how much records per second (\\( \operatorname{RPS}_{max} \\)) a
 Assuming we have 32 threads:
 
 \\[
-\operatorname{RPS}_{max} = \frac{2^{22} - 1}{\operatorname{threads\\_count}} = \frac{2^{22} - 1}{2^{5}} \approx 2^{17} \approx 1.3 \dot{} 10^{5} \text{  } \frac{\text{records}}{\text{second}}
+\operatorname{RPS}_{max} = \frac{2^{22} - 1}{\operatorname{threads\\_count}} = \frac{2^{22} - 1}{2^{5}} \approx 2^{17} \approx 1.3 \dot{} 10^{5} \text{ } \frac{\text{records}}{\text{second}}
 \\]
 
 Which seems more than enough for the most of the applications.

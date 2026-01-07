@@ -6,7 +6,7 @@ Actors can communicate in many ways depending on the situation and desired guara
 
 The most straightforward way is to send a message with minimal guarantees.
 
-![](assets/fire-and-forget.drawio.svg)
+![fire and forget](assets/fire-and-forget.drawio.svg)
 
 However, it's possible to choose the desired behavior by calling the most appropriate method. All variants can be described by the following template: `(try_|unbounded_)send(_to)`.
 
@@ -49,7 +49,7 @@ if let Err(err) = ctx.try_send(SomeMessage) {
 
 Some communications between actors require response message being sent back to the sender.
 
-![](assets/blocking-request.drawio.svg)
+![a blocking request](assets/blocking-request.drawio.svg)
 
 TODO
 
@@ -67,7 +67,7 @@ TODO
 
 ## Non-blocking Request-Response
 
-![](assets/non-blocking-request.drawio.svg)
+![a non-blocking request](assets/non-blocking-request.drawio.svg)
 TODO
 
 ### State
@@ -80,7 +80,6 @@ TODO
 
 ## Subscriptions
 
-**TODO**
-
+TODO
 
 [routing]: ./ch04-01-routing.html

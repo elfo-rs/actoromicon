@@ -19,16 +19,18 @@ In this way, if a message in the protocol becomes more specific (e.g., it gets m
 In the case of downgrading nodes, the update order is the opposite.
 
 Let's consider some example of evolution:
-![](assets/protocol-evolution-example.drawio.svg)
+![protocol evolution](assets/protocol-evolution-example.drawio.svg)
 
 It's a simple example of evolution with only adding required fields, but it helps to understand the common principle. Providing more fields from a sender than a receiver expects is always acceptable because a receiver can skip these fields during deserialization. If a receiver is updated first, it will expect more fields, and deserialization will fail.
 
 This principle can be propagated to multiple updates as well:
-![](assets/protocol-evolution-steps.drawio.svg)
+![protocol evolution steps](assets/protocol-evolution-steps.drawio.svg)
 
 At step 2, the message becomes more specific, so senders are updated first. At step 4, the message becomes less specific, so receivers are updated first.
 
 ## Examples
+
+<!-- rumdl-disable MD033 -->
 
 <table class="protocol-evolution">
 <thead><tr>
@@ -386,5 +388,7 @@ Receiver, Sender
 </td></tr>
 </tbody>
 </table>
+
+<!-- rumdl-enable MD033 -->
 
 [^promotion]: Promotion to/from `i128` and `u128` doesn't work due to `msgpack`'s implementation details.

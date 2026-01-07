@@ -5,6 +5,7 @@ Organizing actors using the functions can quickly escalate in complexity, making
 Complex actors require decomposition into multiple related functions, which scales worse with functional actors considered earlier. The better way to organize actors is to use so-called structural actors. The idea is to write all actor-related code in some specific actor structure. `elfo` has no any `Actor` trait, so it's impossible to see `impl Actor for Counter` or something like this. Thus, the following code is some sort of pattern and can be modified if needed.
 
 To illustrate, let's reconfigure the counter actor to adopt a structural style. The protocol code remains unchanged:
+
 ```rust
 #[message]
 pub struct Increment {
@@ -16,6 +17,7 @@ pub struct GetValue;
 ```
 
 Here's how the counter's code transitions to this new approach:
+
 ```rust
 use elfo::prelude::*;
 
@@ -62,6 +64,7 @@ impl Counter {
 This refactoring can significantly enhances readability in many cases, making it an advantageous choice for complex actors.
 
 Furthermore, sources can be encapsulated within the actor structure, facilitating operation from methods. To illustrate, we can introduce a feature that outputs the current value when the counter stabilizes (i.e. remains unchanged for a period). Here's how:
+
 ```rust
 use std::{time::Duration, mem};
 use elfo::time::Delay;
