@@ -7,10 +7,10 @@
 
 ## Contributing
 
-Install [mdBook](https://phaiax.github.io/mdBook/README.html):
+Install [mdbook](https://phaiax.github.io/mdBook) and [rumdl](https://github.com/rvben/rumdl):
 
 ```sh
-cargo install mdbook
+cargo install mdbook rumdl
 ```
 
 To build the book's HTML:
@@ -26,11 +26,8 @@ mdbook watch --open # local files
 mdbook serve --open # server at localhost:3000
 ```
 
-### `linkcheck`
-
-We use the `linkcheck` tool to find broken links.
-To run it locally (requires the nightly toolchain):
+To lint (check rumdl docs to integrate with your editor):
 
 ```sh
-curl -sSLo linkcheck.sh https://raw.githubusercontent.com/rust-lang/rust/master/src/tools/linkchecker/linkcheck.sh
-sh linkcheck.sh book
+rumdl check
+```

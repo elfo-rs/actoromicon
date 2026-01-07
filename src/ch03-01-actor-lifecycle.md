@@ -37,11 +37,12 @@ An actor goes through several stages in life. Transitions between stages are acc
 
 ## Built-in status transitions
 
-![](assets/status-default-transitions.drawio.svg)
+![FSM of actor statuses](assets/status-default-transitions.drawio.svg)
 
 The schema doesn't include the `Alarming` status, because it can be set only manually for now.
 
 From the point of view of the main actor's loop:
+
 ```rust,ignore
 async fn exec(mut ctx: Context) {
     // Status: Initializing
@@ -62,11 +63,13 @@ async fn exec(mut ctx: Context) {
 It's possible to avoid managing statuses totally, built-in logic is reasonable enough. However, with the increasing complexity of actors, it can be helpful to provide more information about the current status.
 
 The basic way to change status:
+
 ```rust,ignore
 ctx.set_status(ActorStatus::ALARMING);
 ```
 
 Also, details can be provided with each status:
+
 ```rust,ignore
 ctx.set_status(ActorStatus::INITIALIZING.with_details("loading state"));
 ```

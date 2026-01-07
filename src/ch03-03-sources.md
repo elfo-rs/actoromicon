@@ -3,12 +3,14 @@
 In the context of the `elfo` actor system, sources serve as conduits for integrating various streams of incoming messages, such as timers, signals, futures, and streams. They allow for a seamless amalgamation of these additional streams with the messages arriving in the mailbox. Consequently, features like tracing, telemetry, and dumps are uniformly available for both regular and source-generated messages.
 
 You can instantiate sources using dedicated constructors that correspond to different types. It's important to note that initially, these sources are inactive; they only start generating messages once they are linked to the context through the method `ctx.attach(_)`. This method also returns a handler, facilitating the management of the source. Here is how you can utilize this method:
+
 ```rust
 let unattached_source = SomeSource::new();
 let source_handle = ctx.attach(unattached_source);
 ```
 
 If necessary, you can detach sources at any time by invoking the `handle.terminate()` method, as shown below:
+
 ```rust
 source_handle.terminate();
 ```
@@ -20,6 +22,7 @@ Under the hood, the storage and utilization of sources are optimized significant
 [The `Interval` source][Interval] is designed to generate messages at a defined time period.
 
 To activate the source, employ either the `start(period)` or `start_after(delay, period)` methods, as shown below:
+
 ```rust
 use elfo::time::Interval;
 
@@ -39,6 +42,7 @@ while let Some(envelope) = ctx.recv().await {
 ### Adjusting the period
 
 In instances where you need to adjust the timer's interval, possibly as a result of configuration changes, the `interval.set_period()` method comes in handy:
+
 ```rust
 use elfo::{time::Interval, messages::ConfigUpdated};
 
@@ -61,7 +65,8 @@ while let Some(envelope) = ctx.recv().await {
 To halt the timer without detaching the interval, use `interval.stop()`. This method differs from `interval.terminate()` as it allows for the possibility to restart the timer later using `interval.start(period)` or `start_after(delay, period)` methods.
 
 It's essential to note that calling `interval.start()` at different points can yield varied behavior compared to invoking `interval.set_period()` on an already active interval. The `interval.set_period()` method solely modifies the existing interval without resetting the time origin, contrasting with the rescheduling functions (`start_*` methods). Here's a visual representation to illustrate the differences between these two approaches:
-```
+
+```text
 set_period(10s): | 5s | 5s | 5s |  # 10s  |   10s   |
 start(10s):      | 5s | 5s | 5s |  #   10s   |   10s   |
                                    #
@@ -75,6 +80,7 @@ Every message starts a new trace, thus a new [`TraceId`][TraceId] is generated a
 ## Delays
 
 [The `Delay` source][Delay] is designed to generate one message after a specified time:
+
 ```rust
 use elfo::time::Delay;
 
@@ -100,6 +106,7 @@ The emitted message continues the current trace. The reason for it is that this 
 ## Signals
 
 [The `Signal` source][Signal] is designed to generate a message once a signal is received:
+
 ```rust
 use elfo::signal::{Signal, SignalKind};
 
@@ -114,7 +121,6 @@ while let Some(envelope) = ctx.recv().await {
     });
 }
 ```
-
 
 It's based on the tokio implementation, so it should be useful to read
 about [caveats][tokio signal caveats].
@@ -132,6 +138,7 @@ Once stream is exhausted, it's detached automatically.
 ### Futures
 
 Utilize `Stream::once()` when implementing subtasks such as initiating a background request:
+
 ```rust
 use elfo::stream::Stream;
 
@@ -159,6 +166,7 @@ while let Some(envelope) = ctx.recv().await {
 ### futures::Stream
 
 `Stream::from_futures03` is used to wrap existing `futures::Stream`:
+
 ```rust
 use elfo::stream::Stream;
 
@@ -176,6 +184,7 @@ while let Some(envelope) = ctx.recv().await {
 ```
 
 To produce messages of different types from the stream, it's possible to cast specific messages into `AnyMessage` (undocumented for now):
+
 ```rust
 futures::stream::iter(vec![MyItem(0).upcast(), AnotherItem.upcast()])
 ```
@@ -183,6 +192,7 @@ futures::stream::iter(vec![MyItem(0).upcast(), AnotherItem.upcast()])
 ### Generators
 
 `Stream::generate` is an alternative to the [async-stream] crate, offering the same functionality without the need for macros, thereby being formatted by rustfmt:
+
 ```rust
 use elfo::stream::Stream;
 
@@ -205,7 +215,9 @@ while let Some(envelope) = ctx.recv().await {
 ```
 
 ### Tracing
+
 The trace handling varies depending upon the method used to create the stream:
+
 * For `Stream::from_futures03()`: each message initiates a new trace.
 * For `Stream::once()` and `Stream::generate()`: the existing trace is continued.
 

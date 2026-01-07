@@ -30,7 +30,7 @@ This book aims to describe a superior approach to build heavily asynchronous and
 * Utilities for straightforward testing.
 
 The term "observability" could be better understood through demonstration. Consider, for example, the concept of metrics:
-![](assets/metrics.png)
+![a grafana dashboard with the subset of metrics provided by elfo](assets/metrics.png)
 
 [elfo]: https://github.com/elfo-rs/elfo
 [metrics]: https://docs.rs/metrics

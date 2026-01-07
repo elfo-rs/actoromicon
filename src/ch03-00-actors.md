@@ -35,7 +35,7 @@ Every actor has his own mailbox, a queue containing envelopes sent by other acto
 
 What's the envelope? The envelope is a wrapper around a message that includes also some useful metadata: the sender's address, time of sending moment, and some other information that is not so important for now.
 
-![](assets/mailbox.drawio.svg)
+![two actors with mailboxes](assets/mailbox.drawio.svg)
 
 A mailbox is the main source of messages for any actor. Messages are handled sequentially.
 
@@ -48,6 +48,7 @@ Let's define a some simple actor using `elfo` and figure out what's happening.
 The simplest way to define an actor as a function.
 
 For example, let's define the simplest counter:
+
 ```rust,ignore
 use elfo::prelude::*;
 
@@ -86,11 +87,13 @@ pub fn counter() -> Blueprint {
 We haven't discussed actor groups yet, so don't pay attention for now.
 
 Instead, let's talk about other things in the example:
+
 * `ctx.recv()` allows us to wait for the next message asynchronously. Thus, if the mailbox is empty, the actor will return control to the scheduler instead of spending CPU cycles or sleeping.
 * `msg!` allows us to unpack envelopes and match against different types of messages. It's required, because Rust's `match` must include patterns for the same data type only. However, we want to support different messages, often defined in different crates. Also, reusing the `match` syntax is highly desired in order to work well with tooling like `rustfmt` and `rust-analyzer`.
 * `(RequestType, token)` is the syntax for handling requests. `token` cannot be used more than once, thanks to Rust, so we cannot accidentally respond to the request twice. Also, the compiler will warn if we forget to handle `token`. If the token is explicitly dropped without responding, the sending side will get the special error and decide whether it's normal or not. Note that it is possible to send request as a regular message using `ctx.send()` instead of `ctx.request()`. In this case, recipient will get a so-called "forgotten" token. Recipient can still reply using it, but the reply will be discarded before it is sent.
 
 Now let's define another actor to communicate with the counter:
+
 ```rust,ignore
 use elfo::prelude::*;
 use counter::{Increment, GetValue};

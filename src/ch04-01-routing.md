@@ -4,7 +4,7 @@ Routing is the process of searching for the actor that will handle a sent messag
 
 `elfo` offers a two-level routing system. What does it mean? Messages can pass through up to two steps of routing, depending on used methods, as shown on the following diagram:
 
-![](assets/routing-process.drawio.svg)
+![routing process](assets/routing-process.drawio.svg)
 
 1. If we don't know any address (`ctx.(try_|unbounded_)send(msg)` and `ctx.request(msg)`), the inter-group router is called to determine which groups are interested in the message. Then, the corresponding inner-group router is called for each interested group to decide which shards should receive the message.
 2. Only the inner-group router is called if we already know a group's address (`ctx.(try_|unbounded_)send_to(group_addr, msg)` and `ctx.request_to(group_addr, msg)`).
@@ -18,7 +18,7 @@ Inter-group routing is responsible for connecting actor groups among themselves.
 
 Let's consider the following architecture scheme:
 
-![](assets/inter-group-routing.drawio.svg)
+![inter-group routing](assets/inter-group-routing.drawio.svg)
 
 Actor groups and connections between them are defined in so-called "topology":
 
@@ -89,7 +89,7 @@ Not all messages should be specified at this level. Usually, only requests and s
 
 Inner-group routing is responsible for choosing which shards should handle incoming messages.
 
-![](assets/actor-group.drawio.svg)
+![an actor group](assets/actor-group.drawio.svg)
 
 The inner-group router is defined next to the actor implementation, in the group declaration.
 
@@ -111,6 +111,7 @@ ActorGroup::new()
 ```
 
 Possible `Outcome`'s variants:
+
 * `Outcome::Unicast` sends the message only to the actor with a specified key. If there is no active or restarting actor for the key, the new one will be started.
 * `Outcome::GentleUnicast` works like `Outcome::Unicast`, but doesn't lead to spawning new actors, instead a message is discarded.
 * `Outcome::Multicast` sends to several actors. New actors will be started.
@@ -118,9 +119,9 @@ Possible `Outcome`'s variants:
 * `Outcome::Broadcast` sends to all active actors.
 * `Outcome::Discard` drops the message (that leads to an error on sending side).
 * `Outcome::Default` behaviour depends on the message type:
-    - `Outcome::Discard` for `ValidateConfig` message.
-    - `Outcome::Broadcast` for all other system messages (such as `UpdateConfig`, `Terminate`, etc).
-    - `Outcome::Discard` for user-defined messages.
+  * `Outcome::Discard` for `ValidateConfig` message.
+  * `Outcome::Broadcast` for all other system messages (such as `UpdateConfig`, `Terminate`, etc).
+  * `Outcome::Discard` for user-defined messages.
 
 ### Stateful router
 

@@ -8,49 +8,56 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  MDBOOK_VERSION: v0.4.18
+  MDBOOK_VERSION: v0.5.2
 
 jobs:
-  check:
+  build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Install Rust
-      run: |
-        rustup set profile minimal
-        rustup toolchain install nightly -c rust-docs
-        rustup default nightly
-    - name: Install linkcheck
-      run: |
-        curl -sSLo linkcheck.sh \
-          https://raw.githubusercontent.com/rust-lang/rust/master/src/tools/linkchecker/linkcheck.sh
-    - name: Install mdBook
-      run: |
-        mkdir bin
-        curl -sSL https://github.com/rust-lang/mdBook/releases/download/$MDBOOK_VERSION/mdbook-$MDBOOK_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
-        echo "`pwd`/bin" >> $GITHUB_PATH
-    - name: Report versions
-      run: |
-        mdbook -V
-        rustup -V
-    - name: Build & Run linkcheck
-      run: sh linkcheck.sh book
-
-  deploy:
-    needs: [check]
-    runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/master' }}
-    steps:
-    - uses: actions/checkout@v3
-    - name: Install mdBook
+    - uses: actions/checkout@v6
+    - &install_mdbook
+      name: Install mdBook
       run: |
         mkdir bin
         curl -sSL https://github.com/rust-lang/mdBook/releases/download/$MDBOOK_VERSION/mdbook-$MDBOOK_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
         echo "`pwd`/bin" >> $GITHUB_PATH
     - name: Build the book
       run: mdbook build
+
+  rumdl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: rvben/rumdl@v0
+
+  linkcheck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install Rust
+      run: |
+        rustup set profile minimal
+        rustup toolchain install nightly -c rust-docs
+        rustup default nightly
+    - *install_mdbook
+    - name: Install linkcheck
+      run: |
+        curl -sSLo linkcheck.sh \
+          https://raw.githubusercontent.com/rust-lang/rust/master/src/tools/linkchecker/linkcheck.sh
+    - name: Build & Run linkcheck
+      run: sh linkcheck.sh book
+
+  deploy:
+    needs: [build, rumdl, linkcheck]
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/master' }}
+    steps:
+    - uses: actions/checkout@v6
+    - *install_mdbook
+    - name: Build the book
+      run: mdbook build
     - name: Publish
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./book

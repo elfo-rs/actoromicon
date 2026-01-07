@@ -13,6 +13,7 @@ Dumping has a lot of common with [logging][logging], but it's more efficient and
 Dumping is disabled by default until the topology contains the `system.dumpers` group.
 
 Elfo provides the default implementation for such group, that's available with the `full` feature and exported as `elfo::dumper`:
+
 ```rust,ignore
 let topology = elfo::Topology::empty();
 let dumpers = topology.local("system.dumpers");
@@ -23,6 +24,7 @@ dumpers.mount(elfo::dumper::new());
 ```
 
 Besides this, the path to a dump file must be specified in the config:
+
 ```toml
 [system.dumpers]
 path = "path/to/dump/file.dump"
@@ -34,6 +36,7 @@ Dumping settings can be specified for each actor group individually.
 Note that the settings can be changed and applied [on the fly][configs].
 
 Example:
+
 ```toml
 [some_actor_group]
 system.dumping.disabled = true      # false by default
@@ -45,6 +48,7 @@ Dumps above the rate limit are lost, but the sequence number is incremented anyw
 ### Configure dumping on a per-message basis
 
 Simply add the `message(dumping = "disabled")` attribute to the message. Another and default value of the attribute is `"full"`.
+
 ```rust,ignore
 #[message(dumping = "disabled")]
 pub struct SomethingHappened {
@@ -67,9 +71,10 @@ pub struct ChunkProduced {
 }
 ```
 
-Such messages cannot be deserialized properly; that's ok until they are used as input for [regression testing][regression].
+Such messages cannot be deserialized properly; that's ok until they are used as input for regression testing.
 
 ## Metrics
+
 TODO
 
 ## Local storage
@@ -85,6 +90,7 @@ Note that message ordering between actor groups (and even inside the same actor)
 ## The structure of dump files
 
 Dump files contain messages in the newline-delimited JSON format. Each line is object containing the following properties:
+
 * `g` — an actor group's name
 * `k` — an *optional* actor's key
 * `n` — node_no
@@ -100,12 +106,13 @@ Dump files contain messages in the newline-delimited JSON format. Each line is o
 * `c` — an *optional* correlation id, which links requests with corresponding responses
 
 Terms:
+
 * *optional* means that the property can be omitted, but if it's present, then its value isn't `null`.
 * *nullable* means that the property is present always, but the value can be `null`.
 
 The `sequence_no` field can be used to detect missed messages because of limiting.
 
-**TODO: note about classes**
+TODO: note about classes
 
 ## Dump file rotation
 
@@ -115,7 +122,7 @@ The dumper listens to the `SIGHUP` signal to reopen the active dump file. Beside
 
 The most popular solution for file rotation is, of course, `logrotate`.
 
-**TODO: logrotate config**
+TODO: logrotate config
 
 Tip: if dumps are not supposed to be delivered to DB, use hard links to save the dump file for later discovery and avoid deletion.
 
@@ -127,21 +134,21 @@ Ok, so you want to store dumps in DB. The right choice, if you can afford it. Wh
 
 The common schema looks like
 
-![](assets/dumping-infrastructure.drawio.svg)
+![dumping infrastructure](assets/dumping-infrastructure.drawio.svg)
 
-**TODO: add a link to the example with vector.dev and clickhouse**
+TODO: add a link to the example with vector.dev and clickhouse
 
 ## Implementation details
 
-**TODO: implementation has been changed a lot, need to update the section**
+TODO: implementation has been changed a lot, need to update the section
 
 At a top level, dumping is separated into two parts: the dumping subsystem and the dumper.
 
 The dumping subsystem is based on sharded in-memory storage containing a limited queue of messages. We use a predefined number of shards for now, but we will likely use the number of available cores in the future. Every thread writes to its dedicated shard. Such an approach reduces contention and false sharing between threads.
 
-![](assets/dumping-implementation-details.drawio.svg)
+![dumping implementation details](assets/dumping-implementation-details.drawio.svg)
 
-The dumper sequentially, in a round-robin way, replaces the shard's queue with the extra one, then reads and serializes all messages and writes them to the dump file. All this work happens on a timer tick. Firstly,  it's one of the simplest ways to get appropriate batching. Secondly, because the dumper uses [tokio::task::spawn_blocking](https://docs.rs/tokio/1/tokio/task/fn.spawn_blocking.html) and blocking writes insides, that's more effective than using async [tokio::fs](https://docs.rs/tokio/1/tokio/fs/index.html) directly. The timer approach allows us to reduce the impact on the tokio executor. However, this behavior is going to be improved for environments with io_uring in the future.
+The dumper sequentially, in a round-robin way, replaces the shard's queue with the extra one, then reads and serializes all messages and writes them to the dump file. All this work happens on a timer tick. Firstly, it's one of the simplest ways to get appropriate batching. Secondly, because the dumper uses [tokio::task::spawn_blocking](https://docs.rs/tokio/1/tokio/task/fn.spawn_blocking.html) and blocking writes insides, that's more effective than using async [tokio::fs](https://docs.rs/tokio/1/tokio/fs/index.html) directly. The timer approach allows us to reduce the impact on the tokio executor. However, this behavior is going to be improved for environments with io_uring in the future.
 
 The dumper holds the lock only for a small amount of time to replace the queue inside a shard with another one, which was drained by the dumper on the previous tick. Thus, the actual number of queues is one more than shards.
 

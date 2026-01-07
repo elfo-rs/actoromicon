@@ -14,7 +14,7 @@ Avoiding `0` value in IDs simplifies some popular [memory optimizations](https:/
 
 This leads us to the following integer numbers' domain for IDs:
 
-```
+```text
 MIN = 1
 MAX = 2 ^ 63 - 1 =
     = 9_223_372_036_854_775_807 =
@@ -33,7 +33,7 @@ That's why we recommend using 63-bit positive integers as IDs.
 In theory JSON allows you to use numbers of any length, but in a bunch of scenarios it will be great to process or display your data using ECMAScript (JavaScript, widely spread in web browsers) and it has [only](https://262.ecma-international.org/11.0/#sec-numbers-and-dates) `f64` primitive type for numbers so you [can't have](https://262.ecma-international.org/11.0/#sec-number.max_safe_integer) positive integer numbers bigger than \\( 2^{53} - 1 \\) without excess [overhead](https://262.ecma-international.org/11.0/#sec-ecmascript-language-types-bigint-type).
 This leads us to the following integer numbers' domain for IDs in systems with ECMAScript:
 
-```
+```text
 MIN = 1
 MAX = 2 ^ 53 - 1 =
     = 9_007_199_254_740_991 =
@@ -139,7 +139,7 @@ The code implementing `DecimalId` generation can't use bit shift hack as we did 
 You're able to read their decimal representation like this: `cc*ggggglllll` (**c**ounter, **g**enerator ID, **l**aunch ID — respectively).
 For instance:
 
-```
+```text
                ID 14150009200065
                   ccccggggglllll
                    ▲    ▲    ▲
@@ -163,7 +163,5 @@ To make deployment more robust we recommend generating `launch_id` outside of th
 [DecimalId]: #decimalid
 [domain]: #choosing-the-domain-for-your-ids
 [ids_produced_by_db]: #ids-produced-by-db
-[logging]: ./ch05-01-logging.html
 [monotonicity_level]: #level-of-monotonicity
 [TraceId]: ./ch05-04-tracing.html#traceid
-[tracing]: ./ch05-04-tracing.html
