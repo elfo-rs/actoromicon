@@ -25,6 +25,7 @@
   - [Telemetry](ch05-02-telemetry.md)
   - [Dumping](ch05-03-dumping.md)
   - [Tracing](ch05-04-tracing.md)
+  - [Tokio Console](ch05-05-tokio-console.md)
 
 - [Distribution]()
   - [Transport]()
