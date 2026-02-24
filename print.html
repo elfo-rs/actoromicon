@@ -39,10 +39,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-c882938e.js";
+            window.path_to_searchindex_js = "searchindex-967d68cc.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-a826fd5b.js"></script>
+        <script src="toc-5d0463cb.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -1256,6 +1256,30 @@ Assuming we have 32 threads:</p>
 Note that <code>counter</code> is limited to be at least 1 to keep the <a href="#choosing-the-domain-for-your-ids">invariant</a>: \( \operatorname{id} \geqslant 1 \).
 Every other component of <code>TraceId</code> could be zero.</p>
 <div style="break-before: page; page-break-before: always;"></div>
+<h1 id="tokio-console"><a class="header" href="#tokio-console">Tokio Console</a></h1>
+<p><a href="https://github.com/tokio-rs/console">tokio-console</a> is a diagnostics and debugging tool for async Rust programs. It provides a TUI to inspect the state of async tasks and resources in a running tokio runtime.</p>
+<p>Elfo integrates with tokio-console by naming all tasks that run actors or spawned by <code>elfo::task::spawn_blocking()</code> or <code>elfo::task::Builder</code>:
+<img src="assets/tokio-console.png" alt="tokio-console screenshot"></p>
+<p>Firstly, add <code>console-subscriber</code> to dependencies and enable the <code>tokio-tracing</code> feature of elfo:</p>
+<pre><code class="language-toml">[dependencies]
+elfo = { version = "0.2", features = ["tokio-tracing"] }
+console-subscriber = "0.5.0"
+</code></pre>
+<p>Secondly, we need manually initialize the <code>tracing</code> subscriber instead of letting elfo do it for us:</p>
+<pre><code class="language-rust">let (blueprint, scope_filter, capture_layer) = elfo::batteries::logger::new();
+
+tracing_subscriber::registry()
+    .with(console_subscriber::spawn())
+    .with(capture_layer.with_filter(scope_filter))
+    .init();
+
+loggers.mount(blueprint);</code></pre>
+<p>Finally, compile with <code>--cfg tokio_unstable</code> to opt into tokio’s unstable task instrumentation:</p>
+<pre><code class="language-sh">RUSTFLAGS='--cfg tokio_unstable' cargo run
+</code></pre>
+<p>That’s all! Now we can run <code>tokio-console</code> to run the TUI and connect to our application.</p>
+<p>Check <a href="https://github.com/elfo-rs/elfo/blob/master/examples/tokio_console.rs">this example</a> for a complete code sample.</p>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="protocol-evolution"><a class="header" href="#protocol-evolution">Protocol Evolution</a></h1>
 <p>It’s hard to update all nodes in distributed systems simultaneously. Firstly, it requires synchronization of releases and teams. Secondly, it means all nodes become unavailable until the update is finished, which can be highly unpleasant for users.</p>
 <p>An alternative approach is updating nodes one by one without any kind of locks between them. However, they can become incompatible with each other because the communication protocol has evolved. That’s where a protocol evolution appears. If a message is sent to another node, we should be more careful when changing it.</p>
@@ -1511,6 +1535,10 @@ enum Sample {
 </li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div>
+<h1 id="recipes"><a class="header" href="#recipes">Recipes</a></h1>
+<p>The previous chapters covered the core concepts of <code>elfo</code>: actors, groups, observability, distribution, and testing. This chapter is different — it is a collection of self-contained, practical guides for common tasks and decisions you will encounter when building real systems with <code>elfo</code>.</p>
+<p>Each recipe focuses on a specific question. These chapters assume familiarity with the earlier chapters and can be read in any order.</p>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="project-structure"><a class="header" href="#project-structure">Project Structure</a></h1>
 <p>Although the project structure can be arbitrary, it looks reasonable to provide some advices here:</p>
 <ul>
@@ -1569,6 +1597,90 @@ Cargo.toml
 Cargo.lock
 rustfmt.toml
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="multiple-runtimes"><a class="header" href="#multiple-runtimes">Multiple Runtimes</a></h1>
+<p>By default, all actors in an elfo system run on a single shared Tokio runtime (the one that drives <code>elfo::init::start</code>). This is usually fine, but sometimes it’s desirable to isolate different actor groups or even individual actors onto their own dedicated runtimes. This is especially useful when some groups are latency-sensitive and should not be affected by other groups.</p>
+<h2 id="registering-runtimes"><a class="header" href="#registering-runtimes">Registering runtimes</a></h2>
+<p>Dedicated runtimes are registered on the <code>Topology</code> via <code>add_dedicated_rt</code>. Each call takes a filter predicate and a <code>tokio::runtime::Handle</code>:</p>
+<pre><code class="language-rust">use tokio::runtime as rt;
+
+let producers_rt = rt::Builder::new_multi_thread()
+    .worker_threads(2)
+    .build()
+    .unwrap();
+
+let workers_rt = rt::Builder::new_multi_thread()
+    .worker_threads(3)
+    .build()
+    .unwrap();
+
+let topology = Topology::empty();
+
+// Filters are checked in order; first match wins.
+// Actors that don't match any filter run on the default runtime.
+topology.add_dedicated_rt(
+    |meta| meta.group == "producers",
+    producers_rt.handle().clone(),
+);
+topology.add_dedicated_rt(
+    |meta| meta.group == "workers",
+    workers_rt.handle().clone(),
+);</code></pre>
+<p>The filter receives <code>ActorMeta</code>, so it can be used to filter based on actor’s key or group’s name. Filters are evaluated in registration order and the first match wins. Actors whose group matches no filter are spawned on the default runtime (the one that drives <code>elfo::init::start</code>).</p>
+<h2 id="thread-accounting"><a class="header" href="#thread-accounting">Thread accounting</a></h2>
+<p>When building a system with multiple runtimes, it is useful to name all threads to distinguish them in logs, profilers and so on:</p>
+<pre><code class="language-rust">fn start_runtime(name: &amp;str, workers: usize) -&gt; rt::Runtime {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    let name = name.to_string();
+    let worker_idx = AtomicUsize::new(0);
+
+    rt::Builder::new_multi_thread()
+        .worker_threads(workers)
+        .enable_all()
+        .thread_name_fn(move || {
+            let idx = worker_idx.fetch_add(1, Ordering::SeqCst);
+            format!("{name}#{idx}")
+        })
+        .on_thread_start(|| {
+            // A good place to configure thread affinity and set scheduler
+            // policy, e.g. `SCHED_FIFO`.
+            //
+            // Count threads in order to distinguish between workers and
+            // blocking ones: first `workers` threads are workers, the rest are
+            // blocking threads.
+        })
+        .build()
+        .unwrap()
+}</code></pre>
+<p>With this setup the first worker thread of the <code>workers</code> runtime will be named <code>workers#0</code>, the second <code>workers#1</code>, and so on.</p>
+<p>Run <code>ps -T -p $(pidof multi_runtime)</code> to ensure all runtimes are started:</p>
+<pre><code class="language-text">    PID    SPID TTY          TIME CMD
+2163285 2163285 pts/1    00:00:00 multi_runtime
+2163285 2163319 pts/1    00:00:00 producers#0
+2163285 2163320 pts/1    00:00:00 workers#0
+2163285 2163321 pts/1    00:00:00 workers#1
+2163285 2163322 pts/1    00:00:00 workers#2
+2163285 2163323 pts/1    00:00:00 default#0
+</code></pre>
+<p>When actors are started, their initial thread is printed in the log message:</p>
+<pre><code class="language-text">2026-02-24 07:50:28.286933519  INFO [7446157725601366017] producers/_ - started	addr=2/129338070436	thread=producers#0
+</code></pre>
+<p>Note: actors can be rescheduled to a different thread within the same runtime by tokio’s scheduler, but they never migrate between runtimes.</p>
+<h2 id="runtime-lifecycle"><a class="header" href="#runtime-lifecycle">Runtime lifecycle</a></h2>
+<p>The dedicated runtimes must be kept alive for the duration of the system. Because <code>elfo::init::start</code> is an async function, it must be driven by some runtime — this is the <em>default</em> runtime. The dedicated runtimes are created beforehand and shut down after the system terminates:</p>
+<pre><code class="language-rust">fn main() {
+    let (topology, runtimes) = topology();
+
+    start_runtime("default", 1).block_on(elfo::init::start(topology));
+
+    for rt in runtimes {
+        rt.shutdown_background();
+    }
+}</code></pre>
+<p>The dedicated runtimes are only referenced by their handles inside the topology; owning the <code>Runtime</code> values outside and dropping them after <code>start</code> returns is sufficient to ensure clean shutdown.</p>
+<h2 id="full-example"><a class="header" href="#full-example">Full example</a></h2>
+<p>Check <a href="https://github.com/elfo-rs/elfo/blob/master/examples/multi_runtime.rs">this example</a> for a complete code sample.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="pattern-id-generation"><a class="header" href="#pattern-id-generation">Pattern: ID Generation</a></h1>
 <p>It should be noted that ID generation approach which was chosen in your app affects your app’s architecture and overall performance.

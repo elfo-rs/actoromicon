@@ -38,10 +38,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-c882938e.js";
+            window.path_to_searchindex_js = "searchindex-967d68cc.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-a826fd5b.js"></script>
+        <script src="toc-5d0463cb.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -180,7 +180,7 @@
                         <h1 id="tracing"><a class="header" href="#tracing">Tracing</a></h1>
 <p>TODO</p>
 <h2 id="traceid"><a class="header" href="#traceid"><code>TraceId</code></a></h2>
-<p>This ID is <a href="./ch10-01-id-generation.html#level-of-monotonicity">periodically monotonic</a> and fits great as a primary key for tracing entries.
+<p>This ID is <a href="./ch08-10-id-generation.html#level-of-monotonicity">periodically monotonic</a> and fits great as a primary key for tracing entries.
 It was accomplished by using rarely (approx. once a year) wrapping <code>timestamp</code> ID component.</p>
 <p><code>TraceId</code> essentially is:</p>
 <p>\[
@@ -190,7 +190,7 @@ It was accomplished by using rarely (approx. once a year) wrapping <code>timesta
 \operatorname{chunk\_no} \dot{} 2^{10} +
 \operatorname{counter}
 \]</p>
-<p>This formula’s parameters were chosen carefully to leave a good stock of spare space for <code>TraceId</code>’s components inside the available set of <a href="./ch10-01-id-generation.html#choosing-the-domain-for-your-ids">63-bit positive integers</a>.
+<p>This formula’s parameters were chosen carefully to leave a good stock of spare space for <code>TraceId</code>’s components inside the available set of <a href="./ch08-10-id-generation.html#choosing-the-domain-for-your-ids">63-bit positive integers</a>.
 You may see the general idea by looking at the bits distribution table.
 From MSB to LSB:</p>
 <div class="table-wrapper">
@@ -199,7 +199,7 @@ From MSB to LSB:</p>
 <tr><th style="text-align: right">Bits</th><th>Description</th><th>Range</th><th>Source</th></tr>
 </thead>
 <tbody>
-<tr><td style="text-align: right">1</td><td><a href="./ch10-01-id-generation.html#choosing-the-domain-for-your-ids">Reserved</a></td><td><code>0</code></td><td>-</td></tr>
+<tr><td style="text-align: right">1</td><td><a href="./ch08-10-id-generation.html#choosing-the-domain-for-your-ids">Reserved</a></td><td><code>0</code></td><td>-</td></tr>
 <tr><td style="text-align: right">25</td><td><code>timestamp</code> in secs</td><td><code>0..=33_554_431</code></td><td>Clock at runtime</td></tr>
 <tr><td style="text-align: right">16</td><td><code>node_no</code></td><td><code>0..=65_535</code></td><td>Externally specified node (process) configuration</td></tr>
 <tr><td style="text-align: right">12</td><td><code>chunk_no</code></td><td><code>0..=4095</code></td><td>Some number produced at runtime</td></tr>
@@ -210,7 +210,7 @@ From MSB to LSB:</p>
 <p>The code generating <code>TraceId</code> of course can be optimized by using bit shifts for fast multiplication on a power of two:</p>
 <pre><code class="language-text">trace_id = (timestamp &lt;&lt; 38) | (node_no &lt;&lt; 22) | (chunk_no &lt;&lt; 10) | counter
 </code></pre>
-<p><code>TraceId</code> uses time as its <a href="./ch10-01-id-generation.html#monotonicity-source">monotonicity source</a> so <strong><code>timestamp</code></strong> is probably the most important part of the ID.
+<p><code>TraceId</code> uses time as its <a href="./ch08-10-id-generation.html#monotonicity-source">monotonicity source</a> so <strong><code>timestamp</code></strong> is probably the most important part of the ID.
 Note that <code>timestamp</code> has pretty rough resolution — in seconds.
 How long you can count seconds inside 25 bits?</p>
 <p>\[
@@ -225,7 +225,7 @@ timestamp = now_s() &amp; TIMESTAMP_MAX
 <p>This means that primary key is guaranteed to act as a unique identifier for one year.
 To keep an order of entries between monotonic periods of <code>TraceId</code> use some fully monotonic (but not necessarily unique) field as a <a href="https://clickhouse.tech/docs/en/engines/table-engines/mergetree-family/mergetree/#choosing-a-primary-key-that-differs-from-the-sorting-key">sorting key</a> for your entries (<code>created_at</code> or <code>seq_no</code> / <code>sequential_number</code>).</p>
 <p><code>TraceId</code> with such <code>timestamp</code> part is well optimized to produce a lot of entities worth querying for only a limited period of time: <a href="./ch05-01-logging.html">logs</a>, <a href="./ch05-03-dumping.html">dumps</a> or tracing entries.
-However you’re able to store such entries as long as you like and use <a href="./ch10-01-id-generation.html#why-monotonic-ids-are-so-great">data skipping indices</a> for quick time series queries.</p>
+However you’re able to store such entries as long as you like and use <a href="./ch08-10-id-generation.html#why-monotonic-ids-are-so-great">data skipping indices</a> for quick time series queries.</p>
 <p>To make IDs unique across several instances of your system without any synchronization between them <strong><code>node_no</code></strong> ID component should be externally specified from the system deployment configuration.</p>
 <p><strong>TODO: actualize information about <code>thread_id</code>: it’s not used by <code>elfo</code>, but appropriate way to generate <code>trace_id</code> in other systems that want to interact with <code>elfo</code>.</strong></p>
 <p><strong><code>thread_id</code></strong> shares bit space with <code>counter</code>. At the start of the system you should determine how much threads your node could possibly have and choose appropriate \( \operatorname{counter}_{max} \) according to that.</p>
@@ -237,7 +237,7 @@ Assuming we have 32 threads:</p>
 \operatorname{RPS}_{max} = \frac{2^{22} - 1}{\operatorname{threads\_count}} = \frac{2^{22} - 1}{2^{5}} \approx 2^{17} \approx 1.3 \dot{} 10^{5} \text{ } \frac{\text{records}}{\text{second}}
 \]</p>
 <p>Which seems more than enough for the most of the applications.
-Note that <code>counter</code> is limited to be at least 1 to keep the <a href="./ch10-01-id-generation.html#choosing-the-domain-for-your-ids">invariant</a>: \( \operatorname{id} \geqslant 1 \).
+Note that <code>counter</code> is limited to be at least 1 to keep the <a href="./ch08-10-id-generation.html#choosing-the-domain-for-your-ids">invariant</a>: \( \operatorname{id} \geqslant 1 \).
 Every other component of <code>TraceId</code> could be zero.</p>
 
                     </main>
@@ -248,7 +248,7 @@ Every other component of <code>TraceId</code> could be zero.</p>
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="ch06-02-protocol-evolution.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="ch05-05-tokio-console.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -262,7 +262,7 @@ Every other component of <code>TraceId</code> could be zero.</p>
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="ch06-02-protocol-evolution.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="ch05-05-tokio-console.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
