@@ -20,7 +20,7 @@
   - [Supervision](ch04-02-supervision.md)
   - [Configuration](ch04-03-configuration.md)
 
-- [Utility]()
+- [Observability]()
   - [Logging](ch05-01-logging.md)
   - [Telemetry](ch05-02-telemetry.md)
   - [Dumping](ch05-03-dumping.md)
@@ -36,21 +36,7 @@
   - [Approval Testing]()
   - [Stress Testing]()
 
-- [Recipes]()
-  - [Multiple Runtimes](ch08-02-multiple-runtimes.md)
-
-- [Conventions]()
+- [Recipes](ch08-00-recipes.md)
   - [Project Structure](ch08-01-project-structure.md)
-
-- [Deployment]()
-
-- [Patterns]()
-  - [Pattern: ID Generation](ch10-01-id-generation.md)
-  - [Pattern: Network servers]()
-  - [Pattern: Pub/Sub]()
-  - [Pattern: A Workqueue]()
-  - [Pattern: CQS]()
-  - [Pattern: Event Sourcing]()
-  - [Pattern: Transactions]()
-  - [Pattern: Frontend as an Actor]()
-  - [Pattern: Gateways]()
+  - [Multiple Runtimes](ch08-02-multiple-runtimes.md)
+  - [ID Generation](ch08-10-id-generation.md)
