@@ -19,7 +19,6 @@
   - [Routing](ch04-01-routing.md)
   - [Supervision](ch04-02-supervision.md)
   - [Configuration](ch04-03-configuration.md)
-  - [Multiple Runtimes]()
 
 - [Utility]()
   - [Logging](ch05-01-logging.md)
@@ -36,6 +35,9 @@
   - [The Replayer]()
   - [Approval Testing]()
   - [Stress Testing]()
+
+- [Recipes]()
+  - [Multiple Runtimes](ch08-02-multiple-runtimes.md)
 
 - [Conventions]()
   - [Project Structure](ch08-01-project-structure.md)
