@@ -38,10 +38,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-967d68cc.js";
+            window.path_to_searchindex_js = "searchindex-a4e75bf8.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-5d0463cb.js"></script>
+        <script src="toc-d16bc87c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -186,7 +186,7 @@ let source_handle = ctx.attach(unattached_source);</code></pre>
 <pre><code class="language-rust">source_handle.terminate();</code></pre>
 <p>Under the hood, the storage and utilization of sources are optimized significantly to support multiple sources at the same time, thanks to the <a href="https://docs.rs/unicycle">unicycle</a> crate. While the system supports an unlimited number of sources without offering backpressure, it’s essential to moderate the usage to prevent potential out-of-memory (OOM) errors.</p>
 <h2 id="intervals"><a class="header" href="#intervals">Intervals</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.8/elfo/time/struct.Interval.html">The <code>Interval</code> source</a> is designed to generate messages at a defined time period.</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/time/struct.Interval.html">The <code>Interval</code> source</a> is designed to generate messages at a defined time period.</p>
 <p>To activate the source, employ either the <code>start(period)</code> or <code>start_after(delay, period)</code> methods, as shown below:</p>
 <pre><code class="language-rust">use elfo::time::Interval;
 
@@ -229,7 +229,7 @@ start(10s):      | 5s | 5s | 5s |  #   10s   |   10s   |
 <h3 id="tracing"><a class="header" href="#tracing">Tracing</a></h3>
 <p>Every message starts a new trace, thus a new <a href="./ch05-04-tracing.html#traceid"><code>TraceId</code></a> is generated and assigned to the current scope.</p>
 <h2 id="delays"><a class="header" href="#delays">Delays</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.8/elfo/time/struct.Delay.html">The <code>Delay</code> source</a> is designed to generate one message after a specified time:</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/time/struct.Delay.html">The <code>Delay</code> source</a> is designed to generate one message after a specified time:</p>
 <pre><code class="language-rust">use elfo::time::Delay;
 
 #[message]
@@ -247,7 +247,7 @@ while let Some(envelope) = ctx.recv().await {
 <h3 id="tracing-1"><a class="header" href="#tracing-1">Tracing</a></h3>
 <p>The emitted message continues the current trace. The reason for it is that this source is usually used for delaying specific action, so logically it’s continues the current trace.</p>
 <h2 id="signals"><a class="header" href="#signals">Signals</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.8/elfo/signal/struct.Signal.html">The <code>Signal</code> source</a> is designed to generate a message once a signal is received:</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/signal/struct.Signal.html">The <code>Signal</code> source</a> is designed to generate a message once a signal is received:</p>
 <pre><code class="language-rust">use elfo::signal::{Signal, SignalKind};
 
 #[message]
@@ -265,7 +265,7 @@ about <a href="https://docs.rs/tokio/latest/tokio/signal/unix/struct.Signal.html
 <h3 id="tracing-2"><a class="header" href="#tracing-2">Tracing</a></h3>
 <p>Every message starts a new trace, thus a new trace id is generated and assigned to the current scope.</p>
 <h2 id="streams"><a class="header" href="#streams">Streams</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.8/elfo/stream/struct.Stream.html">The <code>Stream</code> source</a> is designed to wrap existing futures/streams of messages. Items can be either any instance of <a href="https://docs.rs/elfo/0.2.0-alpha.8/elfo/trait.Message.html"><code>Message</code></a> or <code>Result&lt;impl Message, impl Message&gt;</code>.</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/stream/struct.Stream.html">The <code>Stream</code> source</a> is designed to wrap existing futures/streams of messages. Items can be either any instance of <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/trait.Message.html"><code>Message</code></a> or <code>Result&lt;impl Message, impl Message&gt;</code>.</p>
 <p>Once stream is exhausted, it’s detached automatically.</p>
 <h3 id="futures"><a class="header" href="#futures">Futures</a></h3>
 <p>Utilize <code>Stream::once()</code> when implementing subtasks such as initiating a background request:</p>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Communication - The Actoromicon</title>
+        <title>Hello, World - The Actoromicon</title>
 
 
         <!-- Custom HTML head -->
@@ -177,76 +177,168 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="communication"><a class="header" href="#communication">Communication</a></h1>
-<p>Actors can communicate in many ways depending on the situation and desired guarantees.</p>
-<h2 id="fire-and-forget"><a class="header" href="#fire-and-forget">Fire and Forget</a></h2>
-<p>The most straightforward way is to send a message with minimal guarantees.</p>
-<p><img src="assets/fire-and-forget.drawio.svg" alt="fire and forget"></p>
-<p>However, it’s possible to choose the desired behavior by calling the most appropriate method. All variants can be described by the following template: <code>(try_|unbounded_)send(_to)</code>.</p>
-<p>Methods with the <code>_to</code> suffix allow to specify a destination address as the first argument. Otherwise, <a href="./ch04-01-routing.html">the routing subsystem</a> will be used.</p>
-<p>The prefix describes what should happen if the destination mailbox is full:</p>
-<div class="table-wrapper">
-<table>
-<thead>
-<tr><th>Syntax</th><th>Error cases</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td><code>send().await</code></td><td><code>Closed</code></td><td>Blocks until a destination mailbox has space for new messages</td></tr>
-<tr><td><code>try_send()</code></td><td><code>Full</code>, <code>Closed</code></td><td>Returns <code>Full</code> if the mailbox is full</td></tr>
-<tr><td><code>unbounded_send()</code></td><td><code>Closed</code></td><td>Ignores the capacity of the mailbox</td></tr>
-</tbody>
-</table>
-</div>
-<p>All methods can return <code>Closed</code> if the destination actor is closed.</p>
-<p>The form <code>send().await</code> is used when desired behavior is backpressure, while <code>try_send()</code> is for actors with predicted latency, when it’s acceptable to lose messages or it can be handled manually. <code>unbounded_send()</code> should be avoided because it can increase mailboxes unpredictably, leading to OOM.</p>
-<h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
-<pre><code class="language-rust ignore">#[message]
-struct SomeMessage;
+                        <h1 id="hello-world"><a class="header" href="#hello-world">Hello, World</a></h1>
+<p>In this chapter we build a small elfo-based application from the ground up.</p>
+<p>The system has two actors:</p>
+<ul>
+<li><strong>producer</strong> sends a stream of numbers to the aggregator.</li>
+<li><strong>aggregator</strong> accumulates a running sum and answers queries about it.</li>
+</ul>
+<p>Their interaction is pretty simple:</p>
+<p><img src="assets/hello-world.drawio.svg" alt="schema"></p>
+<p><strong>Note</strong>: the full code for this example is available in <a href="https://github.com/elfo-rs/elfo/blob/master/examples/hello_world.rs">the elfo repository</a>.</p>
+<h2 id="step-1-installation"><a class="header" href="#step-1-installation">Step 1: Installation</a></h2>
+<p>Add the following dependencies in your <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[dependencies]
+# The actor framework itself. The `full` feature enables all built-in batteries:
+# configurer, logger, telemeter, dumper, etc.
+elfo = { version = "0.2.0-alpha.20", features = ["full"] }
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> <code>elfo</code> is currently in alpha. Check <a href="https://crates.io/crates/elfo">crates.io</a> for the latest published version and update the version string accordingly.</p>
+</blockquote>
+<p>Put everything in <code>src/main.rs</code> for now. In a real project you would split actors into separate crates, see the <a href="./ch08-01-project-structure.html">Project Structure</a> recipe for guidance, but a single file is fine for learning.</p>
+<h2 id="step-2-define-the-protocol"><a class="header" href="#step-2-define-the-protocol">Step 2: Define the protocol</a></h2>
+<p>Actors should not depend on each other’s implementation. Instead, they should only depend on shared messages that they exchange. It decouples the actors and makes the system more modular, easier to test.</p>
+<p>This decoupling allows you to change the internals of an actor without breaking its clients, and it also makes it easier to reuse actors across projects.</p>
+<p>The right place to put shared message types is a protocol module (or, in larger projects, dedicated crates).</p>
+<pre><code class="language-rust">mod protocol {
+    use elfo::prelude::*;
 
-// Block if the destination mailbox is full.
-ctx.send(SomeMessage).await?;
+    // A plain fire-and-forget command.
+    // `#[message]` derives elfo::Message, Debug, Clone, Serialize, Deserialize.
+    #[message]
+    pub struct AddNum {
+        pub num: u32,
+    }
 
-// Do not care if the target actor is closed or full.
-ctx.try_send(SomeMessage)?;
-
-// Forcibly push the message into the mailbox.
-ctx.unbounded_send(SomeMessage)?;
-
-// Manually implement backpressure, e.g. store messages.
-if let Err(err) = ctx.try_send(SomeMessage) {
-    let msg = err.into_inner(); // msg: SomeMessage
+    // A request: `ret = u64` means the sender expects a `u64` back.
+    #[message(ret = u32)]
+    pub struct GetSum;
 }</code></pre>
-<h2 id="blocking-request-response"><a class="header" href="#blocking-request-response">Blocking Request-Response</a></h2>
-<p>Some communications between actors require response message being sent back to the sender.</p>
-<p><img src="assets/blocking-request.drawio.svg" alt="a blocking request"></p>
-<p>TODO</p>
-<h3 id="examples-1"><a class="header" href="#examples-1">Examples</a></h3>
-<pre><code class="language-rust ignore">#[message(ret = Result&lt;(), DoSomethingRejected&gt;)]
-struct DoSomething;
+<p>Every type that flows through a mailbox must be annotated with <code>#[message]</code>. The macro enforces necessary trait bounds.</p>
+<h2 id="step-3-write-the-producer"><a class="header" href="#step-3-write-the-producer">Step 3: Write the producer</a></h2>
+<p>The producer sends numbers to the aggregator, then asks for the final sum.</p>
+<pre><code class="language-rust">mod producer {
+    use elfo::prelude::*;
 
-#[message]
-struct DoSomethingRejected(String);
+    use crate::protocol::*;
 
-TODO</code></pre>
-<h2 id="non-blocking-request-response"><a class="header" href="#non-blocking-request-response">Non-blocking Request-Response</a></h2>
-<p><img src="assets/non-blocking-request.drawio.svg" alt="a non-blocking request">
-TODO</p>
-<h3 id="state"><a class="header" href="#state">State</a></h3>
-<p>TODO</p>
-<h3 id="examples-2"><a class="header" href="#examples-2">Examples</a></h3>
-<p>TODO</p>
-<h2 id="subscriptions"><a class="header" href="#subscriptions">Subscriptions</a></h2>
-<p>TODO</p>
+    pub fn new() -&gt; Blueprint {
+        ActorGroup::new().exec(|ctx| async move {
+            // Send numbers.
+            for num in 0..10u32 {
+                let _ = ctx.send(AddNum { num }).await;
+            }
+
+            // Ask the aggregator for the current sum and wait for the reply.
+            match ctx.request(GetSum).resolve().await {
+                Ok(sum) =&gt; tracing::info!(sum, "done"),
+                Err(err) =&gt; tracing::error!(%err, "request failed"),
+            }
+        })
+    }
+}</code></pre>
+<p><code>ctx.send()</code> is fire-and-forget: it returns as soon as the message lands in the mailbox. <code>ctx.request().resolve().await</code> sends a request and suspends the actor until the response arrives.</p>
+<h2 id="step-4-write-the-aggregator"><a class="header" href="#step-4-write-the-aggregator">Step 4: Write the aggregator</a></h2>
+<p>The aggregator keeps a running sum and responds to <code>GetSum</code> queries.</p>
+<pre><code class="language-rust">mod aggregator {
+    use elfo::prelude::*;
+
+    use crate::protocol::*;
+
+    pub fn new() -&gt; Blueprint {
+        ActorGroup::new().exec(|mut ctx| async move {
+            let mut sum = 0u32;
+
+            // The main actor loop: receive a message, handle it, repeat.
+            // Returns `None` (breaking the loop) when the mailbox is closed.
+            while let Some(envelope) = ctx.recv().await {
+                msg!(match envelope {
+                    AddNum { num } =&gt; {
+                        sum += num;
+                    }
+                    // The `(Request, token)` pattern handles a request-response pair.
+                    (GetSum, token) =&gt; {
+                        ctx.respond(token, sum);
+                    }
+                });
+            }
+        })
+    }
+}</code></pre>
+<p><code>msg!</code> is required because Rust’s built-in <code>match</code> only works with a single type, but a mailbox can carry many different message types. The macro unpacks the envelope and dispatches on the inner type while keeping <code>rustfmt</code>-compatible syntax.</p>
+<h2 id="step-5-wire-up-the-topology"><a class="header" href="#step-5-wire-up-the-topology">Step 5: Wire up the topology</a></h2>
+<p>A <em>topology</em> is the wiring diagram: which actor groups exist, how messages flow between them, and which implementations are used.</p>
+<pre><code class="language-rust">fn topology() -&gt; elfo::Topology {
+    let topology = elfo::Topology::empty();
+
+    // Set up built-in actors (logging, config distribution).
+    let logger = elfo::batteries::logger::init();
+    let loggers = topology.local("system.loggers");
+    let configurers = topology.local("system.configurers").entrypoint();
+
+    // Declare your own groups.
+    let producers = topology.local("producers");
+    let aggregators = topology.local("aggregators");
+
+    // Messages sent by the producer are forwarded to the aggregator.
+    producers.route_all_to(&amp;aggregators);
+
+    // Bind blueprints to groups.
+    producers.mount(producer::new());
+    aggregators.mount(aggregator::new());
+    loggers.mount(logger);
+    configurers.mount(elfo::batteries::configurer::fixture(
+        &amp;topology,
+        elfo::config::AnyConfig::default(),
+    ));
+
+    topology
+}</code></pre>
+<p>We use <code>route_all_to</code> here to forward every message that the producer sends into the aggregator’s mailbox.</p>
+<p>The topology itself doesn’t start anything, so we need to call <code>elfo::init::start()</code> to do it:</p>
+<pre><code class="language-rust">#[tokio::main]
+async fn main() {
+    elfo::init::start(topology()).await;
+}</code></pre>
+<p><code>elfo::init::start</code> blocks until the system shuts down. The configurer starts first, loads <code>config.toml</code>, and then the rest of the actors begin their <code>exec</code> functions.</p>
+<h2 id="step-6-run-the-program"><a class="header" href="#step-6-run-the-program">Step 6: Run the program</a></h2>
+<pre><code class="language-console">$ cargo run
+   Compiling elfo-examples v0.0.0 (/home/code/fave/elfo/examples)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.91s
+     Running `target/debug/hello_world`
+2026-03-05 09:19:00.228283494  INFO [7661362937482706945] system.configurers/_ - started	addr=3/312073041333thread=tokio-runtime-worker
+2026-03-05 09:19:00.228325401  INFO [7661362937482706945] system.configurers/_ - status changed	status=Normal
+2026-03-05 09:19:00.228350429  INFO [7661362937482706945] system.configurers/_ - using a fixture
+2026-03-05 09:19:00.228381124  INFO [7661362937482706945] system.configurers/_ - status changed	status=Normal	details=validating
+2026-03-05 09:19:00.228573146  INFO [7661362937482706945] system.configurers/_ - status changed	status=Normal	details=updating
+2026-03-05 09:19:00.228757835  INFO [7661362937482706945] system.configurers/_ - status changed	status=Normal
+2026-03-05 09:19:00.228768493  INFO [7661362937482706945] system.loggers/_ - started	addr=2/312073041334	thread=tokio-runtime-worker
+2026-03-05 09:19:00.228788056  INFO [7661362937482706945] system.configurers/_ - groups' configs are updated	groups=["system.loggers", "system.configurers", "producers", "aggregators"]
+2026-03-05 09:19:00.228800092  INFO [7661362937482706945] producers/_ - started	addr=4/312073041335	thread=tokio-runtime-worker
+2026-03-05 09:19:00.228843383  INFO [7661362937482706945] system.loggers/_ - status changed	status=Normal
+2026-03-05 09:19:00.228872997  INFO [7661362937482706945] system.configurers/_ - config updated
+2026-03-05 09:19:00.228909195  INFO [7661362937482706945] aggregators/_ - started	addr=5/312073041336	thread=tokio-runtime-worker
+2026-03-05 09:19:00.228920874  INFO [7661362937482706945] system.init/_ - status changed	status=Normal
+2026-03-05 09:19:00.228923888  INFO [7661362937482706945] aggregators/_ - status changed	status=Normal
+2026-03-05 09:19:00.228991147  INFO [7661362937482706945] producers/_ - done	sum=45
+2026-03-05 09:19:00.229008241  INFO [7661362937482706945] producers/_ - status changed	status=Terminated
+</code></pre>
+<p>Press <code>Ctrl+C</code> to gracefully terminate your program.</p>
+<h2 id="whats-next"><a class="header" href="#whats-next">What’s next?</a></h2>
+<p>You now have a working <code>elfo</code> system. The following chapters go deeper into each concept introduced here.</p>
+<p>Check <a href="https://github.com/elfo-rs/elfo/blob/master/examples/usage/main.rs">the usage example</a> for a more complex application that demonstrates more features of the framework.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="ch03-01-actor-lifecycle.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="ch01-01-comparison.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="ch03-03-sources.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="ch03-00-actors.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -256,11 +348,11 @@ TODO</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="ch03-01-actor-lifecycle.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="ch01-01-comparison.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="ch03-03-sources.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="ch03-00-actors.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

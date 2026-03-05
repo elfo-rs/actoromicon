@@ -39,10 +39,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-967d68cc.js";
+            window.path_to_searchindex_js = "searchindex-a4e75bf8.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-5d0463cb.js"></script>
+        <script src="toc-d16bc87c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -239,10 +239,159 @@ spawn(process_events(events_rx));</code></pre>
 <li>Actors can be distributed across several machines because they don’t have to send messages directly to a mailbox; they can have a network before it.</li>
 <li>To add more connections between processes, we need to use more channels in one case and combine messages into big enumerations with unrelated items in other cases.</li>
 </ul>
-<h2 id="where-x--actix"><a class="header" href="#where-x--actix">Where X = actix</a></h2>
-<p>TODO</p>
-<h2 id="where-x--bastion"><a class="header" href="#where-x--bastion">Where X = bastion</a></h2>
-<p>TODO</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="hello-world"><a class="header" href="#hello-world">Hello, World</a></h1>
+<p>In this chapter we build a small elfo-based application from the ground up.</p>
+<p>The system has two actors:</p>
+<ul>
+<li><strong>producer</strong> sends a stream of numbers to the aggregator.</li>
+<li><strong>aggregator</strong> accumulates a running sum and answers queries about it.</li>
+</ul>
+<p>Their interaction is pretty simple:</p>
+<p><img src="assets/hello-world.drawio.svg" alt="schema"></p>
+<p><strong>Note</strong>: the full code for this example is available in <a href="https://github.com/elfo-rs/elfo/blob/master/examples/hello_world.rs">the elfo repository</a>.</p>
+<h2 id="step-1-installation"><a class="header" href="#step-1-installation">Step 1: Installation</a></h2>
+<p>Add the following dependencies in your <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[dependencies]
+# The actor framework itself. The `full` feature enables all built-in batteries:
+# configurer, logger, telemeter, dumper, etc.
+elfo = { version = "0.2.0-alpha.20", features = ["full"] }
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> <code>elfo</code> is currently in alpha. Check <a href="https://crates.io/crates/elfo">crates.io</a> for the latest published version and update the version string accordingly.</p>
+</blockquote>
+<p>Put everything in <code>src/main.rs</code> for now. In a real project you would split actors into separate crates, see the <a href="#project-structure">Project Structure</a> recipe for guidance, but a single file is fine for learning.</p>
+<h2 id="step-2-define-the-protocol"><a class="header" href="#step-2-define-the-protocol">Step 2: Define the protocol</a></h2>
+<p>Actors should not depend on each other’s implementation. Instead, they should only depend on shared messages that they exchange. It decouples the actors and makes the system more modular, easier to test.</p>
+<p>This decoupling allows you to change the internals of an actor without breaking its clients, and it also makes it easier to reuse actors across projects.</p>
+<p>The right place to put shared message types is a protocol module (or, in larger projects, dedicated crates).</p>
+<pre><code class="language-rust">mod protocol {
+    use elfo::prelude::*;
+
+    // A plain fire-and-forget command.
+    // `#[message]` derives elfo::Message, Debug, Clone, Serialize, Deserialize.
+    #[message]
+    pub struct AddNum {
+        pub num: u32,
+    }
+
+    // A request: `ret = u64` means the sender expects a `u64` back.
+    #[message(ret = u32)]
+    pub struct GetSum;
+}</code></pre>
+<p>Every type that flows through a mailbox must be annotated with <code>#[message]</code>. The macro enforces necessary trait bounds.</p>
+<h2 id="step-3-write-the-producer"><a class="header" href="#step-3-write-the-producer">Step 3: Write the producer</a></h2>
+<p>The producer sends numbers to the aggregator, then asks for the final sum.</p>
+<pre><code class="language-rust">mod producer {
+    use elfo::prelude::*;
+
+    use crate::protocol::*;
+
+    pub fn new() -&gt; Blueprint {
+        ActorGroup::new().exec(|ctx| async move {
+            // Send numbers.
+            for num in 0..10u32 {
+                let _ = ctx.send(AddNum { num }).await;
+            }
+
+            // Ask the aggregator for the current sum and wait for the reply.
+            match ctx.request(GetSum).resolve().await {
+                Ok(sum) =&gt; tracing::info!(sum, "done"),
+                Err(err) =&gt; tracing::error!(%err, "request failed"),
+            }
+        })
+    }
+}</code></pre>
+<p><code>ctx.send()</code> is fire-and-forget: it returns as soon as the message lands in the mailbox. <code>ctx.request().resolve().await</code> sends a request and suspends the actor until the response arrives.</p>
+<h2 id="step-4-write-the-aggregator"><a class="header" href="#step-4-write-the-aggregator">Step 4: Write the aggregator</a></h2>
+<p>The aggregator keeps a running sum and responds to <code>GetSum</code> queries.</p>
+<pre><code class="language-rust">mod aggregator {
+    use elfo::prelude::*;
+
+    use crate::protocol::*;
+
+    pub fn new() -&gt; Blueprint {
+        ActorGroup::new().exec(|mut ctx| async move {
+            let mut sum = 0u32;
+
+            // The main actor loop: receive a message, handle it, repeat.
+            // Returns `None` (breaking the loop) when the mailbox is closed.
+            while let Some(envelope) = ctx.recv().await {
+                msg!(match envelope {
+                    AddNum { num } =&gt; {
+                        sum += num;
+                    }
+                    // The `(Request, token)` pattern handles a request-response pair.
+                    (GetSum, token) =&gt; {
+                        ctx.respond(token, sum);
+                    }
+                });
+            }
+        })
+    }
+}</code></pre>
+<p><code>msg!</code> is required because Rust’s built-in <code>match</code> only works with a single type, but a mailbox can carry many different message types. The macro unpacks the envelope and dispatches on the inner type while keeping <code>rustfmt</code>-compatible syntax.</p>
+<h2 id="step-5-wire-up-the-topology"><a class="header" href="#step-5-wire-up-the-topology">Step 5: Wire up the topology</a></h2>
+<p>A <em>topology</em> is the wiring diagram: which actor groups exist, how messages flow between them, and which implementations are used.</p>
+<pre><code class="language-rust">fn topology() -&gt; elfo::Topology {
+    let topology = elfo::Topology::empty();
+
+    // Set up built-in actors (logging, config distribution).
+    let logger = elfo::batteries::logger::init();
+    let loggers = topology.local("system.loggers");
+    let configurers = topology.local("system.configurers").entrypoint();
+
+    // Declare your own groups.
+    let producers = topology.local("producers");
+    let aggregators = topology.local("aggregators");
+
+    // Messages sent by the producer are forwarded to the aggregator.
+    producers.route_all_to(&amp;aggregators);
+
+    // Bind blueprints to groups.
+    producers.mount(producer::new());
+    aggregators.mount(aggregator::new());
+    loggers.mount(logger);
+    configurers.mount(elfo::batteries::configurer::fixture(
+        &amp;topology,
+        elfo::config::AnyConfig::default(),
+    ));
+
+    topology
+}</code></pre>
+<p>We use <code>route_all_to</code> here to forward every message that the producer sends into the aggregator’s mailbox.</p>
+<p>The topology itself doesn’t start anything, so we need to call <code>elfo::init::start()</code> to do it:</p>
+<pre><code class="language-rust">#[tokio::main]
+async fn main() {
+    elfo::init::start(topology()).await;
+}</code></pre>
+<p><code>elfo::init::start</code> blocks until the system shuts down. The configurer starts first, loads <code>config.toml</code>, and then the rest of the actors begin their <code>exec</code> functions.</p>
+<h2 id="step-6-run-the-program"><a class="header" href="#step-6-run-the-program">Step 6: Run the program</a></h2>
+<pre><code class="language-console">$ cargo run
+   Compiling elfo-examples v0.0.0 (/home/code/fave/elfo/examples)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.91s
+     Running `target/debug/hello_world`
+2026-03-05 09:19:00.228283494  INFO [7661362937482706945] system.configurers/_ - started	addr=3/312073041333thread=tokio-runtime-worker
+2026-03-05 09:19:00.228325401  INFO [7661362937482706945] system.configurers/_ - status changed	status=Normal
+2026-03-05 09:19:00.228350429  INFO [7661362937482706945] system.configurers/_ - using a fixture
+2026-03-05 09:19:00.228381124  INFO [7661362937482706945] system.configurers/_ - status changed	status=Normal	details=validating
+2026-03-05 09:19:00.228573146  INFO [7661362937482706945] system.configurers/_ - status changed	status=Normal	details=updating
+2026-03-05 09:19:00.228757835  INFO [7661362937482706945] system.configurers/_ - status changed	status=Normal
+2026-03-05 09:19:00.228768493  INFO [7661362937482706945] system.loggers/_ - started	addr=2/312073041334	thread=tokio-runtime-worker
+2026-03-05 09:19:00.228788056  INFO [7661362937482706945] system.configurers/_ - groups' configs are updated	groups=["system.loggers", "system.configurers", "producers", "aggregators"]
+2026-03-05 09:19:00.228800092  INFO [7661362937482706945] producers/_ - started	addr=4/312073041335	thread=tokio-runtime-worker
+2026-03-05 09:19:00.228843383  INFO [7661362937482706945] system.loggers/_ - status changed	status=Normal
+2026-03-05 09:19:00.228872997  INFO [7661362937482706945] system.configurers/_ - config updated
+2026-03-05 09:19:00.228909195  INFO [7661362937482706945] aggregators/_ - started	addr=5/312073041336	thread=tokio-runtime-worker
+2026-03-05 09:19:00.228920874  INFO [7661362937482706945] system.init/_ - status changed	status=Normal
+2026-03-05 09:19:00.228923888  INFO [7661362937482706945] aggregators/_ - status changed	status=Normal
+2026-03-05 09:19:00.228991147  INFO [7661362937482706945] producers/_ - done	sum=45
+2026-03-05 09:19:00.229008241  INFO [7661362937482706945] producers/_ - status changed	status=Terminated
+</code></pre>
+<p>Press <code>Ctrl+C</code> to gracefully terminate your program.</p>
+<h2 id="whats-next"><a class="header" href="#whats-next">What’s next?</a></h2>
+<p>You now have a working <code>elfo</code> system. The following chapters go deeper into each concept introduced here.</p>
+<p>Check <a href="https://github.com/elfo-rs/elfo/blob/master/examples/usage/main.rs">the usage example</a> for a more complex application that demonstrates more features of the framework.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="actors"><a class="header" href="#actors">Actors</a></h1>
 <p>The most important part of the actor model is, of course, the actor itself. It can be challenging to give the exact definition of this term. However, we can define an actor through its properties:</p>
@@ -476,7 +625,7 @@ let source_handle = ctx.attach(unattached_source);</code></pre>
 <pre><code class="language-rust">source_handle.terminate();</code></pre>
 <p>Under the hood, the storage and utilization of sources are optimized significantly to support multiple sources at the same time, thanks to the <a href="https://docs.rs/unicycle">unicycle</a> crate. While the system supports an unlimited number of sources without offering backpressure, it’s essential to moderate the usage to prevent potential out-of-memory (OOM) errors.</p>
 <h2 id="intervals"><a class="header" href="#intervals">Intervals</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.8/elfo/time/struct.Interval.html">The <code>Interval</code> source</a> is designed to generate messages at a defined time period.</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/time/struct.Interval.html">The <code>Interval</code> source</a> is designed to generate messages at a defined time period.</p>
 <p>To activate the source, employ either the <code>start(period)</code> or <code>start_after(delay, period)</code> methods, as shown below:</p>
 <pre><code class="language-rust">use elfo::time::Interval;
 
@@ -519,7 +668,7 @@ start(10s):      | 5s | 5s | 5s |  #   10s   |   10s   |
 <h3 id="tracing"><a class="header" href="#tracing">Tracing</a></h3>
 <p>Every message starts a new trace, thus a new <a href="#traceid"><code>TraceId</code></a> is generated and assigned to the current scope.</p>
 <h2 id="delays"><a class="header" href="#delays">Delays</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.8/elfo/time/struct.Delay.html">The <code>Delay</code> source</a> is designed to generate one message after a specified time:</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/time/struct.Delay.html">The <code>Delay</code> source</a> is designed to generate one message after a specified time:</p>
 <pre><code class="language-rust">use elfo::time::Delay;
 
 #[message]
@@ -537,7 +686,7 @@ while let Some(envelope) = ctx.recv().await {
 <h3 id="tracing-1"><a class="header" href="#tracing-1">Tracing</a></h3>
 <p>The emitted message continues the current trace. The reason for it is that this source is usually used for delaying specific action, so logically it’s continues the current trace.</p>
 <h2 id="signals"><a class="header" href="#signals">Signals</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.8/elfo/signal/struct.Signal.html">The <code>Signal</code> source</a> is designed to generate a message once a signal is received:</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/signal/struct.Signal.html">The <code>Signal</code> source</a> is designed to generate a message once a signal is received:</p>
 <pre><code class="language-rust">use elfo::signal::{Signal, SignalKind};
 
 #[message]
@@ -555,7 +704,7 @@ about <a href="https://docs.rs/tokio/latest/tokio/signal/unix/struct.Signal.html
 <h3 id="tracing-2"><a class="header" href="#tracing-2">Tracing</a></h3>
 <p>Every message starts a new trace, thus a new trace id is generated and assigned to the current scope.</p>
 <h2 id="streams"><a class="header" href="#streams">Streams</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.8/elfo/stream/struct.Stream.html">The <code>Stream</code> source</a> is designed to wrap existing futures/streams of messages. Items can be either any instance of <a href="https://docs.rs/elfo/0.2.0-alpha.8/elfo/trait.Message.html"><code>Message</code></a> or <code>Result&lt;impl Message, impl Message&gt;</code>.</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/stream/struct.Stream.html">The <code>Stream</code> source</a> is designed to wrap existing futures/streams of messages. Items can be either any instance of <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/trait.Message.html"><code>Message</code></a> or <code>Result&lt;impl Message, impl Message&gt;</code>.</p>
 <p>Once stream is exhausted, it’s detached automatically.</p>
 <h3 id="futures"><a class="header" href="#futures">Futures</a></h3>
 <p>Utilize <code>Stream::once()</code> when implementing subtasks such as initiating a background request:</p>
