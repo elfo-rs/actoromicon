@@ -117,4 +117,4 @@ We haven't connected our actors in any way, this will be discussed later.
 
 Note: it's more useful to write complex actors in another way, which will be considered later in the [Structural Actors] section.
 
-[Structural Actors]: ./ch03-04-structural-actors.html
+[Structural Actors]: ./ch02-04-structural-actors.html

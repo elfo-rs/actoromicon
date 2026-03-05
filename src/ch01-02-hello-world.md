@@ -200,4 +200,4 @@ Check [the usage example] for a more complex application that demonstrates more 
 [full code]: https://github.com/elfo-rs/elfo/blob/master/examples/hello_world.rs
 [the usage example]: https://github.com/elfo-rs/elfo/blob/master/examples/usage/main.rs
 [crates.io]: https://crates.io/crates/elfo
-[Project Structure]: ./ch08-01-project-structure.html
+[Project Structure]: ./ch07-01-project-structure.html

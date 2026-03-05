@@ -164,4 +164,4 @@ To make deployment more robust we recommend generating `launch_id` outside of th
 [domain]: #choosing-the-domain-for-your-ids
 [ids_produced_by_db]: #ids-produced-by-db
 [monotonicity_level]: #level-of-monotonicity
-[TraceId]: ./ch05-04-tracing.html#traceid
+[TraceId]: ./ch04-04-tracing.html#traceid

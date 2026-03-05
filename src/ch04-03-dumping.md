@@ -158,8 +158,8 @@ Yep, we can restore order in the dumper, but don't do it now because remote DB i
 
 [implementation]: #implementation-details
 
-[mailbox]: ./ch03-00-actors.html
-[source]: ./ch03-03-sources.html
-[configs]: ./ch04-03-configuration.html
-[logging]: ./ch05-01-logging.html
-[tracing]: ./ch05-04-tracing.html
+[mailbox]: ./ch02-00-actors.html
+[source]: ./ch02-03-sources.html
+[configs]: ./ch03-03-configuration.html
+[logging]: ./ch04-01-logging.html
+[tracing]: ./ch04-04-tracing.html
