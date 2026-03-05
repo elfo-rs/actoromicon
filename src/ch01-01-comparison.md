@@ -35,12 +35,4 @@ However, complex applications tend to get more and more complicated over time, a
 * Actors can be distributed across several machines because they don't have to send messages directly to a mailbox; they can have a network before it.
 * To add more connections between processes, we need to use more channels in one case and combine messages into big enumerations with unrelated items in other cases.
 
-## Where X = actix
-
-TODO
-
-## Where X = bastion
-
-TODO
-
 [CSP]: https://en.wikipedia.org/wiki/Communicating_sequential_processes

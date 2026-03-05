@@ -4,10 +4,7 @@
 
 - [Introduction](ch01-00-introduction.md)
   - [Comparison](ch01-01-comparison.md)
-
-- [Getting Started]()
-  - [Installation]()
-  - [Hello, World!]()
+  - [Hello, World](ch01-02-hello-world.md)
 
 - [Actors](ch03-00-actors.md)
   - [Actor Lifecycle](ch03-01-actor-lifecycle.md)

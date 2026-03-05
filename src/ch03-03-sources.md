@@ -225,10 +225,10 @@ To override the current trace, leverage `scope::set_trace_id()` at any time.
 
 [unicycle]: https://docs.rs/unicycle
 [async-stream]: https://docs.rs/async-stream
-[Interval]: https://docs.rs/elfo/0.2.0-alpha.8/elfo/time/struct.Interval.html
-[Delay]: https://docs.rs/elfo/0.2.0-alpha.8/elfo/time/struct.Delay.html
-[Signal]: https://docs.rs/elfo/0.2.0-alpha.8/elfo/signal/struct.Signal.html
-[Stream]: https://docs.rs/elfo/0.2.0-alpha.8/elfo/stream/struct.Stream.html
-[Message]: https://docs.rs/elfo/0.2.0-alpha.8/elfo/trait.Message.html
+[Interval]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/time/struct.Interval.html
+[Delay]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/time/struct.Delay.html
+[Signal]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/signal/struct.Signal.html
+[Stream]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/stream/struct.Stream.html
+[Message]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/trait.Message.html
 [tokio signal caveats]: https://docs.rs/tokio/latest/tokio/signal/unix/struct.Signal.html
 [TraceId]: ./ch05-04-tracing.html#traceid
