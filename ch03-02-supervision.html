@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Dumping - The Actoromicon</title>
+        <title>Supervision - The Actoromicon</title>
 
 
         <!-- Custom HTML head -->
@@ -38,10 +38,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-a4e75bf8.js";
+            window.path_to_searchindex_js = "searchindex-444fbd54.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-d16bc87c.js"></script>
+        <script src="toc-c7399a36.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,111 +177,130 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="dumping"><a class="header" href="#dumping">Dumping</a></h1>
-<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
-<p>Dumping is the process of storing incoming and outgoing messages for every actor, including ones from <a href="./ch03-00-actors.html">mailboxes</a> and all other <a href="./ch03-03-sources.html">sources</a> like timers, streams, and so on. The primary purpose is future <a href="./ch05-04-tracing.html">tracing</a>, but it also can be used for regression testing.</p>
-<p>Dumping has a lot of common with <a href="./ch05-01-logging.html">logging</a>, but it’s more efficient and optimized for storing a lot of messages, so it has high throughput requirements instead of low latency like in the logging task, where records are supposed to be delivered as soon as possible, especially warnings and errors.</p>
-<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
-<h3 id="enable-dumping"><a class="header" href="#enable-dumping">Enable dumping</a></h3>
-<p>Dumping is disabled by default until the topology contains the <code>system.dumpers</code> group.</p>
-<p>Elfo provides the default implementation for such group, that’s available with the <code>full</code> feature and exported as <code>elfo::dumper</code>:</p>
-<pre><code class="language-rust ignore">let topology = elfo::Topology::empty();
-let dumpers = topology.local("system.dumpers");
-
-// ...
-
-dumpers.mount(elfo::dumper::new());</code></pre>
-<p>Besides this, the path to a dump file must be specified in the config:</p>
-<pre><code class="language-toml">[system.dumpers]
-path = "path/to/dump/file.dump"
-</code></pre>
-<h3 id="configure-dumping-on-a-per-group-basis"><a class="header" href="#configure-dumping-on-a-per-group-basis">Configure dumping on a per-group basis</a></h3>
-<p>Dumping settings can be specified for each actor group individually.
-Note that the settings can be changed and applied <a href="./ch04-03-configuration.html">on the fly</a>.</p>
-<p>Example:</p>
-<pre><code class="language-toml">[some_actor_group]
-system.dumping.disabled = true      # false by default
-system.dumping.rate_limit = 100500  # 100000 by default
-</code></pre>
-<p>Dumps above the rate limit are lost, but the sequence number is incremented anyway to detect missed messages later.</p>
-<h3 id="configure-dumping-on-a-per-message-basis"><a class="header" href="#configure-dumping-on-a-per-message-basis">Configure dumping on a per-message basis</a></h3>
-<p>Simply add the <code>message(dumping = "disabled")</code> attribute to the message. Another and default value of the attribute is <code>"full"</code>.</p>
-<pre><code class="language-rust ignore">#[message(dumping = "disabled")]
-pub struct SomethingHappened {
-    // ...
-}</code></pre>
-<h3 id="shorten-fields-of-a-message"><a class="header" href="#shorten-fields-of-a-message">Shorten fields of a message</a></h3>
-<p>Sometimes the content of messages is too large, for instance, in writing a backend for graph plotting, where every response can contain thousands of points. We don’t want to lose additional information about responses, but saving whole messages is very expensive in this case.</p>
-<p>For this situation, elfo provides a helper to hide specified fields during serialization, but only in the dumping context. So, these messages still will be properly sent over the network, where serialization is used too.</p>
-<pre><code class="language-rust ignore">#[message]
-pub struct ChunkProduced {
-    pub graph_id: GraphId,
-    #[serde(serialize_with = "elfo::dumping::hide")]
-    pub points: Vec&lt;(f64, f64)&gt;,   // will be dumped as "&lt;hidden&gt;"
-}</code></pre>
-<p>Such messages cannot be deserialized properly; that’s ok until they are used as input for regression testing.</p>
-<h2 id="metrics"><a class="header" href="#metrics">Metrics</a></h2>
-<p>TODO</p>
-<h2 id="local-storage"><a class="header" href="#local-storage">Local storage</a></h2>
-<p>The default implementation of dumpers writes all dumps to a file on the local file system.</p>
-<p>Even home-purpose SSDs can achieve 3GiB/s in 2021, which should be more than enough to avoid a bottleneck in this place.</p>
-<p>Dumps are stored in an uncompressed way so that they can take a lot of space. So, it’s essential to rotate the dump file timely and delete outdated ones.</p>
-<p>Note that message ordering between actor groups (and even inside the same actor) can be easily violated because of <a href="#implementation-details">implementation details</a>. Therefore, in the case of reading from local dump files, you should sort rows by the timestamp field.</p>
-<h2 id="the-structure-of-dump-files"><a class="header" href="#the-structure-of-dump-files">The structure of dump files</a></h2>
-<p>Dump files contain messages in the newline-delimited JSON format. Each line is object containing the following properties:</p>
+                        <h1 id="supervision"><a class="header" href="#supervision">Supervision</a></h1>
+<h2 id="startup"><a class="header" href="#startup">Startup</a></h2>
+<p>Once the system is started, the <code>system.init</code> actor starts all actors marked as <code>entrypoint()</code> in the topology. Usually, it’s only the <code>system.configurers</code> group. Entry points must have empty configs.</p>
+<p>Then, <code>system.configurers</code> loads the config file and sends <code>UpdateConfig</code> to all actor groups. This message is usually used to start any remaining actors in the system. Thus, you need to define routing for <code>UpdateConfig</code> with either <code>Outcome::Unicast</code> or <code>Outcome::Multicast</code> for actor keys you want to start on startup.</p>
+<p><img src="assets/startup.drawio.svg" alt="startup"></p>
+<p>Note that the actor system terminates immediately if the config file is invalid at startup (<code>elfo::start()</code> returns an error).</p>
+<h2 id="reconfiguration"><a class="header" href="#reconfiguration">Reconfiguration</a></h2>
+<p>Reconfiguration can be caused in several cases:</p>
 <ul>
-<li><code>g</code> — an actor group’s name</li>
-<li><code>k</code> — an <em>optional</em> actor’s key</li>
-<li><code>n</code> — node_no</li>
-<li><code>s</code> — <code>sequence_no</code>, unique inside an actor group</li>
-<li><code>t</code> — <a href="./ch05-04-tracing.html"><code>trace_id</code></a></li>
-<li><code>ts</code> — timestamp</li>
-<li><code>d</code> — direction, “In” or “Out”</li>
-<li><code>cl</code> — an <em>optional</em> class</li>
-<li><code>mn</code> — a message’s name</li>
-<li><code>mp</code> — a message’s protocol, usually a crate, which contains the message</li>
-<li><code>mk</code> — a message’s kind, “Regular”, “Request” or “Response”</li>
-<li><code>m</code> — a <em>nullable</em> message’s body</li>
-<li><code>c</code> — an <em>optional</em> correlation id, which links requests with corresponding responses</li>
+<li>The configurer receives <code>ReloadConfigs</code> or <code>TryRealodConfigs</code>.</li>
+<li>The process receives <code>SIGHUP</code>, it’s an equivalent to receiving <code>ReloadConfigs::default()</code>.</li>
+<li>The process receives <code>SIGUSR2</code>, it’s an equivalent to receiving <code>ReloadConfigs::default().with_force(true)</code>.</li>
 </ul>
-<p>Terms:</p>
+<p>What’s the difference between default behavior and <code>with_force(true)</code> one? By default, group’s up-to-date configs aren’t sent across the system. In the force mode, all configs are updated, even unchanged ones.</p>
+<p>The reconfiguration process consists of several stages:
+<img src="assets/reconfiguration.drawio.svg" alt="reconfiguration"></p>
+<ol>
+<li>Config validation: the configurer sends the <code>ValidateConfig</code> request to all groups and waits for responses. If all groups respond <code>Ok(_)</code> or discard the request (which is the default behaviour), the config is considered valid and the configurer proceeds to the next step.</li>
+<li>Config update: the configurer sends <code>UpdateConfig</code> to all groups. Note that it is sent as a regular message, rather than request, making config update asynchronous. System does not wait for all configs to apply before finishing this stage and it is possible for an actor to fail while applying the new config. Despite actor failures, any further actors spawned (or restarted) will have the new config available for them.</li>
+</ol>
+<p>More information about configs and the reconfiguration process is available on <a href="./ch03-03-configuration.html">the corresponding page</a>.</p>
+<h2 id="restart"><a class="header" href="#restart">Restart</a></h2>
+<h3 id="restart-policies"><a class="header" href="#restart-policies">Restart policies</a></h3>
+<p>Three restart policies are implemented now:</p>
 <ul>
-<li><em>optional</em> means that the property can be omitted, but if it’s present, then its value isn’t <code>null</code>.</li>
-<li><em>nullable</em> means that the property is present always, but the value can be <code>null</code>.</li>
+<li><code>RestartPolicy::never</code> (by default) — actors are never restarted. However, they can be started again on incoming messages.</li>
+<li><code>RestartPolicy::on_failure</code> — actors are restarted only after failures (the <code>exec</code> function returned <code>Err</code> or panicked).</li>
+<li><code>RestartPolicy::always</code> — actors are restarted after termination (the <code>exec</code> function returned <code>Ok</code> or <code>()</code>) and failures.</li>
 </ul>
-<p>The <code>sequence_no</code> field can be used to detect missed messages because of limiting.</p>
-<p>TODO: note about classes</p>
-<h2 id="dump-file-rotation"><a class="header" href="#dump-file-rotation">Dump file rotation</a></h2>
-<p><code>elfo::dumper</code> doesn’t use any kind of partitioning and relies on an external file rotation mechanism instead. It means some additional configuration is required, but it provides more flexibility and simplifies the dumper.</p>
-<p>The dumper listens to the <code>SIGHUP</code> signal to reopen the active dump file. Besides this, the dumper accepts the <code>elfo::dumper::ReopenDumpFile</code> command.</p>
-<p>The most popular solution for file rotation is, of course, <code>logrotate</code>.</p>
-<p>TODO: logrotate config</p>
-<p>Tip: if dumps are not supposed to be delivered to DB, use hard links to save the dump file for later discovery and avoid deletion.</p>
-<h2 id="remote-storage"><a class="header" href="#remote-storage">Remote storage</a></h2>
-<p>Depending on your goals, you may or may not want to send your dump files to remote file storage. It can highly improve search capabilities (primarily because of indexing trace_id) and space usage but requires additional infrastructure for dumping. Usually, it’s ok for many services to use only local storage. Dumps are stored in a time-ordered way and, thanks to the structure of trace_id, can be used for good enough search. However, elfo doesn’t provide the utility to search these files for now.</p>
-<p>Ok, so you want to store dumps in DB. The right choice, if you can afford it. What should you do?</p>
-<p>The common schema looks like</p>
-<p><img src="assets/dumping-infrastructure.drawio.svg" alt="dumping infrastructure"></p>
-<p>TODO: add a link to the example with vector.dev and clickhouse</p>
-<h2 id="implementation-details"><a class="header" href="#implementation-details">Implementation details</a></h2>
-<p>TODO: implementation has been changed a lot, need to update the section</p>
-<p>At a top level, dumping is separated into two parts: the dumping subsystem and the dumper.</p>
-<p>The dumping subsystem is based on sharded in-memory storage containing a limited queue of messages. We use a predefined number of shards for now, but we will likely use the number of available cores in the future. Every thread writes to its dedicated shard. Such an approach reduces contention and false sharing between threads.</p>
-<p><img src="assets/dumping-implementation-details.drawio.svg" alt="dumping implementation details"></p>
-<p>The dumper sequentially, in a round-robin way, replaces the shard’s queue with the extra one, then reads and serializes all messages and writes them to the dump file. All this work happens on a timer tick. Firstly, it’s one of the simplest ways to get appropriate batching. Secondly, because the dumper uses <a href="https://docs.rs/tokio/1/tokio/task/fn.spawn_blocking.html">tokio::task::spawn_blocking</a> and blocking writes insides, that’s more effective than using async <a href="https://docs.rs/tokio/1/tokio/fs/index.html">tokio::fs</a> directly. The timer approach allows us to reduce the impact on the tokio executor. However, this behavior is going to be improved for environments with io_uring in the future.</p>
-<p>The dumper holds the lock only for a small amount of time to replace the queue inside a shard with another one, which was drained by the dumper on the previous tick. Thus, the actual number of queues is one more than shards.</p>
-<p>All actors in a group share the same handler with some common things like sequence_no generator and rate limiter. Whenever an actor sends or receives a message, the handler is used to push message to the shard according to the current thread. Thus, messages produced by the same actor can reorder if it’s migrated to another thread by a scheduler.</p>
-<p>Yep, we can restore order in the dumper, but don’t do it now because remote DB is doing it anyway. However, we can add the corresponding option in the future. It’s not trivial, although.</p>
+<p>If the actor is scheduled to be restarted, incoming messages cannot spawn another actor for his key.</p>
+<p>The restart policy can be chosen while creating an <code>ActorGroup</code>. This is the default restart policy for the group, which will be used if not overridden.</p>
+<pre><code class="language-rust">use elfo::{RestartPolicy, RestartParams, ActorGroup};
+
+ActorGroup::new().restart_policy(RestartPolicy::always(RestartParams::new(...)))
+ActorGroup::new().restart_policy(RestartPolicy::on_failure(RestartParams::new(...)))
+ActorGroup::new().restart_policy(RestartPolicy::never())</code></pre>
+<p>The group restart policy can be overridden separately for each actor group in the configuration:</p>
+<pre><code class="language-toml">[group_a.system.restart_policy]
+when = "Never" # Override group policy on `config_update` with `RestartPolicy::never()`.
+
+[group_b.system.restart_policy]
+# Override the group policy on `config_update` with `RestartPolicy::always(...)`.
+when = "Always" # or "OnFailure".
+# Configuration details for the RestartParams of the backoff strategy in the restart policy. 
+# The parameters are described further in the chapter.
+min_backoff = "5s" # Required.
+max_backoff = "30s" # Required.
+factor = "2.0" # Optional.
+max_retries = "20" # Optional.
+auto_reset = "5s" # Optional.
+
+[group_c]
+# If the restart policy is not specified, the restart policy from the blueprint will be used.
+</code></pre>
+<p>Additionally, each actor can further override its restart policy through the actor’s context:</p>
+<pre><code class="language-rust">// Override the group policy with the actor's policy, which is applicable only for this lifecycle.
+ctx.set_restart_policy(RestartPolicy::...);
+
+// Restore the group policy from the configuration (if specified), or use the default group policy.
+ctx.set_restart_policy(None);</code></pre>
+<h3 id="repetitive-restarts"><a class="header" href="#repetitive-restarts">Repetitive restarts</a></h3>
+<p>Repetitive restarts are limited by an exponential backoff strategy. The delay for each subsequent retry is calculated as follows:</p>
+<pre><code class="language-text">delay = min(min_backoff * pow(factor, power), max_backoff)
+power = power + 1
+</code></pre>
+<p>So for example, when <code>factor</code> is set to <code>2</code>, <code>min_backoff</code> is set to <code>4</code>, and <code>max_backoff</code> is set to <code>36</code>, and <code>power</code> is set to <code>0</code>,
+this will result in the following sequence of delays: <code>[4, 8, 16, 32, 36]</code>.</p>
+<p>The backoff strategy is configured by passing a <code>RestartParams</code> to one of the restart policies, either <code>RestartPolicy::on_failure</code> or <code>RestartPolicy::always</code>, upon creation.
+The required parameters for <code>RestartParams</code> are as follows:</p>
+<ul>
+<li><code>min_backoff</code> - Minimal restart time limit.</li>
+<li><code>max_backoff</code> - Maximum restart time limit.</li>
+</ul>
+<p>The <code>RestartParams</code> can be further configured with the following optional parameters:</p>
+<ul>
+<li><code>factor</code> - The value to multiply the current delay with for each retry attempt. Default value is <code>2.0</code>.</li>
+<li><code>max_retries</code> - The limit on retry attempts, after which the actor stops attempts to restart. The default value is <code>NonZeroU64::MAX</code>, which effectively means unlimited retries.</li>
+<li><code>auto_reset</code> - The duration of an actor’s lifecycle sufficient to deem the actor healthy. The default value is <code>min_backoff</code>.
+After this duration elapses, the backoff strategy automatically resets. The following restart will occur <strong>without delays</strong> and will be considered the first retry.</li>
+</ul>
+<p>Subsequent restarts will have delays calculated using the formula above, with the <code>power</code> starting from 0.</p>
+<h2 id="termination"><a class="header" href="#termination">Termination</a></h2>
+<p>System termination is started by the <code>system.init</code> actor in several cases:</p>
+<ul>
+<li>Received <code>SIGTERM</code> or <code>SIGINT</code> signals, Unix only.</li>
+<li>Received <code>CTRL_C_EVENT</code> or <code>CTRL_BREAK_EVENT</code> events, Windows only.</li>
+<li>Too high memory usage, Unix only. Now it’s 90% (ratio of RSS to total memory) and not configurable (<a href="https://github.com/elfo-rs/elfo/issues/60">elfo#60</a>).</li>
+</ul>
+<p>The process consists of several stages:
+<img src="assets/termination.drawio.svg" alt="termination"></p>
+<ol>
+<li><code>system.init</code> sends to all user-defined groups “polite” <code>Terminate::default()</code> message.
+<ul>
+<li>Groups’ supervisors stop spawning new actors.</li>
+<li><code>Terminate</code> is routed as a usual message with <code>Outcome::Broadcast</code> by default.</li>
+<li>For <code>TerminationPolicy::closing</code> (by default): the mailbox is closed instantly, <code>ctx.recv()</code> returns <code>None</code> after already stored messages.</li>
+<li>For <code>TerminationPolicy::manually</code>: the mailbox isn’t closed, <code>ctx.recv()</code> returns <code>Terminate</code> in order to handle in on your own. Use <code>ctx.close()</code> to close the mailbox.</li>
+</ul>
+</li>
+<li>If some groups haven’t terminated after 30s, <code>system.init</code> sends <code>Terminate::closing()</code> message.
+<ul>
+<li><code>Terminate</code> is routed as a usual message with <code>Outcome::Broadcast</code> by default.</li>
+<li>For any policy, the mailbox is closed instantly, <code>ctx.recv()</code> returns <code>None</code> after already stored messages.</li>
+</ul>
+</li>
+<li>If some groups haven’t terminated after another 15s, <code>system.init</code> stops waiting for that groups.</li>
+<li>Repeat the above stages for system groups.</li>
+</ol>
+<p>Timeouts above aren’t configurable for now (<a href="https://github.com/elfo-rs/elfo/issues/61">elfo#61</a>).</p>
+<p>The termination policy can be chosen while creating <code>ActorGroup</code>:</p>
+<pre><code class="language-rust">use elfo::group::{TerminationPolicy, ActorGroup};
+
+ActorGroup::new().termination_policy(TerminationPolicy::closing())
+ActorGroup::new().termination_policy(TerminationPolicy::manually())</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="ch05-02-telemetry.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="ch03-01-routing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="ch05-04-tracing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="ch03-03-configuration.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -291,11 +310,11 @@ pub struct ChunkProduced {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="ch05-02-telemetry.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="ch03-01-routing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="ch05-04-tracing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="ch03-03-configuration.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

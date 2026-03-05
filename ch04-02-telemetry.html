@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Actor Groups - The Actoromicon</title>
+        <title>Telemetry - The Actoromicon</title>
 
 
         <!-- Custom HTML head -->
@@ -38,10 +38,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-a4e75bf8.js";
+            window.path_to_searchindex_js = "searchindex-444fbd54.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-d16bc87c.js"></script>
+        <script src="toc-c7399a36.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,40 +177,122 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="actor-groups"><a class="header" href="#actor-groups">Actor Groups</a></h1>
-<p>Before talking about actor groups, we need to consider another vital topic: <em>scaling</em>.</p>
-<h2 id="scaling"><a class="header" href="#scaling">Scaling</a></h2>
-<p>Scaling is helpful both to increase throughput of a system and reduce latency.</p>
-<p>Two known ways to do scaling are <em>pipelining</em> and <em>sharding</em>.</p>
-<h3 id="pipelining"><a class="header" href="#pipelining">Pipelining</a></h3>
-<p>Pipelining implies dividing the system into several sequential parts. Thus, instead of doing all work in one actor, different actors do the work in parts.</p>
-<p><img src="assets/pipelining.drawio.svg" alt="pipelining"></p>
-<p>Pipelining increases minimal possible latency because of overhead costs but can reduce maximal latency because of parallel execution of different parts. Throughput is the minimum of parts’ throughputs. However, total throughput increases because every actor in the pipeline does less work.</p>
-<p>Usually, it’s not necessary to think about pipelining because well-designed systems are already divided into multiple actors according to their responsibilities, not because of performance requirements.</p>
-<h3 id="sharding"><a class="header" href="#sharding">Sharding</a></h3>
-<p>Sharding implies multiple running actors with the same, possible parameterized, code and responsibility.</p>
-<p><img src="assets/sharding.drawio.svg" alt="sharding"></p>
-<p>Sharding requires some work to route messages to the corresponding shard. Thus, throughput is increased sublinearly. Similarly to pipelining, maximal latency is reduced because arrival messages see ahead of themself fewer messages.</p>
-<h2 id="actor-groups-1"><a class="header" href="#actor-groups-1">Actor Groups</a></h2>
-<p>Actor groups in <code>elfo</code> are a solution for the sharding problem. Each actor has some actor key, a unique label inside a group, that can be used for routing purposes.</p>
-<p>The group’s router is not an actor but some shared code that’s executed on sending side to determine which actor should receive a message. Usually, routers are stateless; thus, this approach is more performant and scalable than routers implemented as separate actors.</p>
-<p><img src="assets/actor-group.drawio.svg" alt="an actor group"></p>
-<p><code>elfo</code> doesn’t support running actors without actor groups. Instead, it’s ok to use groups with only one actor inside if it’s meaningless to do sharding for now.</p>
-<p>Note that actor keys can be arbitrary structures, not mandatory strings.</p>
-<p>See the next chapter to get more details about routing.</p>
-<h2 id="stability"><a class="header" href="#stability">Stability</a></h2>
-<p>TODO: move to the first usage.</p>
-<p>It’s useful to know the term <em>stability</em>. Stable systems are restricted only by input rate and don’t have 100% utilization. We usually want to minimize latency in such systems while keeping throughput higher than real-life requirements. Most of systems are supposed to be stable and have predictable latency. Unstable systems have 100% utilization and reach their throughput. For instance, ETL systems.</p>
+                        <h1 id="telemetry"><a class="header" href="#telemetry">Telemetry</a></h1>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>TODO: <code>metrics</code> crate, metric types.</p>
+<p>All metrics are provided with the <code>actor_group</code> and, optionally, <code>actor_key</code> labels. The last one is added for actor groups with enabled <code>system.telemetry.per_actor_key</code> option.</p>
+<p>Read more information about <a href="https://prometheus.io/docs/concepts/metric_types/">metric types</a>.</p>
+<p>TODO: tips, prefer <code>increment_gauge!</code> over <code>gauge!</code></p>
+<h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
+<p>Telemetry can be configured separately for each actor group. Possible options and their default values:</p>
+<pre><code class="language-toml">[some_group]
+system.telemetry.per_actor_group = true
+system.telemetry.per_actor_key = false
+</code></pre>
+<p>Note that using <code>per_actor_key</code> can highly increase a number of metrics. Use it only for low cardinality groups.</p>
+<p>TODO: <code>elfo-telemeter</code> config.</p>
+<h2 id="built-in-metrics"><a class="header" href="#built-in-metrics">Built-in metrics</a></h2>
+<p><code>elfo</code> is shipped with a lot of metrics. All of them start with the <code>elfo_</code> prefix to avoid collisions with user defined metrics.</p>
+<h3 id="statuses"><a class="header" href="#statuses">Statuses</a></h3>
+<ul>
+<li>
+<p>Gauge <code>elfo_active_actors{status}</code></p>
+<p>The number of active actors in the specified status.</p>
+</li>
+<li>
+<p>Gauge <code>elfo_restarting_actors</code></p>
+<p>The number of actors that will be restarted after some time.</p>
+</li>
+<li>
+<p>Counter <code>elfo_actor_status_changes_total{status}</code></p>
+<p>The number of transitions into the specified status.</p>
+</li>
+</ul>
+<h3 id="messages"><a class="header" href="#messages">Messages</a></h3>
+<ul>
+<li>
+<p>Counter <code>elfo_sent_messages_total{message, protocol}</code></p>
+<p>The number of sent messages.</p>
+</li>
+<li>
+<p>Summary <code>elfo_message_handling_time_seconds{message, protocol}</code></p>
+<p>Spent time on handling the message, measured between <code>(try_)recv()</code> calls. Used to detect slow handlers.</p>
+</li>
+<li>
+<p>Summary <code>elfo_message_waiting_time_seconds</code></p>
+<p>Elapsed time between <code>send()</code> and corresponding <code>recv()</code> calls. Usually it represents a time that a message spends in a mailbox. Used to detect places that should be sharded to reduce a total latency.</p>
+</li>
+<li>
+<p>Summary <code>elfo_busy_time_seconds</code></p>
+<p>Spent time on polling a task with an actor. More precisely, the time for which the task executor is blocked. Equals to CPU time if blocking IO isn’t used.</p>
+</li>
+</ul>
+<h3 id="log-events"><a class="header" href="#log-events">Log events</a></h3>
+<ul>
+<li>
+<p>Counter <code>elfo_emitted_events_total{level}</code></p>
+<p>The number of emitted events per level (<code>Error</code>, <code>Warn</code>, <code>Info</code>, <code>Debug</code>, <code>Trace</code>).</p>
+</li>
+<li>
+<p>Counter <code>elfo_limited_events_total{level}</code></p>
+<p>The number of events that haven’t been emitted because the limit was reached.</p>
+</li>
+<li>
+<p>Counter <code>elfo_lost_events_total{level}</code></p>
+<p>The number of events that hasn’t been emitted because the event storage is full.</p>
+</li>
+</ul>
+<h3 id="dump-events"><a class="header" href="#dump-events">Dump events</a></h3>
+<ul>
+<li>
+<p>Counter <code>elfo_emitted_dumps_total</code></p>
+<p>The number of emitted dumps.</p>
+</li>
+<li>
+<p>Counter <code>elfo_limited_dumps_total</code></p>
+<p>The number of dumps that haven’t been emitted because the limit was reached.</p>
+</li>
+<li>
+<p>Counter <code>elfo_lost_dumps_total</code></p>
+<p>The number of dumps that hasn’t been emitted because the dump storage is full.</p>
+</li>
+</ul>
+<h3 id="other-metrics"><a class="header" href="#other-metrics">Other metrics</a></h3>
+<p>TODO: specific to elfo-logger, elfo-dumper, elfo_telemeter</p>
+<h2 id="derived-metrics"><a class="header" href="#derived-metrics">Derived metrics</a></h2>
+<h3 id="statuses-1"><a class="header" href="#statuses-1">Statuses</a></h3>
+<p>TODO</p>
+<h3 id="incomingoutgoing-rate"><a class="header" href="#incomingoutgoing-rate">Incoming/outgoing rate</a></h3>
+<p>TODO</p>
+<pre><code class="language-text">rate(elfo_message_handling_time_seconds_count{actor_group="${actor_group:raw}",actor_key=""}[$__rate_interval])
+</code></pre>
+<h3 id="waiting-time"><a class="header" href="#waiting-time">Waiting time</a></h3>
+<p>TODO</p>
+<pre><code class="language-text">rate(elfo_message_waiting_time_seconds{actor_group="${actor_group:raw}",actor_key="",quantile=~"0.75|0.9|0.95"}[$__rate_interval])
+</code></pre>
+<h3 id="utilization"><a class="header" href="#utilization">Utilization</a></h3>
+<p>TODO</p>
+<pre><code class="language-text">rate(elfo_message_handling_time_seconds_sum{actor_group="${actor_group:raw}",actor_key=""}[$__rate_interval])
+</code></pre>
+<h3 id="executor-utilization--cpu-usage"><a class="header" href="#executor-utilization--cpu-usage">Executor utilization (≈ CPU usage)</a></h3>
+<p>TODO</p>
+<p>The time for which the task executor is blocked. Equals to CPU time if blocking IO isn’t used.</p>
+<pre><code class="language-text">rate(elfo_busy_time_seconds_sum[$__rate_interval])
+</code></pre>
+<h2 id="dashboards"><a class="header" href="#dashboards">Dashboards</a></h2>
+<p>TODO</p>
+<h2 id="implementation-details"><a class="header" href="#implementation-details">Implementation details</a></h2>
+<p>TODO</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="ch03-04-structural-actors.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="ch04-01-logging.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="ch04-01-routing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="ch04-03-dumping.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -220,11 +302,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="ch03-04-structural-actors.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="ch04-01-logging.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="ch04-01-routing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="ch04-03-dumping.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

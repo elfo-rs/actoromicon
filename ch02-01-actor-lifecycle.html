@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Supervision - The Actoromicon</title>
+        <title>Actor Lifecycle - The Actoromicon</title>
 
 
         <!-- Custom HTML head -->
@@ -38,10 +38,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-a4e75bf8.js";
+            window.path_to_searchindex_js = "searchindex-444fbd54.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-d16bc87c.js"></script>
+        <script src="toc-c7399a36.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,130 +177,73 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="supervision"><a class="header" href="#supervision">Supervision</a></h1>
-<h2 id="startup"><a class="header" href="#startup">Startup</a></h2>
-<p>Once the system is started, the <code>system.init</code> actor starts all actors marked as <code>entrypoint()</code> in the topology. Usually, it’s only the <code>system.configurers</code> group. Entry points must have empty configs.</p>
-<p>Then, <code>system.configurers</code> loads the config file and sends <code>UpdateConfig</code> to all actor groups. This message is usually used to start any remaining actors in the system. Thus, you need to define routing for <code>UpdateConfig</code> with either <code>Outcome::Unicast</code> or <code>Outcome::Multicast</code> for actor keys you want to start on startup.</p>
-<p><img src="assets/startup.drawio.svg" alt="startup"></p>
-<p>Note that the actor system terminates immediately if the config file is invalid at startup (<code>elfo::start()</code> returns an error).</p>
-<h2 id="reconfiguration"><a class="header" href="#reconfiguration">Reconfiguration</a></h2>
-<p>Reconfiguration can be caused in several cases:</p>
+                        <h1 id="actor-lifecycle"><a class="header" href="#actor-lifecycle">Actor lifecycle</a></h1>
+<p>An actor goes through several stages in life. Transitions between stages are accompanied by statuses. Statuses help us to understand better what’s happening with actors. So, a good way to understand actor lifecycle is to get familiar with statuses.</p>
+<h2 id="statuses"><a class="header" href="#statuses">Statuses</a></h2>
 <ul>
-<li>The configurer receives <code>ReloadConfigs</code> or <code>TryRealodConfigs</code>.</li>
-<li>The process receives <code>SIGHUP</code>, it’s an equivalent to receiving <code>ReloadConfigs::default()</code>.</li>
-<li>The process receives <code>SIGUSR2</code>, it’s an equivalent to receiving <code>ReloadConfigs::default().with_force(true)</code>.</li>
-</ul>
-<p>What’s the difference between default behavior and <code>with_force(true)</code> one? By default, group’s up-to-date configs aren’t sent across the system. In the force mode, all configs are updated, even unchanged ones.</p>
-<p>The reconfiguration process consists of several stages:
-<img src="assets/reconfiguration.drawio.svg" alt="reconfiguration"></p>
-<ol>
-<li>Config validation: the configurer sends the <code>ValidateConfig</code> request to all groups and waits for responses. If all groups respond <code>Ok(_)</code> or discard the request (which is the default behaviour), the config is considered valid and the configurer proceeds to the next step.</li>
-<li>Config update: the configurer sends <code>UpdateConfig</code> to all groups. Note that it is sent as a regular message, rather than request, making config update asynchronous. System does not wait for all configs to apply before finishing this stage and it is possible for an actor to fail while applying the new config. Despite actor failures, any further actors spawned (or restarted) will have the new config available for them.</li>
-</ol>
-<p>More information about configs and the reconfiguration process is available on <a href="./ch04-03-configuration.html">the corresponding page</a>.</p>
-<h2 id="restart"><a class="header" href="#restart">Restart</a></h2>
-<h3 id="restart-policies"><a class="header" href="#restart-policies">Restart policies</a></h3>
-<p>Three restart policies are implemented now:</p>
-<ul>
-<li><code>RestartPolicy::never</code> (by default) — actors are never restarted. However, they can be started again on incoming messages.</li>
-<li><code>RestartPolicy::on_failure</code> — actors are restarted only after failures (the <code>exec</code> function returned <code>Err</code> or panicked).</li>
-<li><code>RestartPolicy::always</code> — actors are restarted after termination (the <code>exec</code> function returned <code>Ok</code> or <code>()</code>) and failures.</li>
-</ul>
-<p>If the actor is scheduled to be restarted, incoming messages cannot spawn another actor for his key.</p>
-<p>The restart policy can be chosen while creating an <code>ActorGroup</code>. This is the default restart policy for the group, which will be used if not overridden.</p>
-<pre><code class="language-rust">use elfo::{RestartPolicy, RestartParams, ActorGroup};
-
-ActorGroup::new().restart_policy(RestartPolicy::always(RestartParams::new(...)))
-ActorGroup::new().restart_policy(RestartPolicy::on_failure(RestartParams::new(...)))
-ActorGroup::new().restart_policy(RestartPolicy::never())</code></pre>
-<p>The group restart policy can be overridden separately for each actor group in the configuration:</p>
-<pre><code class="language-toml">[group_a.system.restart_policy]
-when = "Never" # Override group policy on `config_update` with `RestartPolicy::never()`.
-
-[group_b.system.restart_policy]
-# Override the group policy on `config_update` with `RestartPolicy::always(...)`.
-when = "Always" # or "OnFailure".
-# Configuration details for the RestartParams of the backoff strategy in the restart policy. 
-# The parameters are described further in the chapter.
-min_backoff = "5s" # Required.
-max_backoff = "30s" # Required.
-factor = "2.0" # Optional.
-max_retries = "20" # Optional.
-auto_reset = "5s" # Optional.
-
-[group_c]
-# If the restart policy is not specified, the restart policy from the blueprint will be used.
-</code></pre>
-<p>Additionally, each actor can further override its restart policy through the actor’s context:</p>
-<pre><code class="language-rust">// Override the group policy with the actor's policy, which is applicable only for this lifecycle.
-ctx.set_restart_policy(RestartPolicy::...);
-
-// Restore the group policy from the configuration (if specified), or use the default group policy.
-ctx.set_restart_policy(None);</code></pre>
-<h3 id="repetitive-restarts"><a class="header" href="#repetitive-restarts">Repetitive restarts</a></h3>
-<p>Repetitive restarts are limited by an exponential backoff strategy. The delay for each subsequent retry is calculated as follows:</p>
-<pre><code class="language-text">delay = min(min_backoff * pow(factor, power), max_backoff)
-power = power + 1
-</code></pre>
-<p>So for example, when <code>factor</code> is set to <code>2</code>, <code>min_backoff</code> is set to <code>4</code>, and <code>max_backoff</code> is set to <code>36</code>, and <code>power</code> is set to <code>0</code>,
-this will result in the following sequence of delays: <code>[4, 8, 16, 32, 36]</code>.</p>
-<p>The backoff strategy is configured by passing a <code>RestartParams</code> to one of the restart policies, either <code>RestartPolicy::on_failure</code> or <code>RestartPolicy::always</code>, upon creation.
-The required parameters for <code>RestartParams</code> are as follows:</p>
-<ul>
-<li><code>min_backoff</code> - Minimal restart time limit.</li>
-<li><code>max_backoff</code> - Maximum restart time limit.</li>
-</ul>
-<p>The <code>RestartParams</code> can be further configured with the following optional parameters:</p>
-<ul>
-<li><code>factor</code> - The value to multiply the current delay with for each retry attempt. Default value is <code>2.0</code>.</li>
-<li><code>max_retries</code> - The limit on retry attempts, after which the actor stops attempts to restart. The default value is <code>NonZeroU64::MAX</code>, which effectively means unlimited retries.</li>
-<li><code>auto_reset</code> - The duration of an actor’s lifecycle sufficient to deem the actor healthy. The default value is <code>min_backoff</code>.
-After this duration elapses, the backoff strategy automatically resets. The following restart will occur <strong>without delays</strong> and will be considered the first retry.</li>
-</ul>
-<p>Subsequent restarts will have delays calculated using the formula above, with the <code>power</code> starting from 0.</p>
-<h2 id="termination"><a class="header" href="#termination">Termination</a></h2>
-<p>System termination is started by the <code>system.init</code> actor in several cases:</p>
-<ul>
-<li>Received <code>SIGTERM</code> or <code>SIGINT</code> signals, Unix only.</li>
-<li>Received <code>CTRL_C_EVENT</code> or <code>CTRL_BREAK_EVENT</code> events, Windows only.</li>
-<li>Too high memory usage, Unix only. Now it’s 90% (ratio of RSS to total memory) and not configurable (<a href="https://github.com/elfo-rs/elfo/issues/60">elfo#60</a>).</li>
-</ul>
-<p>The process consists of several stages:
-<img src="assets/termination.drawio.svg" alt="termination"></p>
-<ol>
-<li><code>system.init</code> sends to all user-defined groups “polite” <code>Terminate::default()</code> message.
-<ul>
-<li>Groups’ supervisors stop spawning new actors.</li>
-<li><code>Terminate</code> is routed as a usual message with <code>Outcome::Broadcast</code> by default.</li>
-<li>For <code>TerminationPolicy::closing</code> (by default): the mailbox is closed instantly, <code>ctx.recv()</code> returns <code>None</code> after already stored messages.</li>
-<li>For <code>TerminationPolicy::manually</code>: the mailbox isn’t closed, <code>ctx.recv()</code> returns <code>Terminate</code> in order to handle in on your own. Use <code>ctx.close()</code> to close the mailbox.</li>
-</ul>
+<li>
+<p><code>Initializing</code></p>
+<p>An initial status.
+The actor doesn’t handle incoming messages and is doing some initialization, e.g. subscribing to other actors, collecting an initial state, connecting to DB, etc.</p>
 </li>
-<li>If some groups haven’t terminated after 30s, <code>system.init</code> sends <code>Terminate::closing()</code> message.
-<ul>
-<li><code>Terminate</code> is routed as a usual message with <code>Outcome::Broadcast</code> by default.</li>
-<li>For any policy, the mailbox is closed instantly, <code>ctx.recv()</code> returns <code>None</code> after already stored messages.</li>
-</ul>
+<li>
+<p><code>Normal</code></p>
+<p>The actor handles incoming messages.</p>
+<p>This status appears on first <code>ctx.(try_)recv()</code> call.</p>
 </li>
-<li>If some groups haven’t terminated after another 15s, <code>system.init</code> stops waiting for that groups.</li>
-<li>Repeat the above stages for system groups.</li>
-</ol>
-<p>Timeouts above aren’t configurable for now (<a href="https://github.com/elfo-rs/elfo/issues/61">elfo#61</a>).</p>
-<p>The termination policy can be chosen while creating <code>ActorGroup</code>:</p>
-<pre><code class="language-rust">use elfo::group::{TerminationPolicy, ActorGroup};
+<li>
+<p><code>Terminating</code></p>
+<p>An actor is preparing to termination, e.g. doing some cleanup, flushing data, etc.</p>
+<p>It happens when the actor’s mailbox is closed and all messages are handled. Additionally, if the actor uses <code>TerminationPolicy::manually</code>, it also happens when <code>Terminate</code> is received.</p>
+</li>
+<li>
+<p><code>Terminated</code></p>
+<p>A terminal status. The actor’s <code>exec()</code> finished without errors.</p>
+</li>
+<li>
+<p><code>Alarming</code></p>
+<p>The actor has some long term problem, but still handles messages, maybe in a special way.</p>
+<p>Currently, this status can be set manually only.</p>
+</li>
+<li>
+<p><code>Failed</code></p>
+<p>A terminal status. The actor panicked or his <code>exec()</code> returns <code>Err</code>.</p>
+</li>
+</ul>
+<h2 id="built-in-status-transitions"><a class="header" href="#built-in-status-transitions">Built-in status transitions</a></h2>
+<p><img src="assets/status-default-transitions.drawio.svg" alt="FSM of actor statuses"></p>
+<p>The schema doesn’t include the <code>Alarming</code> status, because it can be set only manually for now.</p>
+<p>From the point of view of the main actor’s loop:</p>
+<pre><code class="language-rust ignore">async fn exec(mut ctx: Context) {
+    // Status: Initializing
+    //  subscribe to other actors, connect to DB, etc
 
-ActorGroup::new().termination_policy(TerminationPolicy::closing())
-ActorGroup::new().termination_policy(TerminationPolicy::manually())</code></pre>
+    while let Some(envelope) = ctx.recv().await {
+        // Status: Normal
+        //  handle messages
+    }
+
+    // Status: Terminating
+    //  make cleanup, flush data, etc
+} // Status: Terminated or Failed</code></pre>
+<h2 id="manual-status-management"><a class="header" href="#manual-status-management">Manual status management</a></h2>
+<p>It’s possible to avoid managing statuses totally, built-in logic is reasonable enough. However, with the increasing complexity of actors, it can be helpful to provide more information about the current status.</p>
+<p>The basic way to change status:</p>
+<pre><code class="language-rust ignore">ctx.set_status(ActorStatus::ALARMING);</code></pre>
+<p>Also, details can be provided with each status:</p>
+<pre><code class="language-rust ignore">ctx.set_status(ActorStatus::INITIALIZING.with_details("loading state"));</code></pre>
+<h2 id="subscribing-to-actors-statuses"><a class="header" href="#subscribing-to-actors-statuses">Subscribing to actor’s statuses</a></h2>
+<p>TODO: <code>SubscribeToActorStatuses</code>, <code>ActorStatusReport</code></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="ch04-01-routing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="ch02-00-actors.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="ch04-03-configuration.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="ch02-02-communication.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -310,11 +253,11 @@ ActorGroup::new().termination_policy(TerminationPolicy::manually())</code></pre>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="ch04-01-routing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="ch02-00-actors.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="ch04-03-configuration.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="ch02-02-communication.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

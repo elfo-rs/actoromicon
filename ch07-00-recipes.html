@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Routing - The Actoromicon</title>
+        <title>Recipes - The Actoromicon</title>
 
 
         <!-- Custom HTML head -->
@@ -38,10 +38,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-a4e75bf8.js";
+            window.path_to_searchindex_js = "searchindex-444fbd54.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-d16bc87c.js"></script>
+        <script src="toc-c7399a36.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,137 +177,19 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="routing"><a class="header" href="#routing">Routing</a></h1>
-<p>Routing is the process of searching for the actor that will handle a sent message. In order to append the message to his mailbox, we need to discover the actor’s address.</p>
-<p><code>elfo</code> offers a two-level routing system. What does it mean? Messages can pass through up to two steps of routing, depending on used methods, as shown on the following diagram:</p>
-<p><img src="assets/routing-process.drawio.svg" alt="routing process"></p>
-<ol>
-<li>If we don’t know any address (<code>ctx.(try_|unbounded_)send(msg)</code> and <code>ctx.request(msg)</code>), the inter-group router is called to determine which groups are interested in the message. Then, the corresponding inner-group router is called for each interested group to decide which shards should receive the message.</li>
-<li>Only the inner-group router is called if we already know a group’s address (<code>ctx.(try_|unbounded_)send_to(group_addr, msg)</code> and <code>ctx.request_to(group_addr, msg)</code>).</li>
-<li>If we already know an actor’s address (<code>ctx.(try_|unbounded_)send_to(actor_addr, msg)</code> and <code>ctx.request_to(actor_addr, msg)</code>), nothing additional is done because we already know which actor should handle the message.</li>
-</ol>
-<p>Note that if several actors are interested in the message, each receives a copy of the message. It’s ok for messages without heap-allocated fields or for rare messages, but for the big ones consider wrapping into <code>Arc</code> to reduce the <code>clone()</code> overhead.</p>
-<h2 id="inter-group-routing"><a class="header" href="#inter-group-routing">Inter-group routing</a></h2>
-<p>Inter-group routing is responsible for connecting actor groups among themselves.</p>
-<p>Let’s consider the following architecture scheme:</p>
-<p><img src="assets/inter-group-routing.drawio.svg" alt="inter-group routing"></p>
-<p>Actor groups and connections between them are defined in so-called “topology”:</p>
-<pre><code class="language-rust">fn topology(config_path: &amp;str) -&gt; elfo::Topology {
-    let topology = elfo::Topology::empty();
-    let logger = elfo::logger::init();
-
-    // Define system groups.
-    let loggers = topology.local("system.loggers");
-    let telemeters = topology.local("system.telemeters");
-    let dumpers = topology.local("system.dumpers");
-    let pingers = topology.local("system.pingers");
-    let configurers = topology.local("system.configurers").entrypoint();
-
-    // Define user groups.
-    let group_a = topology.local("group_a");
-    let group_b = topology.local("group_b");
-    let group_c = topology.local("group_c");
-
-    // Define connections between user actor groups.
-    group_a.route_to(&amp;group_b, |e| { // "e" means "Envelope"
-        msg!(match e {
-            MessageX | MessageY =&gt; true,
-            _ =&gt; false,
-        })
-    });
-    group_a.route_to(&amp;group_c, |e| {
-        msg!(match e {
-            MessageX =&gt; true,
-            _ =&gt; false,
-        })
-    });
-    group_b.route_to(&amp;group_c, |e| {
-        msg!(match e {
-            MessageZ =&gt; true,
-            _ =&gt; false,
-        })
-    });
-    group_c.route_to(&amp;group_a, |e| {
-        msg!(match e {
-            MessageW =&gt; true,
-            _ =&gt; false,
-        })
-    });
-
-    // Mount specific implementations.
-    loggers.mount(logger);
-    telemeters.mount(elfo::telemeter::new());
-    dumpers.mount(elfo::dumper::new());
-    pingers.mount(elfo::pinger::new(&amp;topology));
-
-    // Actors can use `topology` as a service locator.
-    // Usually it should be used for utilities only.
-    configurers.mount(elfo::configurer::from_path(&amp;topology, config_path));
-
-    group_a.mount(group_a::new());
-    group_b.mount(group_b::new());
-    group_c.mount(group_c::new());
-
-    topology
-}</code></pre>
-<p>Not all messages should be specified at this level. Usually, only requests and some multicast events are specified here, but not messages that will be passed directly, such as responses or events of subscriptions.</p>
-<h2 id="inner-group-routing"><a class="header" href="#inner-group-routing">Inner-group routing</a></h2>
-<p>Inner-group routing is responsible for choosing which shards should handle incoming messages.</p>
-<p><img src="assets/actor-group.drawio.svg" alt="an actor group"></p>
-<p>The inner-group router is defined next to the actor implementation, in the group declaration.</p>
-<h3 id="stateless-router"><a class="header" href="#stateless-router">Stateless router</a></h3>
-<pre><code class="language-rust">use elfo::routers::{Outcome, MapRouter};
-
-ActorGroup::new()
-    .router(MapRouter::new(|e| {
-        msg!(match e {
-            MessageX { key, .. } =&gt; Outcome::Unicast(key),
-            MessageY { keys, .. } =&gt; Outcome::Multicast(keys.to_vec()),
-            MessageZ =&gt; Outcome::Broadcast,
-            _ =&gt; Outcome::Default,
-        })
-    }))
-    .exec(exec);</code></pre>
-<p>Possible <code>Outcome</code>’s variants:</p>
-<ul>
-<li><code>Outcome::Unicast</code> sends the message only to the actor with a specified key. If there is no active or restarting actor for the key, the new one will be started.</li>
-<li><code>Outcome::GentleUnicast</code> works like <code>Outcome::Unicast</code>, but doesn’t lead to spawning new actors, instead a message is discarded.</li>
-<li><code>Outcome::Multicast</code> sends to several actors. New actors will be started.</li>
-<li><code>Outcome::GentleMulticast</code> works like <code>Outcome::Multicast</code>, but doesn’t lead to spawning new actors, instead a message is discarded.</li>
-<li><code>Outcome::Broadcast</code> sends to all active actors.</li>
-<li><code>Outcome::Discard</code> drops the message (that leads to an error on sending side).</li>
-<li><code>Outcome::Default</code> behaviour depends on the message type:
-<ul>
-<li><code>Outcome::Discard</code> for <code>ValidateConfig</code> message.</li>
-<li><code>Outcome::Broadcast</code> for all other system messages (such as <code>UpdateConfig</code>, <code>Terminate</code>, etc).</li>
-<li><code>Outcome::Discard</code> for user-defined messages.</li>
-</ul>
-</li>
-</ul>
-<h3 id="stateful-router"><a class="header" href="#stateful-router">Stateful router</a></h3>
-<p>Sometimes we need to use a router with rarely changing state. If the state should be changed often, consider using a dedicated actor as a router.</p>
-<p>To create a stateful router use the <code>MapRouter::with_state</code> constructor. Note that the state type should implement <code>Default</code>, <code>Send</code> and <code>Sync</code>.</p>
-<pre><code class="language-rust">ActorGroup::new()
-    .router(MapRouter::with_state(
-        // Called if the config is changed.
-        |config: &amp;Config, state| make_new_state(..),
-        // The routing function.
-        |e, state| {
-            msg!(match e { .. })
-        }
-    ))
-    .exec(exec);</code></pre>
-<p>The state is recreated every time when the config is changed. Useful when all needed information (e.g. a list of actors) can be extracted from the config. Note that recreation doesn’t block execution; the state is atomically replaced only once <code>make_new_state(..)</code> is finished.</p>
+                        <h1 id="recipes"><a class="header" href="#recipes">Recipes</a></h1>
+<p>The previous chapters covered the core concepts of <code>elfo</code>: actors, groups, observability, distribution, and testing. This chapter is different — it is a collection of self-contained, practical guides for common tasks and decisions you will encounter when building real systems with <code>elfo</code>.</p>
+<p>Each recipe focuses on a specific question. These chapters assume familiarity with the earlier chapters and can be read in any order.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="ch04-00-groups.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="ch05-02-protocol-evolution.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="ch04-02-supervision.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="ch07-01-project-structure.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -317,11 +199,11 @@ ActorGroup::new()
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="ch04-00-groups.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="ch05-02-protocol-evolution.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="ch04-02-supervision.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="ch07-01-project-structure.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Actor Lifecycle - The Actoromicon</title>
+        <title>Tokio Console - The Actoromicon</title>
 
 
         <!-- Custom HTML head -->
@@ -38,10 +38,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-a4e75bf8.js";
+            window.path_to_searchindex_js = "searchindex-444fbd54.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-d16bc87c.js"></script>
+        <script src="toc-c7399a36.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,73 +177,39 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="actor-lifecycle"><a class="header" href="#actor-lifecycle">Actor lifecycle</a></h1>
-<p>An actor goes through several stages in life. Transitions between stages are accompanied by statuses. Statuses help us to understand better what’s happening with actors. So, a good way to understand actor lifecycle is to get familiar with statuses.</p>
-<h2 id="statuses"><a class="header" href="#statuses">Statuses</a></h2>
-<ul>
-<li>
-<p><code>Initializing</code></p>
-<p>An initial status.
-The actor doesn’t handle incoming messages and is doing some initialization, e.g. subscribing to other actors, collecting an initial state, connecting to DB, etc.</p>
-</li>
-<li>
-<p><code>Normal</code></p>
-<p>The actor handles incoming messages.</p>
-<p>This status appears on first <code>ctx.(try_)recv()</code> call.</p>
-</li>
-<li>
-<p><code>Terminating</code></p>
-<p>An actor is preparing to termination, e.g. doing some cleanup, flushing data, etc.</p>
-<p>It happens when the actor’s mailbox is closed and all messages are handled. Additionally, if the actor uses <code>TerminationPolicy::manually</code>, it also happens when <code>Terminate</code> is received.</p>
-</li>
-<li>
-<p><code>Terminated</code></p>
-<p>A terminal status. The actor’s <code>exec()</code> finished without errors.</p>
-</li>
-<li>
-<p><code>Alarming</code></p>
-<p>The actor has some long term problem, but still handles messages, maybe in a special way.</p>
-<p>Currently, this status can be set manually only.</p>
-</li>
-<li>
-<p><code>Failed</code></p>
-<p>A terminal status. The actor panicked or his <code>exec()</code> returns <code>Err</code>.</p>
-</li>
-</ul>
-<h2 id="built-in-status-transitions"><a class="header" href="#built-in-status-transitions">Built-in status transitions</a></h2>
-<p><img src="assets/status-default-transitions.drawio.svg" alt="FSM of actor statuses"></p>
-<p>The schema doesn’t include the <code>Alarming</code> status, because it can be set only manually for now.</p>
-<p>From the point of view of the main actor’s loop:</p>
-<pre><code class="language-rust ignore">async fn exec(mut ctx: Context) {
-    // Status: Initializing
-    //  subscribe to other actors, connect to DB, etc
+                        <h1 id="tokio-console"><a class="header" href="#tokio-console">Tokio Console</a></h1>
+<p><a href="https://github.com/tokio-rs/console">tokio-console</a> is a diagnostics and debugging tool for async Rust programs. It provides a TUI to inspect the state of async tasks and resources in a running tokio runtime.</p>
+<p>Elfo integrates with tokio-console by naming all tasks that run actors or spawned by <code>elfo::task::spawn_blocking()</code> or <code>elfo::task::Builder</code>:
+<img src="assets/tokio-console.png" alt="tokio-console screenshot"></p>
+<p>Firstly, add <code>console-subscriber</code> to dependencies and enable the <code>tokio-tracing</code> feature of elfo:</p>
+<pre><code class="language-toml">[dependencies]
+elfo = { version = "0.2", features = ["tokio-tracing"] }
+console-subscriber = "0.5.0"
+</code></pre>
+<p>Secondly, we need manually initialize the <code>tracing</code> subscriber instead of letting elfo do it for us:</p>
+<pre><code class="language-rust">let (blueprint, scope_filter, capture_layer) = elfo::batteries::logger::new();
 
-    while let Some(envelope) = ctx.recv().await {
-        // Status: Normal
-        //  handle messages
-    }
+tracing_subscriber::registry()
+    .with(console_subscriber::spawn())
+    .with(capture_layer.with_filter(scope_filter))
+    .init();
 
-    // Status: Terminating
-    //  make cleanup, flush data, etc
-} // Status: Terminated or Failed</code></pre>
-<h2 id="manual-status-management"><a class="header" href="#manual-status-management">Manual status management</a></h2>
-<p>It’s possible to avoid managing statuses totally, built-in logic is reasonable enough. However, with the increasing complexity of actors, it can be helpful to provide more information about the current status.</p>
-<p>The basic way to change status:</p>
-<pre><code class="language-rust ignore">ctx.set_status(ActorStatus::ALARMING);</code></pre>
-<p>Also, details can be provided with each status:</p>
-<pre><code class="language-rust ignore">ctx.set_status(ActorStatus::INITIALIZING.with_details("loading state"));</code></pre>
-<h2 id="subscribing-to-actors-statuses"><a class="header" href="#subscribing-to-actors-statuses">Subscribing to actor’s statuses</a></h2>
-<p>TODO: <code>SubscribeToActorStatuses</code>, <code>ActorStatusReport</code></p>
+loggers.mount(blueprint);</code></pre>
+<p>Finally, compile with <code>--cfg tokio_unstable</code> to opt into tokio’s unstable task instrumentation:</p>
+<pre><code class="language-sh">RUSTFLAGS='--cfg tokio_unstable' cargo run
+</code></pre>
+<p>That’s all! Now we can run <code>tokio-console</code> to run the TUI and connect to our application.</p>
+<p>Check <a href="https://github.com/elfo-rs/elfo/blob/master/examples/tokio_console.rs">this example</a> for a complete code sample.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="ch03-00-actors.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="ch04-04-tracing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="ch03-02-communication.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="ch05-02-protocol-evolution.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -253,11 +219,11 @@ The actor doesn’t handle incoming messages and is doing some initialization, e
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="ch03-00-actors.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="ch04-04-tracing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="ch03-02-communication.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="ch05-02-protocol-evolution.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Communication - The Actoromicon</title>
+        <title>Multiple Runtimes - The Actoromicon</title>
 
 
         <!-- Custom HTML head -->
@@ -38,10 +38,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-a4e75bf8.js";
+            window.path_to_searchindex_js = "searchindex-444fbd54.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-d16bc87c.js"></script>
+        <script src="toc-c7399a36.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,76 +177,99 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="communication"><a class="header" href="#communication">Communication</a></h1>
-<p>Actors can communicate in many ways depending on the situation and desired guarantees.</p>
-<h2 id="fire-and-forget"><a class="header" href="#fire-and-forget">Fire and Forget</a></h2>
-<p>The most straightforward way is to send a message with minimal guarantees.</p>
-<p><img src="assets/fire-and-forget.drawio.svg" alt="fire and forget"></p>
-<p>However, it’s possible to choose the desired behavior by calling the most appropriate method. All variants can be described by the following template: <code>(try_|unbounded_)send(_to)</code>.</p>
-<p>Methods with the <code>_to</code> suffix allow to specify a destination address as the first argument. Otherwise, <a href="./ch04-01-routing.html">the routing subsystem</a> will be used.</p>
-<p>The prefix describes what should happen if the destination mailbox is full:</p>
-<div class="table-wrapper">
-<table>
-<thead>
-<tr><th>Syntax</th><th>Error cases</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td><code>send().await</code></td><td><code>Closed</code></td><td>Blocks until a destination mailbox has space for new messages</td></tr>
-<tr><td><code>try_send()</code></td><td><code>Full</code>, <code>Closed</code></td><td>Returns <code>Full</code> if the mailbox is full</td></tr>
-<tr><td><code>unbounded_send()</code></td><td><code>Closed</code></td><td>Ignores the capacity of the mailbox</td></tr>
-</tbody>
-</table>
-</div>
-<p>All methods can return <code>Closed</code> if the destination actor is closed.</p>
-<p>The form <code>send().await</code> is used when desired behavior is backpressure, while <code>try_send()</code> is for actors with predicted latency, when it’s acceptable to lose messages or it can be handled manually. <code>unbounded_send()</code> should be avoided because it can increase mailboxes unpredictably, leading to OOM.</p>
-<h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
-<pre><code class="language-rust ignore">#[message]
-struct SomeMessage;
+                        <h1 id="multiple-runtimes"><a class="header" href="#multiple-runtimes">Multiple Runtimes</a></h1>
+<p>By default, all actors in an elfo system run on a single shared Tokio runtime (the one that drives <code>elfo::init::start</code>). This is usually fine, but sometimes it’s desirable to isolate different actor groups or even individual actors onto their own dedicated runtimes. This is especially useful when some groups are latency-sensitive and should not be affected by other groups.</p>
+<h2 id="registering-runtimes"><a class="header" href="#registering-runtimes">Registering runtimes</a></h2>
+<p>Dedicated runtimes are registered on the <code>Topology</code> via <code>add_dedicated_rt</code>. Each call takes a filter predicate and a <code>tokio::runtime::Handle</code>:</p>
+<pre><code class="language-rust">use tokio::runtime as rt;
 
-// Block if the destination mailbox is full.
-ctx.send(SomeMessage).await?;
+let producers_rt = rt::Builder::new_multi_thread()
+    .worker_threads(2)
+    .build()
+    .unwrap();
 
-// Do not care if the target actor is closed or full.
-ctx.try_send(SomeMessage)?;
+let workers_rt = rt::Builder::new_multi_thread()
+    .worker_threads(3)
+    .build()
+    .unwrap();
 
-// Forcibly push the message into the mailbox.
-ctx.unbounded_send(SomeMessage)?;
+let topology = Topology::empty();
 
-// Manually implement backpressure, e.g. store messages.
-if let Err(err) = ctx.try_send(SomeMessage) {
-    let msg = err.into_inner(); // msg: SomeMessage
+// Filters are checked in order; first match wins.
+// Actors that don't match any filter run on the default runtime.
+topology.add_dedicated_rt(
+    |meta| meta.group == "producers",
+    producers_rt.handle().clone(),
+);
+topology.add_dedicated_rt(
+    |meta| meta.group == "workers",
+    workers_rt.handle().clone(),
+);</code></pre>
+<p>The filter receives <code>ActorMeta</code>, so it can be used to filter based on actor’s key or group’s name. Filters are evaluated in registration order and the first match wins. Actors whose group matches no filter are spawned on the default runtime (the one that drives <code>elfo::init::start</code>).</p>
+<h2 id="thread-accounting"><a class="header" href="#thread-accounting">Thread accounting</a></h2>
+<p>When building a system with multiple runtimes, it is useful to name all threads to distinguish them in logs, profilers and so on:</p>
+<pre><code class="language-rust">fn start_runtime(name: &amp;str, workers: usize) -&gt; rt::Runtime {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    let name = name.to_string();
+    let worker_idx = AtomicUsize::new(0);
+
+    rt::Builder::new_multi_thread()
+        .worker_threads(workers)
+        .enable_all()
+        .thread_name_fn(move || {
+            let idx = worker_idx.fetch_add(1, Ordering::SeqCst);
+            format!("{name}#{idx}")
+        })
+        .on_thread_start(|| {
+            // A good place to configure thread affinity and set scheduler
+            // policy, e.g. `SCHED_FIFO`.
+            //
+            // Count threads in order to distinguish between workers and
+            // blocking ones: first `workers` threads are workers, the rest are
+            // blocking threads.
+        })
+        .build()
+        .unwrap()
 }</code></pre>
-<h2 id="blocking-request-response"><a class="header" href="#blocking-request-response">Blocking Request-Response</a></h2>
-<p>Some communications between actors require response message being sent back to the sender.</p>
-<p><img src="assets/blocking-request.drawio.svg" alt="a blocking request"></p>
-<p>TODO</p>
-<h3 id="examples-1"><a class="header" href="#examples-1">Examples</a></h3>
-<pre><code class="language-rust ignore">#[message(ret = Result&lt;(), DoSomethingRejected&gt;)]
-struct DoSomething;
+<p>With this setup the first worker thread of the <code>workers</code> runtime will be named <code>workers#0</code>, the second <code>workers#1</code>, and so on.</p>
+<p>Run <code>ps -T -p $(pidof multi_runtime)</code> to ensure all runtimes are started:</p>
+<pre><code class="language-text">    PID    SPID TTY          TIME CMD
+2163285 2163285 pts/1    00:00:00 multi_runtime
+2163285 2163319 pts/1    00:00:00 producers#0
+2163285 2163320 pts/1    00:00:00 workers#0
+2163285 2163321 pts/1    00:00:00 workers#1
+2163285 2163322 pts/1    00:00:00 workers#2
+2163285 2163323 pts/1    00:00:00 default#0
+</code></pre>
+<p>When actors are started, their initial thread is printed in the log message:</p>
+<pre><code class="language-text">2026-02-24 07:50:28.286933519  INFO [7446157725601366017] producers/_ - started	addr=2/129338070436	thread=producers#0
+</code></pre>
+<p>Note: actors can be rescheduled to a different thread within the same runtime by tokio’s scheduler, but they never migrate between runtimes.</p>
+<h2 id="runtime-lifecycle"><a class="header" href="#runtime-lifecycle">Runtime lifecycle</a></h2>
+<p>The dedicated runtimes must be kept alive for the duration of the system. Because <code>elfo::init::start</code> is an async function, it must be driven by some runtime — this is the <em>default</em> runtime. The dedicated runtimes are created beforehand and shut down after the system terminates:</p>
+<pre><code class="language-rust">fn main() {
+    let (topology, runtimes) = topology();
 
-#[message]
-struct DoSomethingRejected(String);
+    start_runtime("default", 1).block_on(elfo::init::start(topology));
 
-TODO</code></pre>
-<h2 id="non-blocking-request-response"><a class="header" href="#non-blocking-request-response">Non-blocking Request-Response</a></h2>
-<p><img src="assets/non-blocking-request.drawio.svg" alt="a non-blocking request">
-TODO</p>
-<h3 id="state"><a class="header" href="#state">State</a></h3>
-<p>TODO</p>
-<h3 id="examples-2"><a class="header" href="#examples-2">Examples</a></h3>
-<p>TODO</p>
-<h2 id="subscriptions"><a class="header" href="#subscriptions">Subscriptions</a></h2>
-<p>TODO</p>
+    for rt in runtimes {
+        rt.shutdown_background();
+    }
+}</code></pre>
+<p>The dedicated runtimes are only referenced by their handles inside the topology; owning the <code>Runtime</code> values outside and dropping them after <code>start</code> returns is sufficient to ensure clean shutdown.</p>
+<h2 id="full-example"><a class="header" href="#full-example">Full example</a></h2>
+<p>Check <a href="https://github.com/elfo-rs/elfo/blob/master/examples/multi_runtime.rs">this example</a> for a complete code sample.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="ch03-01-actor-lifecycle.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="ch07-01-project-structure.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="ch03-03-sources.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="ch07-10-id-generation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -256,11 +279,11 @@ TODO</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="ch03-01-actor-lifecycle.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="ch07-01-project-structure.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="ch03-03-sources.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="ch07-10-id-generation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>ID Generation - The Actoromicon</title>
+        <title>Routing - The Actoromicon</title>
 
 
         <!-- Custom HTML head -->
@@ -38,10 +38,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-a4e75bf8.js";
+            window.path_to_searchindex_js = "searchindex-444fbd54.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-d16bc87c.js"></script>
+        <script src="toc-c7399a36.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -177,134 +177,139 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="pattern-id-generation"><a class="header" href="#pattern-id-generation">Pattern: ID Generation</a></h1>
-<p>It should be noted that ID generation approach which was chosen in your app affects your app’s architecture and overall performance.
-Here we discuss how to design good ID and show a couple of great ID designs.</p>
-<h2 id="choosing-the-domain-for-your-ids"><a class="header" href="#choosing-the-domain-for-your-ids">Choosing the domain for your IDs</a></h2>
-<p>Despite of wide spread of 64-bit computer architecture several popular technologies still don’t support 64-bit unsigned integer numbers completely.
-For example several popular versions of Java <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html">have only <code>i64</code> type</a> so you <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Long.html#MAX_VALUE">can’t have</a> positive integer numbers bigger than \( 2^{63} - 1 \) without excess <a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html">overhead</a>.
-Therefore a lot of Java-powered apps (e.g. Graylog) have limitations on IDs’ domain.</p>
-<p>At some external apps you can gain a couple of problems because of IDs less than <code>1</code>, e.g. value <code>0</code> may be <a href="https://cloud.google.com/datastore/docs/concepts/entities#assigning_your_own_numeric_id">explicitly forbidden</a>.
-Avoiding <code>0</code> value in IDs simplifies some popular <a href="https://doc.rust-lang.org/core/num/struct.NonZeroU64.html">memory optimizations</a> and allows you to use zero values instead of <code>Nullable</code> columns which can improve performance in some databases (e.g. ClickHouse).</p>
-<p>This leads us to the following integer numbers’ domain for IDs:</p>
-<pre><code class="language-text">MIN = 1
-MAX = 2 ^ 63 - 1 =
-    = 9_223_372_036_854_775_807 =
-    = 0x7fff_ffff_ffff_ffff ≈
-    ≈ 9.2e18
-</code></pre>
-<p>Probably today you don’t need to be compatible with such domain-limiting systems but in most cases such limitations are very easy to withstand and there’s no reason for your project not to be ready for integration with such obsolete systems in the future.
-Such domain allows you to store \( 2^{63} - 1 \) entities which is bigger than \( 9.2 \dot{} 10^{18} \) and is enough to uniquely identify entities in almost every possible practical task.
-You shouldn’t forget though that a good ID generation scheme is just a trade-off between a dense domain usage and robust sharded unique IDs generation algorithm.</p>
-<p>That’s why we recommend using 63-bit positive integers as IDs.</p>
-<h3 id="systems-with-ecmascript"><a class="header" href="#systems-with-ecmascript">Systems with ECMAScript</a></h3>
-<p>In theory JSON allows you to use numbers of any length, but in a bunch of scenarios it will be great to process or display your data using ECMAScript (JavaScript, widely spread in web browsers) and it has <a href="https://262.ecma-international.org/11.0/#sec-numbers-and-dates">only</a> <code>f64</code> primitive type for numbers so you <a href="https://262.ecma-international.org/11.0/#sec-number.max_safe_integer">can’t have</a> positive integer numbers bigger than \( 2^{53} - 1 \) without excess <a href="https://262.ecma-international.org/11.0/#sec-ecmascript-language-types-bigint-type">overhead</a>.
-This leads us to the following integer numbers’ domain for IDs in systems with ECMAScript:</p>
-<pre><code class="language-text">MIN = 1
-MAX = 2 ^ 53 - 1 =
-    = 9_007_199_254_740_991 =
-    = 0x1f_ffff_ffff_ffff ≈
-    ≈ 9.0e12
-</code></pre>
-<p>From the other hand you can add an extra serialization step storing your IDs in JSON as strings which will be a decent workaround for this problem.</p>
-<h2 id="properties-of-your-id-generation-algorithm"><a class="header" href="#properties-of-your-id-generation-algorithm">Properties of your ID generation algorithm</a></h2>
-<p>We call generated IDs sequence <em>monotonic</em> if every subsequent ID is bigger than a previous one as a number.</p>
-<h3 id="why-monotonic-ids-are-so-great"><a class="header" href="#why-monotonic-ids-are-so-great">Why monotonic IDs are so great</a></h3>
-<p>The app should gain parameters for ID generation algorithm after every restart taking into account previously issued IDs.
-Monotonic IDs generation allows you to take into account only the most recently generated IDs or don’t bother about existing entries at all.</p>
-<p>Most of the modern storages allow you to take a notable performance advance if your data was put down in an ordered or partially-ordered form.
-The storage lays down the data according to <a href="https://clickhouse.tech/docs/en/engines/table-engines/mergetree-family/mergetree/#mergetree-query-clauses">sorting key</a> which <a href="https://clickhouse.tech/docs/en/engines/table-engines/mergetree-family/mergetree/#choosing-a-primary-key-that-differs-from-the-sorting-key">may differ</a> from the primary key (ID).
-To perform time series queries on partially-ordered data very quickly one can use the cheapest form of <a href="https://clickhouse.tech/docs/en/engines/table-engines/mergetree-family/mergetree/#table_engine-mergetree-data_skipping-indexes">data skipping indices</a> — the <code>minmax</code> index.</p>
-<p>Partially-monotonic data can be compressed using <a href="https://clickhouse.tech/docs/en/sql-reference/statements/create/table/#create-query-specialized-codecs">specialized codecs</a> very effectively, thanks to storing deltas instead of absolute values.
-Effective data compression is able to lower storage consumption and increase DB throughput significantly.</p>
-<p>This means that you should have a good reason to use non-monotonic IDs.</p>
-<h3 id="level-of-monotonicity"><a class="header" href="#level-of-monotonicity">Level of monotonicity</a></h3>
-<p>Depending on the length of monotonic segments in the generated IDs sequence we can divide ID generation algorithms to:</p>
+                        <h1 id="routing"><a class="header" href="#routing">Routing</a></h1>
+<p>Routing is the process of searching for the actor that will handle a sent message. In order to append the message to his mailbox, we need to discover the actor’s address.</p>
+<p><code>elfo</code> offers a two-level routing system. What does it mean? Messages can pass through up to two steps of routing, depending on used methods, as shown on the following diagram:</p>
+<p><img src="assets/routing-process.drawio.svg" alt="routing process"></p>
+<ol>
+<li>If we don’t know any address (<code>ctx.(try_|unbounded_)send(msg)</code> and <code>ctx.request(msg)</code>), the inter-group router is called to determine which groups are interested in the message. Then, the corresponding inner-group router is called for each interested group to decide which shards should receive the message.</li>
+<li>Only the inner-group router is called if we already know a group’s address (<code>ctx.(try_|unbounded_)send_to(group_addr, msg)</code> and <code>ctx.request_to(group_addr, msg)</code>).</li>
+<li>If we already know an actor’s address (<code>ctx.(try_|unbounded_)send_to(actor_addr, msg)</code> and <code>ctx.request_to(actor_addr, msg)</code>), nothing additional is done because we already know which actor should handle the message.</li>
+</ol>
+<p>Note that if several actors are interested in the message, each receives a copy of the message. It’s ok for messages without heap-allocated fields or for rare messages, but for the big ones consider wrapping into <code>Arc</code> to reduce the <code>clone()</code> overhead.</p>
+<h2 id="inter-group-routing"><a class="header" href="#inter-group-routing">Inter-group routing</a></h2>
+<p>Inter-group routing is responsible for connecting actor groups among themselves.</p>
+<p>Let’s consider the following architecture scheme:</p>
+<p><img src="assets/inter-group-routing.drawio.svg" alt="inter-group routing"></p>
+<p>Actor groups and connections between them are defined in so-called “topology”:</p>
+<pre><code class="language-rust">fn topology(config_path: &amp;str) -&gt; elfo::Topology {
+    let topology = elfo::Topology::empty();
+    let logger = elfo::logger::init();
+
+    // Define system groups.
+    let loggers = topology.local("system.loggers");
+    let telemeters = topology.local("system.telemeters");
+    let dumpers = topology.local("system.dumpers");
+    let pingers = topology.local("system.pingers");
+    let configurers = topology.local("system.configurers").entrypoint();
+
+    // Define user groups.
+    let group_a = topology.local("group_a");
+    let group_b = topology.local("group_b");
+    let group_c = topology.local("group_c");
+
+    // Define connections between user actor groups.
+    group_a.route_to(&amp;group_b, |e| { // "e" means "Envelope"
+        msg!(match e {
+            MessageX | MessageY =&gt; true,
+            _ =&gt; false,
+        })
+    });
+    group_a.route_to(&amp;group_c, |e| {
+        msg!(match e {
+            MessageX =&gt; true,
+            _ =&gt; false,
+        })
+    });
+    group_b.route_to(&amp;group_c, |e| {
+        msg!(match e {
+            MessageZ =&gt; true,
+            _ =&gt; false,
+        })
+    });
+    group_c.route_to(&amp;group_a, |e| {
+        msg!(match e {
+            MessageW =&gt; true,
+            _ =&gt; false,
+        })
+    });
+
+    // Mount specific implementations.
+    loggers.mount(logger);
+    telemeters.mount(elfo::telemeter::new());
+    dumpers.mount(elfo::dumper::new());
+    pingers.mount(elfo::pinger::new(&amp;topology));
+
+    // Actors can use `topology` as a service locator.
+    // Usually it should be used for utilities only.
+    configurers.mount(elfo::configurer::from_path(&amp;topology, config_path));
+
+    group_a.mount(group_a::new());
+    group_b.mount(group_b::new());
+    group_c.mount(group_c::new());
+
+    topology
+}</code></pre>
+<p>Not all messages should be specified at this level. Usually, only requests and some multicast events are specified here, but not messages that will be passed directly, such as responses or events of subscriptions.</p>
+<h2 id="inner-group-routing"><a class="header" href="#inner-group-routing">Inner-group routing</a></h2>
+<p>Inner-group routing is responsible for choosing which shards should handle incoming messages.</p>
+<p><img src="assets/actor-group.drawio.svg" alt="an actor group"></p>
+<p>The inner-group router is defined next to the actor implementation, in the group declaration.</p>
+<h3 id="stateless-router"><a class="header" href="#stateless-router">Stateless router</a></h3>
+<pre><code class="language-rust">use elfo::routers::{Outcome, MapRouter};
+
+ActorGroup::new()
+    .router(MapRouter::new(|e| {
+        msg!(match e {
+            MessageX { key, .. } =&gt; Outcome::Unicast(key),
+            MessageY { keys, .. } =&gt; Outcome::Multicast(keys.to_vec()),
+            MessageZ =&gt; Outcome::Broadcast,
+            _ =&gt; Outcome::Default,
+        })
+    }))
+    .exec(exec);</code></pre>
+<p>Possible <code>Outcome</code>’s variants:</p>
 <ul>
-<li><em>Fully monotonic</em> — generated ID sequence is monotonic during the whole lifetime of the system (see also <a href="#ids-produced-by-db">IDs produced by DB</a>).</li>
-<li><em>Periodically monotonic</em> — ID generation algorithm reaches the maximal value for ID several times during the lifetime of the system and starts counting from the beginning of the domain.
-This means that the storage would contain a couple of monotonic segments e.g. with data for several months long each (see also <a href="./ch05-04-tracing.html#traceid"><code>TraceId</code></a>).</li>
-<li>With <em>sharded monotonicity</em> — the app generates IDs monotonically for several segments frequently switching between these segments.
-E.g. every actor generates only monotonic IDs but because of concurrent nature of actors’ work the storage should handle a lot of intersecting consecutive IDs inserts (see also <a href="#decimalid"><code>DecimalId</code></a>).</li>
-</ul>
-<h3 id="monotonicity-source"><a class="header" href="#monotonicity-source">Monotonicity source</a></h3>
-<p>There’re several means to gain monotonic IDs.
-Your choice of them would affect application restart strategy:</p>
+<li><code>Outcome::Unicast</code> sends the message only to the actor with a specified key. If there is no active or restarting actor for the key, the new one will be started.</li>
+<li><code>Outcome::GentleUnicast</code> works like <code>Outcome::Unicast</code>, but doesn’t lead to spawning new actors, instead a message is discarded.</li>
+<li><code>Outcome::Multicast</code> sends to several actors. New actors will be started.</li>
+<li><code>Outcome::GentleMulticast</code> works like <code>Outcome::Multicast</code>, but doesn’t lead to spawning new actors, instead a message is discarded.</li>
+<li><code>Outcome::Broadcast</code> sends to all active actors.</li>
+<li><code>Outcome::Discard</code> drops the message (that leads to an error on sending side).</li>
+<li><code>Outcome::Default</code> behaviour depends on the message type:
 <ul>
-<li><a href="#ids-produced-by-db">Using DB</a>.
-Needs atomic <a href="https://www.scylladb.com/2020/07/15/getting-the-most-out-of-lightweight-transactions-in-scylla/">compare-and-set</a> (ScyllaDB) or auto-increment</li>
-<li>Launch number (e.g. <a href="#decimalid"><code>DecimalId</code></a>).</li>
-<li>Time (e.g. <a href="./ch05-04-tracing.html#traceid"><code>TraceId</code></a>).
-Time-series-based (not determined, has advantages limitations).</li>
+<li><code>Outcome::Discard</code> for <code>ValidateConfig</code> message.</li>
+<li><code>Outcome::Broadcast</code> for all other system messages (such as <code>UpdateConfig</code>, <code>Terminate</code>, etc).</li>
+<li><code>Outcome::Discard</code> for user-defined messages.</li>
 </ul>
-<h3 id="the-reasons-for-non-monotonic-ids"><a class="header" href="#the-reasons-for-non-monotonic-ids">The reasons for non-monotonic IDs</a></h3>
-<p>If ID generation algorithm shouldn’t look predictive because of information security concerns it’s a good reason to use <a href="https://en.wikipedia.org/wiki/Hash_function#Multiplicative_hashing">multiplicative hashing</a> or <a href="https://preshing.com/20121224/how-to-generate-a-sequence-of-unique-random-integers/">random permutations</a> to generate your IDs.</p>
-<p>It’s usually a great idea to apply randomness tests to your IDs in such scenarios.</p>
-<p>Please note that really secure IDs would require security algorithms (or at least some versions of UUID).
-Algorithms mentioned above are for IDs that should just <em>look random</em>.</p>
-<h3 id="common-or-separate-domains-for-several-entities-ids"><a class="header" href="#common-or-separate-domains-for-several-entities-ids">Common or separate domains for several entities’ IDs</a></h3>
-<p>Should we use common ID generator for several entities?</p>
-<p>In such scenario IDs for various entities will never intersect so you have no chance to successfully query entity A by ID of entity B by mistake and you essentially have “fail fast” approach on entities’ querying.</p>
-<p>Unfortunately common ID generator for several entities will exhaust ID domain more quickly.</p>
-<h2 id="great-ids-case-study"><a class="header" href="#great-ids-case-study">Great IDs case study</a></h2>
-<h3 id="ids-produced-by-db"><a class="header" href="#ids-produced-by-db">IDs produced by DB</a></h3>
-<p>Probably you did already use <code>AUTO_INCREMENT</code> SQL DDL instruction for primary keys.
-The general idea with it is to never generate IDs by ourselves and instead rely on the counter inside the database as a single source of truth.
-This means that you don’t know the IDs of entities you’d like to insert before you actually insert them so you should essentially support separate schema just for entities’ “construction stubs” and your app’s latency is bound by DB latency by design.
-If you need a cycle reference between entities you’d like to insert you’re most likely in trouble.
-If you need database replication you’ll be in trouble <a href="https://mariadb.com/kb/en/auto_increment/#replication">too</a>.</p>
-<p>Alternative — is to use atomic compare-and-swap integrated into several DB engines, for example <a href="https://stackoverflow.com/a/29391877/697625">Cassandra’s lightweight transactions</a>.
-IDs produced by DB are great for storing entities appearing with relatively low frequency (probably less than 10000 per second): like users or accounts.</p>
-<p>Such approach gives us <a href="#level-of-monotonicity">fully monotonic</a> IDs and uses the whole <a href="#choosing-the-domain-for-your-ids">63-bit space</a> to store ID’s positive value right away.</p>
-<h3 id="decimalid"><a class="header" href="#decimalid"><code>DecimalId</code></a></h3>
-<p>Probably your application already has some kind of <em>launch log</em> storing information about release ticket in the issue tracking system, launch time, user initiated the launch, etc.
-If you have such entity in your system <code>DecimalId</code> will probably serve to you really good.
-This ID has <a href="#level-of-monotonicity">sharded monotonicity</a>.
-The primary idea behind <code>DecimalId</code> is to increase ID’s legibility by storing its parts in a separate decimal places.</p>
-<p><code>DecimalId</code> essentially is:</p>
-<p>\[
-\operatorname{decimal\_id} = \operatorname{counter} \dot{} 10^{10} + \operatorname{generator\_id} \dot{} 10^{5} + \operatorname{launch\_id}
-\]</p>
-<p>This formula corresponds to the following decimal places distribution table:</p>
-<div class="table-wrapper">
-<table>
-<thead>
-<tr><th style="text-align: right">Digits</th><th>Description</th><th>Range</th><th>Source</th></tr>
-</thead>
-<tbody>
-<tr><td style="text-align: right">9</td><td><code>counter</code></td><td><code>1..=922_337_202</code></td><td>Not synchronized runtime parameter</td></tr>
-<tr><td style="text-align: right">5</td><td><code>generator_id</code></td><td><code>0..=99_999</code></td><td>Synchronized runtime parameter</td></tr>
-<tr><td style="text-align: right">5</td><td><code>launch_id</code></td><td><code>1..=99_999</code>, <code>0</code> for tests</td><td>Externally specified and consistent across the whole system during a single launch</td></tr>
-</tbody>
-</table>
-</div>
-<p>The code implementing <code>DecimalId</code> generation can’t use bit shift hack as we did for <code>TraceId</code>, but IDs generated using such schema are much more legible.
-You’re able to read their decimal representation like this: <code>cc*ggggglllll</code> (<strong>c</strong>ounter, <strong>g</strong>enerator ID, <strong>l</strong>aunch ID — respectively).
-For instance:</p>
-<pre><code class="language-text">               ID 14150009200065
-                  ccccggggglllll
-                   ▲    ▲    ▲
-   counter (1415) ─┘    │    │
-generator_id (92) ──────┘    │
-   launch_id (65) ───────────┘
-</code></pre>
-<p><a href="#choosing-the-domain-for-your-ids">Maximal possible</a> ID value is <code>922_337_203___68_547___75_807</code> however <strong><code>counter</code></strong> is limited by <code>922_337_202</code> (please note the decrement).
-Such trick prevents limiting <code>generator_id</code> (next ID component) by <code>68_547</code> (now it’s limited by <code>99_999</code>).
-Note that \( \operatorname{counter}_{min} = 1 \) to keep the <a href="#choosing-the-domain-for-your-ids">invariant</a>: \( \operatorname{id} \geqslant 1 \) because every other conmonent of <code>DecimalId</code> could be zero.</p>
-<p>Every time system produces more than \( \operatorname{counter}_{max} \) elements it requests persistent synchronized counter global for the whole system for the next <strong><code>generator_id</code></strong>.
-This increment happens at the every start of the app and only once for every \( 9.2 \dot{} 10^{8} \) records so contention on it is negligible.</p>
-<p>At every launch of your app <strong><code>launch_id</code></strong> should be taken from the persistent launch log of the system.
-To make deployment more robust we recommend generating <code>launch_id</code> outside of the app in the deployment configuration.</p>
-<p><code>launch_id = 0</code> should never appear in production records and may only be used for testing.</p>
+</li>
+</ul>
+<h3 id="stateful-router"><a class="header" href="#stateful-router">Stateful router</a></h3>
+<p>Sometimes we need to use a router with rarely changing state. If the state should be changed often, consider using a dedicated actor as a router.</p>
+<p>To create a stateful router use the <code>MapRouter::with_state</code> constructor. Note that the state type should implement <code>Default</code>, <code>Send</code> and <code>Sync</code>.</p>
+<pre><code class="language-rust">ActorGroup::new()
+    .router(MapRouter::with_state(
+        // Called if the config is changed.
+        |config: &amp;Config, state| make_new_state(..),
+        // The routing function.
+        |e, state| {
+            msg!(match e { .. })
+        }
+    ))
+    .exec(exec);</code></pre>
+<p>The state is recreated every time when the config is changed. Useful when all needed information (e.g. a list of actors) can be extracted from the config. Note that recreation doesn’t block execution; the state is atomically replaced only once <code>make_new_state(..)</code> is finished.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="ch08-02-multiple-runtimes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="ch03-00-groups.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
+                            <a rel="next prefetch" href="ch03-02-supervision.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -312,10 +317,13 @@ To make deployment more robust we recommend generating <code>launch_id</code> ou
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="ch08-02-multiple-runtimes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="ch03-00-groups.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
+                    <a rel="next prefetch" href="ch03-02-supervision.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
             </nav>
 
         </div>
