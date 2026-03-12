@@ -160,6 +160,6 @@ Yep, we can restore order in the dumper, but don't do it now because remote DB i
 
 [mailbox]: ./ch02-00-actors.html
 [source]: ./ch02-03-sources.html
-[configs]: ./ch03-03-configuration.html
+[configs]: ./ch03-02-configuration.html
 [logging]: ./ch04-01-logging.html
 [tracing]: ./ch04-04-tracing.html

@@ -141,4 +141,4 @@ ActorGroup::new().termination_policy(TerminationPolicy::closing())
 ActorGroup::new().termination_policy(TerminationPolicy::manually())
 ```
 
-[configuration]: ./ch03-03-configuration.md
+[configuration]: ./ch03-02-configuration.md

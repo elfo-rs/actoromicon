@@ -14,8 +14,8 @@
 
 - [Actor Groups](ch03-00-groups.md)
   - [Routing](ch03-01-routing.md)
-  - [Supervision](ch03-02-supervision.md)
-  - [Configuration](ch03-03-configuration.md)
+  - [Configuration](ch03-02-configuration.md)
+  - [Supervision](ch03-03-supervision.md)
 
 - [Observability]()
   - [Logging](ch04-01-logging.md)
