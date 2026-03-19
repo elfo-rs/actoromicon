@@ -39,10 +39,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-ab6e02e6.js";
+            window.path_to_searchindex_js = "searchindex-71717fa7.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-90c5b466.js"></script>
+        <script src="toc-156b87c7.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -1225,6 +1225,34 @@ After this duration elapses, the backoff strategy automatically resets. The foll
 
 ActorGroup::new().termination_policy(TerminationPolicy::closing())
 ActorGroup::new().termination_policy(TerminationPolicy::manually())</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="observability"><a class="header" href="#observability">Observability</a></h1>
+<p>In production systems, knowing that the code runs is not enough, you need to know <em>how</em> it runs. Observability answers questions like: how actors are processing requests? What happened in the system a minute before the outage? Without good tooling, these questions can only be answered by adding more logging or metrics after the fact, redeploying, and waiting for the problem to happen again.</p>
+<p>In a distributed actor system these challenges are amplified. Requests hop across actors and nodes, work is performed concurrently, and a single logical operation may touch dozens of components. Retrofitting observability onto such a system rarely works well: developers forget to propagate context, log lines lack the identity of the actor that produced them, rate limits have to be re-implemented in every project and so on.</p>
+<p>This is why elfo treats observability as a first-class concern implemented at the framework level. Things like logging, telemetry, and message dumping are built-in batteries that work correctly out of the box and, critically, they work <em>implicitly</em>. Actor code does not need to pass meta to logs or metrics handles, or a trace context through every function call. The framework provides that context automatically.</p>
+<h2 id="scope"><a class="header" href="#scope">Scope</a></h2>
+<p>The mechanism behind this implicit context is <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/scope/struct.Scope.html"><code>Scope</code></a>.</p>
+<p>Every task running inside elfo has a <code>Scope</code> installed as a task-local value. Actors get one automatically; by default, there is exactly one <code>Scope</code> per running actor task. It carries everything the observability machinery needs: actor location, identity, current trace, limits for logging and dumping and so on.</p>
+<p>When a <code>tracing::info!</code> call fires inside an actor, the logging layer reads the current task’s <code>Scope</code> to decide whether the event passes the configured level, whether it exceeds the rate limit, and which actor group and key to attach to the log line, all without the actor knowing any of this is happening.</p>
+<h2 id="scope-propagation"><a class="header" href="#scope-propagation">Scope propagation</a></h2>
+<p>Sometimes you need to run code outside the normal actor task, for instance, in <code>tokio::task::spawn_blocking</code>. If you use elfo’s own <code>elfo::task::spawn_blocking</code>, the scope is propagated automatically:</p>
+<pre><code class="language-rust">// The scope of the current actor is automatically installed on the blocking thread.
+// Logs, metrics, and dumps inside the closure are attributed to this actor.
+elfo::task::spawn_blocking(|| {
+    tracing::info!("running on a blocking thread, still attributed correctly");
+    do_heavy_work()
+}).await?;</code></pre>
+<p>If you need to spawn a task manually, for example using a third-party executor or a raw <code>tokio::task::spawn_blocking</code>, you can capture the current scope with <code>elfo::scope::expose()</code> and re-install it with <code>Scope::sync_within</code> (for blocking code) or <code>Scope::within</code> (for async code):</p>
+<pre><code class="language-rust">let scope = elfo::scope::expose(); // clone the current scope out of TLS
+
+tokio::task::spawn_blocking(move || {
+    scope.sync_within(|| {
+        // Everything here runs with the actor's scope installed.
+        tracing::info!("still attributed to the right actor");
+        do_heavy_work()
+    })
+}).await?;</code></pre>
+<p><code>scope::expose()</code> panics if called outside the actor system. Use <code>scope::try_expose()</code> in code that may run in both contexts.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="logging"><a class="header" href="#logging">Logging</a></h1>
 <p>Elfo uses the <a href="https://docs.rs/tracing"><code>tracing</code></a> crate as its logging interface. Actor code emits log events with the standard <code>tracing</code> macros, so no elfo-specific API is needed.</p>
