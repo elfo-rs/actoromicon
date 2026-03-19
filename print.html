@@ -39,7 +39,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-391b2349.js";
+            window.path_to_searchindex_js = "searchindex-ab6e02e6.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-90c5b466.js"></script>
@@ -1227,7 +1227,74 @@ ActorGroup::new().termination_policy(TerminationPolicy::closing())
 ActorGroup::new().termination_policy(TerminationPolicy::manually())</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="logging"><a class="header" href="#logging">Logging</a></h1>
-<p>TODO</p>
+<p>Elfo uses the <a href="https://docs.rs/tracing"><code>tracing</code></a> crate as its logging interface. Actor code emits log events with the standard <code>tracing</code> macros, so no elfo-specific API is needed.</p>
+<p>Thus, it’s possible to install and use a custom <a href="https://docs.rs/tracing/latest/tracing/trait.Subscriber.html"><code>tracing::Subscriber</code></a>. However, elfo provides the <code>elfo-logger</code> actor with the subscriber implementation. Because it’s a normal actor, it can be configured and observed. Traditionally, <code>elfo-logger</code> is mounted at the <code>system.loggers</code> actor group.</p>
+<p>Any events emitted anywhere are captured by the subscriber, stored in the queue of the <code>elfo-logger</code> actor, and then processed by the logger’s main loop according to its configuration.</p>
+<p><img src="assets/logging.drawio.svg" alt="logging schema"></p>
+<h2 id="setting-up-the-logger"><a class="header" href="#setting-up-the-logger">Setting up the logger</a></h2>
+<p>To enable logging, call <code>elfo::batteries::logger::init()</code> before building your topology and mount the returned <code>Blueprint</code> at the <code>system.loggers</code> group:</p>
+<pre><code class="language-rust">fn topology() -&gt; elfo::Topology {
+    let topology = elfo::Topology::empty();
+
+    // Registers the global tracing subscriber; returns a Blueprint.
+    let logger = elfo::batteries::logger::init();
+    // From this point, every event emitted anywhere is captured.
+
+    let loggers = topology.local("system.loggers");
+    let configurers = topology.local("system.configurers").entrypoint();
+
+    // ... user groups ...
+
+    loggers.mount(logger);
+    configurers.mount(..);
+
+    topology
+}</code></pre>
+<blockquote>
+<p>Note: <code>init()</code> also respects the <code>RUST_LOG</code> environment variable (via <code>tracing-subscriber</code>’s <code>EnvFilter</code>) when the <code>env-filter</code> feature is enabled, which is the default.</p>
+</blockquote>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<p>Use regular macros (<code>tracing::info!</code>, <code>tracing::warn!</code> etc) directly in your actors:</p>
+<pre><code class="language-rust">while let Some(envelope) = ctx.recv().await {
+    msg!(match envelope {
+        MyRequest { value } =&gt; {
+            tracing::info!(value, "received a request!");
+        }
+    });
+}</code></pre>
+<p>By default, every log line written by <code>elfo-logger</code> has the following structure:</p>
+<pre><code class="language-text">&lt;timestamp&gt; &lt;level&gt; [&lt;trace_id&gt;] &lt;actor_group&gt;/&lt;actor_key&gt; - &lt;message&gt;\t&lt;fields&gt;
+</code></pre>
+<p>Example output from a running system:</p>
+<pre><code class="language-text">2026-03-05 09:19:00.228757835  INFO [7661362937482706945] system.configurers/_ - status changed	status=Normal	details=updating
+2026-03-05 09:19:00.228988147  INFO [7661362937482706945] producers/_ - done	sum=45
+</code></pre>
+<h2 id="configuration-1"><a class="header" href="#configuration-1">Configuration</a></h2>
+<p>The logging configuration is defined in the <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/logging/struct.LoggingConfig.html">system.logging</a> subsection:</p>
+<pre><code class="language-toml">[some_group]
+system.logging.max_level = "Info"
+system.logging.max_rate_per_level = 1_000
+</code></pre>
+<p>To configure <code>elfo-logger</code> itself, use the <code>[system.loggers]</code> section:</p>
+<pre><code class="language-toml">[system.loggers]
+sink = "File"
+path = "app.log"
+</code></pre>
+<p>See the <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/batteries/logger/config/struct.Config.html">rustdoc</a> for more details.</p>
+<blockquote>
+<p>Note: all configuration is hot-reloaded: when the config file is reloaded (e.g. on <code>SIGHUP</code>), the logger reconfigures itself without restarting.</p>
+</blockquote>
+<h2 id="composing-a-custom-subscriber"><a class="header" href="#composing-a-custom-subscriber">Composing a custom subscriber</a></h2>
+<p>If you need to compose elfo’s logger with additional layers, use <code>elfo::batteries::logger::new()</code> instead of <code>init()</code>. It returns the raw parts so you can assemble your own subscriber:</p>
+<pre><code class="language-rust">let (blueprint, scope_filter, capture_layer) = elfo::batteries::logger::new();
+
+tracing_subscriber::registry()
+    .with(my_extra_layer)
+    .with(capture_layer.with_filter(scope_filter))
+    .init();
+
+loggers.mount(blueprint);</code></pre>
+<p>See the <a href="#tokio-console">Tokio Console</a> chapter for a concrete example of this pattern.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="telemetry"><a class="header" href="#telemetry">Telemetry</a></h1>
 <h2 id="introduction-1"><a class="header" href="#introduction-1">Introduction</a></h2>
@@ -1235,7 +1302,7 @@ ActorGroup::new().termination_policy(TerminationPolicy::manually())</code></pre>
 <p>All metrics are provided with the <code>actor_group</code> and, optionally, <code>actor_key</code> labels. The last one is added for actor groups with enabled <code>system.telemetry.per_actor_key</code> option.</p>
 <p>Read more information about <a href="https://prometheus.io/docs/concepts/metric_types/">metric types</a>.</p>
 <p>TODO: tips, prefer <code>increment_gauge!</code> over <code>gauge!</code></p>
-<h2 id="configuration-1"><a class="header" href="#configuration-1">Configuration</a></h2>
+<h2 id="configuration-2"><a class="header" href="#configuration-2">Configuration</a></h2>
 <p>Telemetry can be configured separately for each actor group. Possible options and their default values:</p>
 <pre><code class="language-toml">[some_group]
 system.telemetry.per_actor_group = true
@@ -1340,7 +1407,7 @@ system.telemetry.per_actor_key = false
 <h2 id="introduction-2"><a class="header" href="#introduction-2">Introduction</a></h2>
 <p>Dumping is the process of storing incoming and outgoing messages for every actor, including ones from <a href="#actors">mailboxes</a> and all other <a href="#sources">sources</a> like timers, streams, and so on. The primary purpose is future <a href="#tracing-4">tracing</a>, but it also can be used for regression testing.</p>
 <p>Dumping has a lot of common with <a href="#logging">logging</a>, but it’s more efficient and optimized for storing a lot of messages, so it has high throughput requirements instead of low latency like in the logging task, where records are supposed to be delivered as soon as possible, especially warnings and errors.</p>
-<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<h2 id="usage-1"><a class="header" href="#usage-1">Usage</a></h2>
 <h3 id="enable-dumping"><a class="header" href="#enable-dumping">Enable dumping</a></h3>
 <p>Dumping is disabled by default until the topology contains the <code>system.dumpers</code> group.</p>
 <p>Elfo provides the default implementation for such group, that’s available with the <code>full</code> feature and exported as <code>elfo::dumper</code>:</p>
