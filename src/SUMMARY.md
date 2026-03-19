@@ -17,7 +17,7 @@
   - [Configuration](ch03-02-configuration.md)
   - [Supervision](ch03-03-supervision.md)
 
-- [Observability]()
+- [Observability](ch04-00-observability.md)
   - [Logging](ch04-01-logging.md)
   - [Telemetry](ch04-02-telemetry.md)
   - [Dumping](ch04-03-dumping.md)
