@@ -9,7 +9,7 @@ Firstly, add `console-subscriber` to dependencies and enable the `tokio-tracing`
 
 ```toml
 [dependencies]
-elfo = { version = "0.2", features = ["tokio-tracing"] }
+elfo = { version = "0.2.0-alpha.21", features = ["tokio-tracing"] }
 console-subscriber = "0.5.0"
 ```
 

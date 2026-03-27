@@ -21,7 +21,7 @@ Add the following dependencies in your `Cargo.toml`:
 [dependencies]
 # The actor framework itself. The `full` feature enables all built-in batteries:
 # configurer, logger, telemeter, dumper, etc.
-elfo = { version = "0.2.0-alpha.20", features = ["full"] }
+elfo = { version = "0.2.0-alpha.21", features = ["full"] }
 ```
 
 > **Note:** `elfo` is currently in alpha. Check [crates.io] for the latest published version and update the version string accordingly.

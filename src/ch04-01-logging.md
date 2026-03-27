@@ -103,5 +103,5 @@ See the [Tokio Console] chapter for a concrete example of this pattern.
 [`tracing`]: https://docs.rs/tracing
 [`tracing::Subscriber`]: https://docs.rs/tracing/latest/tracing/trait.Subscriber.html
 [Tokio Console]: ./ch04-05-tokio-console.md
-[docs-logging]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/logging/struct.LoggingConfig.html
-[docs-logger]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/batteries/logger/config/struct.Config.html
+[docs-logging]: https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/logging/struct.LoggingConfig.html
+[docs-logger]: https://docs.rs/elfo/0.2.0-alpha.21/elfo/batteries/logger/config/struct.Config.html

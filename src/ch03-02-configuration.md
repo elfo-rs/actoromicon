@@ -128,9 +128,9 @@ Batteries (built-in actors provided by elfo) exports their own [configuration][d
 [`validator`]: https://lib.rs/crates/validator
 [reconfiguration]: ./ch03-03-supervision.html#reconfiguration
 [restart policies]: ./ch03-03-supervision.html#restart-policies
-[docs-mailbox]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/mailbox/struct.MailboxConfig.html
-[docs-telemetry]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/telemetry/struct.TelemetryConfig.html
-[docs-logging]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/logging/struct.LoggingConfig.html
-[docs-dumping]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/dumping/struct.DumpingConfig.html
-[docs-restart]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/restart_policy/struct.RestartPolicyConfig.html
-[docs-batteries]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/batteries/index.html
+[docs-mailbox]: https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/mailbox/struct.MailboxConfig.html
+[docs-telemetry]: https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/telemetry/struct.TelemetryConfig.html
+[docs-logging]: https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/logging/struct.LoggingConfig.html
+[docs-dumping]: https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/dumping/struct.DumpingConfig.html
+[docs-restart]: https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/restart_policy/struct.RestartPolicyConfig.html
+[docs-batteries]: https://docs.rs/elfo/0.2.0-alpha.21/elfo/batteries/index.html

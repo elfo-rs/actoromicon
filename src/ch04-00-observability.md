@@ -43,4 +43,4 @@ tokio::task::spawn_blocking(move || {
 
 `scope::expose()` panics if called outside the actor system. Use `scope::try_expose()` in code that may run in both contexts.
 
-[`Scope`]: https://docs.rs/elfo/0.2.0-alpha.20/elfo/scope/struct.Scope.html
+[`Scope`]: https://docs.rs/elfo/0.2.0-alpha.21/elfo/scope/struct.Scope.html
