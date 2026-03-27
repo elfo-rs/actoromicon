@@ -39,7 +39,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-71717fa7.js";
+            window.path_to_searchindex_js = "searchindex-3a78dee6.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-156b87c7.js"></script>
@@ -255,7 +255,7 @@ spawn(process_events(events_rx));</code></pre>
 <pre><code class="language-toml">[dependencies]
 # The actor framework itself. The `full` feature enables all built-in batteries:
 # configurer, logger, telemeter, dumper, etc.
-elfo = { version = "0.2.0-alpha.20", features = ["full"] }
+elfo = { version = "0.2.0-alpha.21", features = ["full"] }
 </code></pre>
 <blockquote>
 <p><strong>Note:</strong> <code>elfo</code> is currently in alpha. Check <a href="https://crates.io/crates/elfo">crates.io</a> for the latest published version and update the version string accordingly.</p>
@@ -625,7 +625,7 @@ let source_handle = ctx.attach(unattached_source);</code></pre>
 <pre><code class="language-rust">source_handle.terminate();</code></pre>
 <p>Under the hood, the storage and utilization of sources are optimized significantly to support multiple sources at the same time, thanks to the <a href="https://docs.rs/unicycle">unicycle</a> crate. While the system supports an unlimited number of sources without offering backpressure, it’s essential to moderate the usage to prevent potential out-of-memory (OOM) errors.</p>
 <h2 id="intervals"><a class="header" href="#intervals">Intervals</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/time/struct.Interval.html">The <code>Interval</code> source</a> is designed to generate messages at a defined time period.</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/time/struct.Interval.html">The <code>Interval</code> source</a> is designed to generate messages at a defined time period.</p>
 <p>To activate the source, employ either the <code>start(period)</code> or <code>start_after(delay, period)</code> methods, as shown below:</p>
 <pre><code class="language-rust">use elfo::time::Interval;
 
@@ -668,7 +668,7 @@ start(10s):      | 5s | 5s | 5s |  #   10s   |   10s   |
 <h3 id="tracing"><a class="header" href="#tracing">Tracing</a></h3>
 <p>Every message starts a new trace, thus a new <a href="#traceid"><code>TraceId</code></a> is generated and assigned to the current scope.</p>
 <h2 id="delays"><a class="header" href="#delays">Delays</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/time/struct.Delay.html">The <code>Delay</code> source</a> is designed to generate one message after a specified time:</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/time/struct.Delay.html">The <code>Delay</code> source</a> is designed to generate one message after a specified time:</p>
 <pre><code class="language-rust">use elfo::time::Delay;
 
 #[message]
@@ -686,7 +686,7 @@ while let Some(envelope) = ctx.recv().await {
 <h3 id="tracing-1"><a class="header" href="#tracing-1">Tracing</a></h3>
 <p>The emitted message continues the current trace. The reason for it is that this source is usually used for delaying specific action, so logically it’s continues the current trace.</p>
 <h2 id="signals"><a class="header" href="#signals">Signals</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/signal/struct.Signal.html">The <code>Signal</code> source</a> is designed to generate a message once a signal is received:</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/signal/struct.Signal.html">The <code>Signal</code> source</a> is designed to generate a message once a signal is received:</p>
 <pre><code class="language-rust">use elfo::signal::{Signal, SignalKind};
 
 #[message]
@@ -704,7 +704,7 @@ about <a href="https://docs.rs/tokio/latest/tokio/signal/unix/struct.Signal.html
 <h3 id="tracing-2"><a class="header" href="#tracing-2">Tracing</a></h3>
 <p>Every message starts a new trace, thus a new trace id is generated and assigned to the current scope.</p>
 <h2 id="streams"><a class="header" href="#streams">Streams</a></h2>
-<p><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/stream/struct.Stream.html">The <code>Stream</code> source</a> is designed to wrap existing futures/streams of messages. Items can be either any instance of <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/trait.Message.html"><code>Message</code></a> or <code>Result&lt;impl Message, impl Message&gt;</code>.</p>
+<p><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/stream/struct.Stream.html">The <code>Stream</code> source</a> is designed to wrap existing futures/streams of messages. Items can be either any instance of <a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/trait.Message.html"><code>Message</code></a> or <code>Result&lt;impl Message, impl Message&gt;</code>.</p>
 <p>Once stream is exhausted, it’s detached automatically.</p>
 <h3 id="futures"><a class="header" href="#futures">Futures</a></h3>
 <p>Utilize <code>Stream::once()</code> when implementing subtasks such as initiating a background request:</p>
@@ -1100,16 +1100,16 @@ msg!(match envelope {
 <tr><th>Sub-section</th><th>Struct</th><th>Description</th></tr>
 </thead>
 <tbody>
-<tr><td><code>system.mailbox</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/mailbox/struct.MailboxConfig.html"><code>MailboxConfig</code></a></td><td>Mailbox capacity</td></tr>
-<tr><td><code>system.telemetry</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/telemetry/struct.TelemetryConfig.html"><code>TelemetryConfig</code></a></td><td>Metrics grouping</td></tr>
-<tr><td><code>system.logging</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/logging/struct.LoggingConfig.html"><code>LoggingConfig</code></a></td><td>Log level and rate limits</td></tr>
-<tr><td><code>system.dumping</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/dumping/struct.DumpingConfig.html"><code>DumpingConfig</code></a></td><td>Message dumping on/off and rate</td></tr>
-<tr><td><code>system.restart_policy</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/restart_policy/struct.RestartPolicyConfig.html"><code>RestartPolicyConfig</code></a></td><td>Configuration of <a href="#restart-policies">restart policies</a></td></tr>
+<tr><td><code>system.mailbox</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/mailbox/struct.MailboxConfig.html"><code>MailboxConfig</code></a></td><td>Mailbox capacity</td></tr>
+<tr><td><code>system.telemetry</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/telemetry/struct.TelemetryConfig.html"><code>TelemetryConfig</code></a></td><td>Metrics grouping</td></tr>
+<tr><td><code>system.logging</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/logging/struct.LoggingConfig.html"><code>LoggingConfig</code></a></td><td>Log level and rate limits</td></tr>
+<tr><td><code>system.dumping</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/dumping/struct.DumpingConfig.html"><code>DumpingConfig</code></a></td><td>Message dumping on/off and rate</td></tr>
+<tr><td><code>system.restart_policy</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/restart_policy/struct.RestartPolicyConfig.html"><code>RestartPolicyConfig</code></a></td><td>Configuration of <a href="#restart-policies">restart policies</a></td></tr>
 </tbody>
 </table>
 </div>
 <h2 id="batteries-config"><a class="header" href="#batteries-config">Batteries’ config</a></h2>
-<p>Batteries (built-in actors provided by elfo) exports their own <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/batteries/index.html">configuration</a>.</p>
+<p>Batteries (built-in actors provided by elfo) exports their own <a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/batteries/index.html">configuration</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="supervision"><a class="header" href="#supervision">Supervision</a></h1>
 <h2 id="startup"><a class="header" href="#startup">Startup</a></h2>
@@ -1231,7 +1231,7 @@ ActorGroup::new().termination_policy(TerminationPolicy::manually())</code></pre>
 <p>In a distributed actor system these challenges are amplified. Requests hop across actors and nodes, work is performed concurrently, and a single logical operation may touch dozens of components. Retrofitting observability onto such a system rarely works well: developers forget to propagate context, log lines lack the identity of the actor that produced them, rate limits have to be re-implemented in every project and so on.</p>
 <p>This is why elfo treats observability as a first-class concern implemented at the framework level. Things like logging, telemetry, and message dumping are built-in batteries that work correctly out of the box and, critically, they work <em>implicitly</em>. Actor code does not need to pass meta to logs or metrics handles, or a trace context through every function call. The framework provides that context automatically.</p>
 <h2 id="scope"><a class="header" href="#scope">Scope</a></h2>
-<p>The mechanism behind this implicit context is <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/scope/struct.Scope.html"><code>Scope</code></a>.</p>
+<p>The mechanism behind this implicit context is <a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/scope/struct.Scope.html"><code>Scope</code></a>.</p>
 <p>Every task running inside elfo has a <code>Scope</code> installed as a task-local value. Actors get one automatically; by default, there is exactly one <code>Scope</code> per running actor task. It carries everything the observability machinery needs: actor location, identity, current trace, limits for logging and dumping and so on.</p>
 <p>When a <code>tracing::info!</code> call fires inside an actor, the logging layer reads the current task’s <code>Scope</code> to decide whether the event passes the configured level, whether it exceeds the rate limit, and which actor group and key to attach to the log line, all without the actor knowing any of this is happening.</p>
 <h2 id="scope-propagation"><a class="header" href="#scope-propagation">Scope propagation</a></h2>
@@ -1298,7 +1298,7 @@ tokio::task::spawn_blocking(move || {
 2026-03-05 09:19:00.228988147  INFO [7661362937482706945] producers/_ - done	sum=45
 </code></pre>
 <h2 id="configuration-1"><a class="header" href="#configuration-1">Configuration</a></h2>
-<p>The logging configuration is defined in the <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/logging/struct.LoggingConfig.html">system.logging</a> subsection:</p>
+<p>The logging configuration is defined in the <a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/logging/struct.LoggingConfig.html">system.logging</a> subsection:</p>
 <pre><code class="language-toml">[some_group]
 system.logging.max_level = "Info"
 system.logging.max_rate_per_level = 1_000
@@ -1308,7 +1308,7 @@ system.logging.max_rate_per_level = 1_000
 sink = "File"
 path = "app.log"
 </code></pre>
-<p>See the <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/batteries/logger/config/struct.Config.html">rustdoc</a> for more details.</p>
+<p>See the <a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/batteries/logger/config/struct.Config.html">rustdoc</a> for more details.</p>
 <blockquote>
 <p>Note: all configuration is hot-reloaded: when the config file is reloaded (e.g. on <code>SIGHUP</code>), the logger reconfigures itself without restarting.</p>
 </blockquote>

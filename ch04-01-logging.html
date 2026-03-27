@@ -38,7 +38,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-71717fa7.js";
+            window.path_to_searchindex_js = "searchindex-3a78dee6.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-156b87c7.js"></script>
@@ -221,7 +221,7 @@
 2026-03-05 09:19:00.228988147  INFO [7661362937482706945] producers/_ - done	sum=45
 </code></pre>
 <h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
-<p>The logging configuration is defined in the <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/config/system/logging/struct.LoggingConfig.html">system.logging</a> subsection:</p>
+<p>The logging configuration is defined in the <a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/logging/struct.LoggingConfig.html">system.logging</a> subsection:</p>
 <pre><code class="language-toml">[some_group]
 system.logging.max_level = "Info"
 system.logging.max_rate_per_level = 1_000
@@ -231,7 +231,7 @@ system.logging.max_rate_per_level = 1_000
 sink = "File"
 path = "app.log"
 </code></pre>
-<p>See the <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/batteries/logger/config/struct.Config.html">rustdoc</a> for more details.</p>
+<p>See the <a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/batteries/logger/config/struct.Config.html">rustdoc</a> for more details.</p>
 <blockquote>
 <p>Note: all configuration is hot-reloaded: when the config file is reloaded (e.g. on <code>SIGHUP</code>), the logger reconfigures itself without restarting.</p>
 </blockquote>

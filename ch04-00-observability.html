@@ -38,7 +38,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-71717fa7.js";
+            window.path_to_searchindex_js = "searchindex-3a78dee6.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-156b87c7.js"></script>
@@ -182,7 +182,7 @@
 <p>In a distributed actor system these challenges are amplified. Requests hop across actors and nodes, work is performed concurrently, and a single logical operation may touch dozens of components. Retrofitting observability onto such a system rarely works well: developers forget to propagate context, log lines lack the identity of the actor that produced them, rate limits have to be re-implemented in every project and so on.</p>
 <p>This is why elfo treats observability as a first-class concern implemented at the framework level. Things like logging, telemetry, and message dumping are built-in batteries that work correctly out of the box and, critically, they work <em>implicitly</em>. Actor code does not need to pass meta to logs or metrics handles, or a trace context through every function call. The framework provides that context automatically.</p>
 <h2 id="scope"><a class="header" href="#scope">Scope</a></h2>
-<p>The mechanism behind this implicit context is <a href="https://docs.rs/elfo/0.2.0-alpha.20/elfo/scope/struct.Scope.html"><code>Scope</code></a>.</p>
+<p>The mechanism behind this implicit context is <a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/scope/struct.Scope.html"><code>Scope</code></a>.</p>
 <p>Every task running inside elfo has a <code>Scope</code> installed as a task-local value. Actors get one automatically; by default, there is exactly one <code>Scope</code> per running actor task. It carries everything the observability machinery needs: actor location, identity, current trace, limits for logging and dumping and so on.</p>
 <p>When a <code>tracing::info!</code> call fires inside an actor, the logging layer reads the current task’s <code>Scope</code> to decide whether the event passes the configured level, whether it exceeds the rate limit, and which actor group and key to attach to the log line, all without the actor knowing any of this is happening.</p>
 <h2 id="scope-propagation"><a class="header" href="#scope-propagation">Scope propagation</a></h2>
