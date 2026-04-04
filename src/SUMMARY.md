@@ -29,7 +29,7 @@
   - [Protocol Evolution](ch05-02-protocol-evolution.md)
 
 - [Testing]()
-  - [Unit Testing]()
+  - [Functional Testing](ch06-01-functional-testing.md)
   - [The Replayer]()
   - [Approval Testing]()
   - [Stress Testing]()
