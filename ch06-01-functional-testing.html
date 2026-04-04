@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Configuration - The Actoromicon</title>
+        <title>Functional Testing - The Actoromicon</title>
 
 
         <!-- Custom HTML head -->
@@ -177,112 +177,144 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
-<p>Each actor group can have its own configuration section in the TOML config file. The section name corresponds to the group’s name as registered in the topology.</p>
-<h2 id="structure"><a class="header" href="#structure">Structure</a></h2>
-<p>A typical config file looks like this:</p>
-<pre><code class="language-toml"># Properties defined here are merged into every actor group's section.
-[common]
-system.logging.max_level = "Info"
-
-# User-defined config fields for the group named in the topology.
-[some_group_name]
-some_param = 42
-
-# The system.* sub-section is reserved for elfo's own settings.
-system.telemetry.per_actor_key = true
+                        <h1 id="functional-testing"><a class="header" href="#functional-testing">Functional Testing</a></h1>
+<p>When testing actors, we are rarely interested in their internal state directly. What matters is observable behavior: given a sequence of incoming messages, what messages does the actor produce? This is functional testing at the scale of a single actor group.</p>
+<p>These tests exercise the actor through its public protocol, exactly as any other actor in the system would, thus they belong in <code>tests/</code> rather than <code>src/</code>. That keeps them separate from unit tests for internal helpers, which live in <code>src/</code>.</p>
+<h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
+<p>Add the <code>test-util</code> feature to <code>elfo</code> in <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[dev-dependencies]
+elfo = { version = "0.2.0-alpha.21", features = ["test-util"] }
+tokio = { version = "1", features = ["rt", "macros"] }
 </code></pre>
-<p>The <code>[common]</code> section is special: its contents are merged into every actor group’s config. Thus, it can be used to set defaults that apply to all groups, while still allowing individual groups to override them.</p>
-<h2 id="user-config"><a class="header" href="#user-config">User config</a></h2>
-<p>Actor groups declare their own config by calling <code>.config::&lt;T&gt;()</code> on <code>ActorGroup</code>. <code>T</code> must implement <code>serde::Deserialize</code> and <code>Debug</code>.</p>
-<pre><code class="language-rust">#[derive(Debug, Deserialize)]
-struct MyConfig {
-    interval: Duration,
-    threshold: u64,
-}
+<p><strong>Note:</strong> <code>test-util</code> exposes <code>elfo::test</code>, additional constructors for messages, and <code>tokio/test-util</code> which let control time in tests. It is intended only for tests; the feature warning printed at startup reminds you not to enable it in production builds.</p>
+<h2 id="a-minimal-example"><a class="header" href="#a-minimal-example">A minimal example</a></h2>
+<p><strong>Note</strong>: the full code for this example is available in <a href="https://github.com/elfo-rs/elfo/blob/master/examples/test.rs">the elfo repository</a>.</p>
+<p>Consider a simple summator actor that accumulates values and responds to summary requests:</p>
+<pre><code class="language-rust ignore">#[message]
+pub struct Increment;
 
-ActorGroup::new().config::&lt;MyConfig&gt;().exec(my_actor)</code></pre>
-<p>The deserialized value is accessed inside the actor via <code>ctx.config()</code>, which always returns the latest validated and applied version.</p>
-<h3 id="secrets"><a class="header" href="#secrets">Secrets</a></h3>
-<p>Fields that contain sensitive data (passwords, API keys, etc.) should be wrapped in <code>elfo::config::Secret&lt;T&gt;</code>. This suppresses the field’s value in logs and dumps while keeping full access to the underlying value in code and allowing it to be sent over network.</p>
-<pre><code class="language-rust">use elfo::config::Secret;
+#[message]
+#[derive(PartialEq)]
+pub struct Added(u32);
+
+#[message(ret = u32)]
+pub struct Summarize;
 
 #[derive(Debug, Deserialize)]
-struct Config {
-    password: Secret&lt;String&gt;,
-}</code></pre>
-<h2 id="handling-config-updates"><a class="header" href="#handling-config-updates">Handling config updates</a></h2>
-<p>When the config file is changed and the system reloads it (e.g. on <code>SIGHUP</code>), actors receive the <code>UpdateConfig</code> message, which silently updates the value returned by <code>ctx.config()</code> and transformed into the <code>ConfigUpdated</code> message. This allows actors to react to the new config values without needing to restart the whole system:</p>
-<pre><code class="language-rust">use elfo::{
-    prelude::*,
-    messages::ConfigUpdated,
-    time::Interval,
-};
+pub struct Config {
+    step: u32,
+}
 
-async fn my_actor(mut ctx: Context&lt;MyConfig&gt;) {
-    let interval = ctx.attach(Interval::new(Tick));
-    interval.start(ctx.config().interval);
+async fn summator(mut ctx: Context&lt;Config&gt;) {
+    let mut sum = 0;
 
     while let Some(envelope) = ctx.recv().await {
         msg!(match envelope {
-            ConfigUpdated =&gt; {
-                // React to the new config values.
-                interval.set_period(ctx.config().interval);
+            Increment =&gt; {
+                let step = ctx.config().step;
+                sum += step;
+                let _ = ctx.send(Added(step)).await;
             }
-            Tick =&gt; { /* ... */ }
-        });
+            (Summarize, token) =&gt; {
+                ctx.respond(token, sum);
+            }
+        })
     }
-}</code></pre>
-<h2 id="validating-config-updates"><a class="header" href="#validating-config-updates">Validating config updates</a></h2>
-<p>Actors have a chance to validate the incoming config on reconfiguration by receiving the <code>ValidateConfig</code> request. Any structural / type-level validation should happen at deserialization time (consider the <a href="https://lib.rs/crates/validator"><code>validator</code></a> crate for that). <code>ValidateConfig</code> is for checks requiring the access to actors’ state. Responding <code>Ok(())</code> accepts the config; <code>Err(reason)</code> rejects the whole reload. If the message is simply discarded (no response), validation is considered passed.</p>
-<pre><code class="language-rust">use elfo::{
-    messages::{ConfigUpdated, ValidateConfig},
-    prelude::*,
-};
+}
 
-msg!(match envelope {
-    (ValidateConfig { config, .. }, token) =&gt; {
-        let new = ctx.unpack_config(&amp;config);
-        // Perform any dynamic validation here.
-        ctx.respond(token, Ok(()));
-    }
-})</code></pre>
-<p>Note that <code>ValidateConfig</code> is discarded by the default router. So, you should explicitly allow it in the router:</p>
-<pre><code class="language-rust">ActorGroup::new().router(MapRouter::new(|e| {
-    msg!(match e {
-        ValidateConfig =&gt; Outcome::GentleUnicast(MyKey),
-        _ =&gt; Outcome::Default,
-    })
-}))</code></pre>
-<p>See the <a href="./ch03-03-supervision.html#reconfiguration">reconfiguration</a> page for more details.</p>
-<h2 id="system-config"><a class="header" href="#system-config">System config</a></h2>
-<p>Every actor group’s config section may contain a <code>system.*</code> sub-table that controls built-in elfo behaviour:</p>
-<div class="table-wrapper">
-<table>
-<thead>
-<tr><th>Sub-section</th><th>Struct</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td><code>system.mailbox</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/mailbox/struct.MailboxConfig.html"><code>MailboxConfig</code></a></td><td>Mailbox capacity</td></tr>
-<tr><td><code>system.telemetry</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/telemetry/struct.TelemetryConfig.html"><code>TelemetryConfig</code></a></td><td>Metrics grouping</td></tr>
-<tr><td><code>system.logging</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/logging/struct.LoggingConfig.html"><code>LoggingConfig</code></a></td><td>Log level and rate limits</td></tr>
-<tr><td><code>system.dumping</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/dumping/struct.DumpingConfig.html"><code>DumpingConfig</code></a></td><td>Message dumping on/off and rate</td></tr>
-<tr><td><code>system.restart_policy</code></td><td><a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/config/system/restart_policy/struct.RestartPolicyConfig.html"><code>RestartPolicyConfig</code></a></td><td>Configuration of <a href="./ch03-03-supervision.html#restart-policies">restart policies</a></td></tr>
-</tbody>
-</table>
-</div>
-<h2 id="batteries-config"><a class="header" href="#batteries-config">Batteries’ config</a></h2>
-<p>Batteries (built-in actors provided by elfo) exports their own <a href="https://docs.rs/elfo/0.2.0-alpha.21/elfo/batteries/index.html">configuration</a>.</p>
+pub fn new() -&gt; Blueprint {
+    ActorGroup::new().config::&lt;Config&gt;().exec(summator)
+}</code></pre>
+<p>The corresponding functional smoke test uses <code>elfo::test::proxy(blueprint, config)</code> to start the actor group in an isolated topology and get a dedicated handle to communicate with the actor group:</p>
+<pre><code class="language-rust ignore">#[tokio::test]
+async fn it_works() {
+    // Note: `RUST_LOG=elfo` can be provided to see all messages in failed cases.
+
+    // Define a config (usually using `toml!` or `json!`).
+    let config = toml::toml! {
+        step = 20
+    };
+
+    // ... or provide the default one.
+    let _config = elfo::config::AnyConfig::default();
+
+    // Wrap the actor group to take control over it.
+    let mut proxy = elfo::test::proxy(summators::new(), config).await;
+
+    // How to send messages to the group.
+    proxy.send(Increment).await;
+    proxy.send(Increment).await;
+
+    // How to check actors' output.
+    assert_msg!(proxy.recv().await, Added(15u32..=35)); // Note: rhs is a pattern.
+    assert_msg_eq!(proxy.recv().await, Added(20));
+
+    // How to check request-response.
+    assert_eq!(proxy.request(Summarize).await, 40);
+}</code></pre>
+<h2 id="asserting-messages"><a class="header" href="#asserting-messages">Asserting messages</a></h2>
+<p><code>assert_msg!</code> and <code>assert_msg_eq!</code> extract a typed message from an <code>Envelope</code> and check it, panicking with a clear diagnostic if the check fails.</p>
+<pre><code class="language-rust ignore">// Pattern matching — ranges, wildcards, and guards are all valid.
+assert_msg!(proxy.recv().await, Added(15u32..=35));
+
+// Exact equality — requires PartialEq on the message type.
+assert_msg_eq!(proxy.recv().await, Added(20));</code></pre>
+<p>The key difference: <code>assert_msg!</code> takes a Rust <strong>pattern</strong> (so ranges, nested destructuring, and <code>if</code> guards work), while <code>assert_msg_eq!</code> takes a <strong>value</strong> and uses <code>assert_eq!</code> under the hood.</p>
+<p>See also <code>elfo::test::extract_message</code>, <code>elfo::test::extract_request</code> to extract messages from envelopes to further check them with custom logic.</p>
+<h2 id="synchronization"><a class="header" href="#synchronization">Synchronization</a></h2>
+<p><code>proxy.sync().await</code> tries to ensure the actor has processed all messages sent so far. It’s not needed for tests using <code>.await</code> communication (e.g. <code>recv</code>, <code>send</code>), but it helps when asserting the <em>absence</em> of output with <code>try_recv()</code>:</p>
+<pre><code class="language-rust ignore">proxy.send(Increment).await;
+proxy.sync().await;
+// It's true if the actor sent nothing.
+assert!(proxy.try_recv().await.is_none());</code></pre>
+<h2 id="timeouts"><a class="header" href="#timeouts">Timeouts</a></h2>
+<p><code>proxy.recv().await</code> panics if no message arrives within the timeout (default: 150 ms). Importantly, this timer runs on the real wall clock, isolated from tokio’s mocked time, so <code>tokio::time::pause()</code> does not stall <code>recv</code>. The timeout can be changed with <code>proxy.set_recv_timeout(duration)</code>, but this is rarely needed: tests that use mocked time typically don’t need to tune it either, since the real clock keeps ticking regardless.</p>
+<h2 id="subproxies"><a class="header" href="#subproxies">Subproxies</a></h2>
+<p>Actors can use <code>send_to</code> or <code>request_to</code> with a specific address rather than the <a href="./ch03-01-routing.html">routing</a> system. To test those paths, create a subproxy:</p>
+<pre><code class="language-rust ignore">#[tokio::test]
+async fn it_uses_subproxies() {
+    let config = toml::toml! { step = 20 };
+    let mut proxy = elfo::test::proxy(summators(), config).await;
+
+    let mut subproxy = proxy.subproxy().await;
+    assert_eq!(subproxy.request(Summarize).await, 0);
+    assert!(proxy.try_recv().await.is_none());
+
+    // `send(..)` and `request(..)` always send messages to the original proxy.
+    subproxy.send(Increment).await;
+    assert!(subproxy.try_recv().await.is_none());
+    assert_msg_eq!(proxy.recv().await, Added(20));
+}</code></pre>
+<p>The subproxy has its own address, so the actor can address replies back to it specifically. Messages sent through <code>subproxy.send()</code> still go to the original actor; only the <em>return address</em> differs.</p>
+<h2 id="reconfiguration"><a class="header" href="#reconfiguration">Reconfiguration</a></h2>
+<p>To test how an actor reacts to config changes, send an <code>UpdateConfig</code> message carrying a new <code>AnyConfig</code>. The actor receives <code>ConfigUpdated</code> as usual, and <code>ctx.config()</code> returns the new values from that point on. See the <a href="./ch03-03-supervision.html#reconfiguration">reconfiguration</a> section for how this works at the system level.</p>
+<pre><code class="language-rust ignore">use elfo::{config::AnyConfig, messages::UpdateConfig};
+
+let new_config = AnyConfig::deserialize(toml::toml! { step = 42 }).unwrap();
+proxy.send(UpdateConfig::new(new_config)).await;</code></pre>
+<p><code>UpdateConfig</code> can also be used as a request. The response is <code>Ok(())</code> on success or <code>Err(ConfigRejected)</code> if the new config fails to deserialize into the actor’s <code>Config</code> type:</p>
+<pre><code class="language-rust ignore">let bad_config = AnyConfig::deserialize(toml::toml! { step = -1 }).unwrap();
+assert!(proxy.request(UpdateConfig::new(bad_config)).await.is_err());
+// Config unchanged after rejection.</code></pre>
+<p>See <code>ValidateConfig</code> for testing config validation without applying the new config.</p>
+<h2 id="termination"><a class="header" href="#termination">Termination</a></h2>
+<p>To test graceful shutdown, send <code>Terminate::default()</code> and then wait for the actor to finish with <code>proxy.finished().await</code>. Any messages the actor sends during teardown can still be received after <code>finished()</code> returns, since the proxy mailbox remains open:</p>
+<pre><code class="language-rust ignore">use elfo::messages::Terminate;
+
+proxy.send(Terminate::default()).await;
+proxy.finished().await;
+let envelope = proxy.recv().await;</code></pre>
+<p><code>Terminate::default()</code> respects the group’s <a href="./ch03-03-supervision.html#termination">termination policy</a>. When you need to force-close the mailbox regardless of the termination policy, use <code>Terminate::closing()</code> instead.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="ch03-01-routing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="ch05-02-protocol-evolution.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="ch03-03-supervision.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="ch07-00-recipes.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -292,11 +324,11 @@ msg!(match envelope {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="ch03-01-routing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="ch05-02-protocol-evolution.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="ch03-03-supervision.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="ch07-00-recipes.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

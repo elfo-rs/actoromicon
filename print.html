@@ -39,10 +39,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-383c83a6.js";
+            window.path_to_searchindex_js = "searchindex-42e093ae.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-156b87c7.js"></script>
+        <script src="toc-3546f902.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -1868,6 +1868,135 @@ enum Sample {
 <p>Promotion to/from <code>i128</code> and <code>u128</code> doesn’t work due to <code>msgpack</code>’s implementation details. <a href="#fr-promotion-1">↩</a></p>
 </li>
 </ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="functional-testing"><a class="header" href="#functional-testing">Functional Testing</a></h1>
+<p>When testing actors, we are rarely interested in their internal state directly. What matters is observable behavior: given a sequence of incoming messages, what messages does the actor produce? This is functional testing at the scale of a single actor group.</p>
+<p>These tests exercise the actor through its public protocol, exactly as any other actor in the system would, thus they belong in <code>tests/</code> rather than <code>src/</code>. That keeps them separate from unit tests for internal helpers, which live in <code>src/</code>.</p>
+<h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
+<p>Add the <code>test-util</code> feature to <code>elfo</code> in <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[dev-dependencies]
+elfo = { version = "0.2.0-alpha.21", features = ["test-util"] }
+tokio = { version = "1", features = ["rt", "macros"] }
+</code></pre>
+<p><strong>Note:</strong> <code>test-util</code> exposes <code>elfo::test</code>, additional constructors for messages, and <code>tokio/test-util</code> which let control time in tests. It is intended only for tests; the feature warning printed at startup reminds you not to enable it in production builds.</p>
+<h2 id="a-minimal-example"><a class="header" href="#a-minimal-example">A minimal example</a></h2>
+<p><strong>Note</strong>: the full code for this example is available in <a href="https://github.com/elfo-rs/elfo/blob/master/examples/test.rs">the elfo repository</a>.</p>
+<p>Consider a simple summator actor that accumulates values and responds to summary requests:</p>
+<pre><code class="language-rust ignore">#[message]
+pub struct Increment;
+
+#[message]
+#[derive(PartialEq)]
+pub struct Added(u32);
+
+#[message(ret = u32)]
+pub struct Summarize;
+
+#[derive(Debug, Deserialize)]
+pub struct Config {
+    step: u32,
+}
+
+async fn summator(mut ctx: Context&lt;Config&gt;) {
+    let mut sum = 0;
+
+    while let Some(envelope) = ctx.recv().await {
+        msg!(match envelope {
+            Increment =&gt; {
+                let step = ctx.config().step;
+                sum += step;
+                let _ = ctx.send(Added(step)).await;
+            }
+            (Summarize, token) =&gt; {
+                ctx.respond(token, sum);
+            }
+        })
+    }
+}
+
+pub fn new() -&gt; Blueprint {
+    ActorGroup::new().config::&lt;Config&gt;().exec(summator)
+}</code></pre>
+<p>The corresponding functional smoke test uses <code>elfo::test::proxy(blueprint, config)</code> to start the actor group in an isolated topology and get a dedicated handle to communicate with the actor group:</p>
+<pre><code class="language-rust ignore">#[tokio::test]
+async fn it_works() {
+    // Note: `RUST_LOG=elfo` can be provided to see all messages in failed cases.
+
+    // Define a config (usually using `toml!` or `json!`).
+    let config = toml::toml! {
+        step = 20
+    };
+
+    // ... or provide the default one.
+    let _config = elfo::config::AnyConfig::default();
+
+    // Wrap the actor group to take control over it.
+    let mut proxy = elfo::test::proxy(summators::new(), config).await;
+
+    // How to send messages to the group.
+    proxy.send(Increment).await;
+    proxy.send(Increment).await;
+
+    // How to check actors' output.
+    assert_msg!(proxy.recv().await, Added(15u32..=35)); // Note: rhs is a pattern.
+    assert_msg_eq!(proxy.recv().await, Added(20));
+
+    // How to check request-response.
+    assert_eq!(proxy.request(Summarize).await, 40);
+}</code></pre>
+<h2 id="asserting-messages"><a class="header" href="#asserting-messages">Asserting messages</a></h2>
+<p><code>assert_msg!</code> and <code>assert_msg_eq!</code> extract a typed message from an <code>Envelope</code> and check it, panicking with a clear diagnostic if the check fails.</p>
+<pre><code class="language-rust ignore">// Pattern matching — ranges, wildcards, and guards are all valid.
+assert_msg!(proxy.recv().await, Added(15u32..=35));
+
+// Exact equality — requires PartialEq on the message type.
+assert_msg_eq!(proxy.recv().await, Added(20));</code></pre>
+<p>The key difference: <code>assert_msg!</code> takes a Rust <strong>pattern</strong> (so ranges, nested destructuring, and <code>if</code> guards work), while <code>assert_msg_eq!</code> takes a <strong>value</strong> and uses <code>assert_eq!</code> under the hood.</p>
+<p>See also <code>elfo::test::extract_message</code>, <code>elfo::test::extract_request</code> to extract messages from envelopes to further check them with custom logic.</p>
+<h2 id="synchronization"><a class="header" href="#synchronization">Synchronization</a></h2>
+<p><code>proxy.sync().await</code> tries to ensure the actor has processed all messages sent so far. It’s not needed for tests using <code>.await</code> communication (e.g. <code>recv</code>, <code>send</code>), but it helps when asserting the <em>absence</em> of output with <code>try_recv()</code>:</p>
+<pre><code class="language-rust ignore">proxy.send(Increment).await;
+proxy.sync().await;
+// It's true if the actor sent nothing.
+assert!(proxy.try_recv().await.is_none());</code></pre>
+<h2 id="timeouts"><a class="header" href="#timeouts">Timeouts</a></h2>
+<p><code>proxy.recv().await</code> panics if no message arrives within the timeout (default: 150 ms). Importantly, this timer runs on the real wall clock, isolated from tokio’s mocked time, so <code>tokio::time::pause()</code> does not stall <code>recv</code>. The timeout can be changed with <code>proxy.set_recv_timeout(duration)</code>, but this is rarely needed: tests that use mocked time typically don’t need to tune it either, since the real clock keeps ticking regardless.</p>
+<h2 id="subproxies"><a class="header" href="#subproxies">Subproxies</a></h2>
+<p>Actors can use <code>send_to</code> or <code>request_to</code> with a specific address rather than the <a href="#routing">routing</a> system. To test those paths, create a subproxy:</p>
+<pre><code class="language-rust ignore">#[tokio::test]
+async fn it_uses_subproxies() {
+    let config = toml::toml! { step = 20 };
+    let mut proxy = elfo::test::proxy(summators(), config).await;
+
+    let mut subproxy = proxy.subproxy().await;
+    assert_eq!(subproxy.request(Summarize).await, 0);
+    assert!(proxy.try_recv().await.is_none());
+
+    // `send(..)` and `request(..)` always send messages to the original proxy.
+    subproxy.send(Increment).await;
+    assert!(subproxy.try_recv().await.is_none());
+    assert_msg_eq!(proxy.recv().await, Added(20));
+}</code></pre>
+<p>The subproxy has its own address, so the actor can address replies back to it specifically. Messages sent through <code>subproxy.send()</code> still go to the original actor; only the <em>return address</em> differs.</p>
+<h2 id="reconfiguration-1"><a class="header" href="#reconfiguration-1">Reconfiguration</a></h2>
+<p>To test how an actor reacts to config changes, send an <code>UpdateConfig</code> message carrying a new <code>AnyConfig</code>. The actor receives <code>ConfigUpdated</code> as usual, and <code>ctx.config()</code> returns the new values from that point on. See the <a href="#reconfiguration">reconfiguration</a> section for how this works at the system level.</p>
+<pre><code class="language-rust ignore">use elfo::{config::AnyConfig, messages::UpdateConfig};
+
+let new_config = AnyConfig::deserialize(toml::toml! { step = 42 }).unwrap();
+proxy.send(UpdateConfig::new(new_config)).await;</code></pre>
+<p><code>UpdateConfig</code> can also be used as a request. The response is <code>Ok(())</code> on success or <code>Err(ConfigRejected)</code> if the new config fails to deserialize into the actor’s <code>Config</code> type:</p>
+<pre><code class="language-rust ignore">let bad_config = AnyConfig::deserialize(toml::toml! { step = -1 }).unwrap();
+assert!(proxy.request(UpdateConfig::new(bad_config)).await.is_err());
+// Config unchanged after rejection.</code></pre>
+<p>See <code>ValidateConfig</code> for testing config validation without applying the new config.</p>
+<h2 id="termination-1"><a class="header" href="#termination-1">Termination</a></h2>
+<p>To test graceful shutdown, send <code>Terminate::default()</code> and then wait for the actor to finish with <code>proxy.finished().await</code>. Any messages the actor sends during teardown can still be received after <code>finished()</code> returns, since the proxy mailbox remains open:</p>
+<pre><code class="language-rust ignore">use elfo::messages::Terminate;
+
+proxy.send(Terminate::default()).await;
+proxy.finished().await;
+let envelope = proxy.recv().await;</code></pre>
+<p><code>Terminate::default()</code> respects the group’s <a href="#termination">termination policy</a>. When you need to force-close the mailbox regardless of the termination policy, use <code>Terminate::closing()</code> instead.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="recipes"><a class="header" href="#recipes">Recipes</a></h1>
 <p>The previous chapters covered the core concepts of <code>elfo</code>: actors, groups, observability, distribution, and testing. This chapter is different — it is a collection of self-contained, practical guides for common tasks and decisions you will encounter when building real systems with <code>elfo</code>.</p>
